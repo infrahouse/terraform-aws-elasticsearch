@@ -20,10 +20,31 @@ module "elastic_master_userdata" {
 
 }
 
+module "elastic_data_userdata" {
+  source                   = "infrahouse/cloud-init/aws"
+  version                  = "~> 1.8"
+  environment              = var.environment
+  role                     = "elastic_data"
+  puppet_hiera_config_path = var.puppet_hiera_config_path
+  puppet_module_path       = var.puppet_module_path
+
+  packages = var.packages
+
+  extra_files = var.extra_files
+  extra_repos = var.extra_repos
+
+  custom_facts = {
+    "elasticsearch" : {
+      "bootstrap_cluster" : false
+      "cluster_name" : var.cluster_name
+    }
+  }
+
+}
 
 module "elastic_cluster" {
   source  = "infrahouse/website-pod/aws"
-  version = "~> 2.6"
+  version = "~> 2.7"
   providers = {
     aws     = aws
     aws.dns = aws.dns
@@ -34,28 +55,80 @@ module "elastic_cluster" {
   subnets                   = var.subnet_ids
   backend_subnets           = var.subnet_ids
   zone_id                   = var.zone_id
+  alb_internal              = true
   internet_gateway_id       = var.internet_gateway_id
   key_pair_name             = var.key_pair_name
-  dns_a_records             = [var.cluster_name]
+  dns_a_records             = [var.cluster_name, "${var.cluster_name}-master"]
   alb_name_prefix           = substr(var.cluster_name, 0, 6) ## "name_prefix" cannot be longer than 6 characters: "elastic"
   userdata                  = module.elastic_master_userdata.userdata
   webserver_permissions     = data.aws_iam_policy_document.elastic_permissions.json
   stickiness_enabled        = true
-  asg_min_size              = var.bootstrap_mode ? 1 : var.cluster_size
-  asg_max_size              = var.bootstrap_mode ? 1 : var.cluster_size
+  asg_min_size              = var.bootstrap_mode ? 1 : var.cluster_master_count
+  asg_max_size              = var.bootstrap_mode ? 1 : var.cluster_master_count
   instance_type             = var.instance_type
   target_group_port         = 9200
   alb_healthcheck_path      = "/_nodes/stats"
   alb_healthcheck_port      = 9200
   health_check_grace_period = var.asg_health_check_grace_period
+  wait_for_capacity_timeout = "${var.asg_health_check_grace_period * 1.5}m"
   extra_security_groups_backend = [
     aws_security_group.backend_extra.id
   ]
 
-  asg_min_elb_capacity = 0
-  instance_profile     = "${var.cluster_name}-master"
+  asg_min_elb_capacity = 1
+  instance_profile     = "${var.cluster_name}-master-${random_string.profile-suffix.result}"
   tags = {
-    Name : "${var.cluster_name} node"
+    Name : "${var.cluster_name} master node"
     cluster : var.cluster_name
+    elastic_role : "master"
+  }
+}
+
+resource "random_string" "profile-suffix" {
+  length  = 6
+  special = false
+}
+
+module "elastic_cluster_data" {
+  # Deploy only if not in the bootstrap mode
+  count   = var.bootstrap_mode ? 0 : 1
+  source  = "infrahouse/website-pod/aws"
+  version = "~> 2.7"
+  providers = {
+    aws     = aws
+    aws.dns = aws.dns
+  }
+  service_name              = var.cluster_name
+  environment               = var.environment
+  ami                       = data.aws_ami.ubuntu.image_id
+  subnets                   = var.subnet_ids
+  backend_subnets           = var.subnet_ids
+  zone_id                   = var.zone_id
+  alb_internal              = true
+  internet_gateway_id       = var.internet_gateway_id
+  key_pair_name             = var.key_pair_name
+  dns_a_records             = ["${var.cluster_name}-data"]
+  alb_name_prefix           = substr(var.cluster_name, 0, 6) ## "name_prefix" cannot be longer than 6 characters: "elastic"
+  userdata                  = module.elastic_data_userdata.userdata
+  webserver_permissions     = data.aws_iam_policy_document.elastic_permissions.json
+  stickiness_enabled        = true
+  asg_min_size              = var.cluster_data_count
+  asg_max_size              = var.cluster_data_count
+  instance_type             = var.instance_type
+  target_group_port         = 9200
+  alb_healthcheck_path      = "/_nodes/stats"
+  alb_healthcheck_port      = 9200
+  health_check_grace_period = var.asg_health_check_grace_period
+  wait_for_capacity_timeout = "${var.asg_health_check_grace_period * 1.5}m"
+  extra_security_groups_backend = [
+    aws_security_group.backend_extra.id
+  ]
+
+  asg_min_elb_capacity = 1
+  instance_profile     = "${var.cluster_name}-data-${random_string.profile-suffix.result}"
+  tags = {
+    Name : "${var.cluster_name} data node"
+    cluster : var.cluster_name
+    elastic_role : "data"
   }
 }

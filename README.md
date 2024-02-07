@@ -75,19 +75,18 @@ Declare the cluster and add `bootstrap_mode = true` to the module inputs.
 The size of the autoscaling group will be not three, but one node.
 ```hcl
 module "test" {
-  source = "../../"
-  providers = {
-    aws     = aws
-    aws.dns = aws
+  module "test" {
+    source = "../../"
+    providers = {
+      aws     = aws
+      aws.dns = aws
+    }
+    internet_gateway_id = module.service-network.internet_gateway_id
+    key_pair_name       = aws_key_pair.test.key_name
+    subnet_ids          = module.service-network.subnet_public_ids
+    zone_id             = data.aws_route53_zone.cicd.zone_id
+    bootstrap_mode      = true
   }
-  cluster_name                  = "main-cluster"
-  cluster_size                  = 3
-  internet_gateway_id           = module.service-network.internet_gateway_id
-  key_pair_name                 = aws_key_pair.test.key_name
-  subnet_ids                    = module.service-network.subnet_public_ids
-  zone_id                       = data.aws_route53_zone.cicd.zone_id
-  asg_health_check_grace_period = 3600 * 24
-  bootstrap_mode                = true
 }
 ```
 
@@ -102,12 +101,17 @@ index c13df0d..33cf0d3 100644
 @@ -12,5 +12,5 @@ module "test" {
    subnet_ids                    = module.service-network.subnet_private_ids
    zone_id                       = data.aws_route53_zone.cicd.zone_id
-   asg_health_check_grace_period = 3600 * 24
 -  bootstrap_mode                = true
 +  bootstrap_mode                = false
  }
 ```
 
+## Accessing the cluster
+
+The module creates three endpoints to access the cluster. All three of them are output variables of the module.
+
+* Master nodes: `https://${var.cluster_name}-master.${data.aws_route53_zone.cluster.name}` or `https://${var.cluster_name}.${data.aws_route53_zone.cluster.name}` 
+* Data nodes: `https://${var.cluster_name}-data.${data.aws_route53_zone.cluster.name}`
 
 ## Requirements
 
@@ -116,18 +120,23 @@ index c13df0d..33cf0d3 100644
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.5 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5.11 |
 | <a name="requirement_cloudinit"></a> [cloudinit](#requirement\_cloudinit) | ~> 2.3 |
+| <a name="requirement_random"></a> [random](#requirement\_random) | ~> 3.6 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 5.11 |
+| <a name="provider_aws.dns"></a> [aws.dns](#provider\_aws.dns) | ~> 5.11 |
+| <a name="provider_random"></a> [random](#provider\_random) | ~> 3.6 |
 
 ## Modules
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_elastic_cluster"></a> [elastic\_cluster](#module\_elastic\_cluster) | infrahouse/website-pod/aws | ~> 2.6 |
+| <a name="module_elastic_cluster"></a> [elastic\_cluster](#module\_elastic\_cluster) | infrahouse/website-pod/aws | ~> 2.7 |
+| <a name="module_elastic_cluster_data"></a> [elastic\_cluster\_data](#module\_elastic\_cluster\_data) | infrahouse/website-pod/aws | ~> 2.7 |
+| <a name="module_elastic_data_userdata"></a> [elastic\_data\_userdata](#module\_elastic\_data\_userdata) | infrahouse/cloud-init/aws | ~> 1.8 |
 | <a name="module_elastic_master_userdata"></a> [elastic\_master\_userdata](#module\_elastic\_master\_userdata) | infrahouse/cloud-init/aws | ~> 1.8 |
 
 ## Resources
@@ -136,21 +145,24 @@ index c13df0d..33cf0d3 100644
 |------|------|
 | [aws_security_group.backend_extra](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_vpc_security_group_ingress_rule.backend_extra_reserved](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
+| [random_string.profile-suffix](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string) | resource |
 | [aws_ami.ubuntu](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ami) | data source |
 | [aws_availability_zones.available](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/availability_zones) | data source |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
 | [aws_iam_policy_document.elastic_permissions](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
+| [aws_route53_zone.cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/route53_zone) | data source |
 | [aws_subnet.selected](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet) | data source |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_asg_health_check_grace_period"></a> [asg\_health\_check\_grace\_period](#input\_asg\_health\_check\_grace\_period) | ASG will wait up to this number of seconds for instance to become healthy | `number` | `300` | no |
+| <a name="input_asg_health_check_grace_period"></a> [asg\_health\_check\_grace\_period](#input\_asg\_health\_check\_grace\_period) | ASG will wait up to this number of seconds for instance to become healthy | `number` | `900` | no |
 | <a name="input_bootstrap_mode"></a> [bootstrap\_mode](#input\_bootstrap\_mode) | Set this to true if the cluster is to be bootstrapped | `bool` | `true` | no |
+| <a name="input_cluster_data_count"></a> [cluster\_data\_count](#input\_cluster\_data\_count) | Number of data nodes in the cluster | `number` | `3` | no |
+| <a name="input_cluster_master_count"></a> [cluster\_master\_count](#input\_cluster\_master\_count) | Number of master nodes in the cluster | `number` | `3` | no |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | How to name the cluster | `string` | `"elastic"` | no |
-| <a name="input_cluster_size"></a> [cluster\_size](#input\_cluster\_size) | Number of nodes in the cluster | `number` | `3` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | Name of environment. | `string` | `"development"` | no |
 | <a name="input_extra_files"></a> [extra\_files](#input\_extra\_files) | Additional files to create on an instance. | <pre>list(object({<br>    content     = string<br>    path        = string<br>    permissions = string<br>  }))</pre> | `[]` | no |
 | <a name="input_extra_repos"></a> [extra\_repos](#input\_extra\_repos) | Additional APT repositories to configure on an instance. | <pre>map(object({<br>    source = string<br>    key    = string<br>  }))</pre> | `{}` | no |
@@ -168,4 +180,8 @@ index c13df0d..33cf0d3 100644
 
 ## Outputs
 
-No outputs.
+| Name | Description |
+|------|-------------|
+| <a name="output_cluster_data_url"></a> [cluster\_data\_url](#output\_cluster\_data\_url) | HTTPS endpoint to access the cluster data nodes |
+| <a name="output_cluster_master_url"></a> [cluster\_master\_url](#output\_cluster\_master\_url) | HTTPS endpoint to access the cluster masters |
+| <a name="output_cluster_url"></a> [cluster\_url](#output\_cluster\_url) | HTTPS endpoint to access the cluster |

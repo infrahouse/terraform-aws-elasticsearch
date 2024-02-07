@@ -8,11 +8,14 @@ terraform {
       configuration_aliases = [
         aws.dns # AWS provider for DNS
       ]
-
     }
     cloudinit = {
       source  = "hashicorp/cloudinit"
       version = "~> 2.3"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.6"
     }
   }
 }
