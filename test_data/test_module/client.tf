@@ -4,7 +4,7 @@ resource "aws_key_pair" "test" {
 
 module "jumphost" {
   source  = "infrahouse/jumphost/aws"
-  version = "1.2.0"
+  version = "~> 1.3"
   # insert the 4 required variables here
   environment     = var.environment
   keypair_name    = aws_key_pair.test.key_name

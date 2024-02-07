@@ -1,7 +1,7 @@
 variable "asg_health_check_grace_period" {
   description = "ASG will wait up to this number of seconds for instance to become healthy"
   type        = number
-  default     = 300
+  default     = 900
 }
 
 variable "bootstrap_mode" {
@@ -16,8 +16,14 @@ variable "cluster_name" {
   default     = "elastic"
 }
 
-variable "cluster_size" {
-  description = "Number of nodes in the cluster"
+variable "cluster_master_count" {
+  description = "Number of master nodes in the cluster"
+  type        = number
+  default     = 3
+}
+
+variable "cluster_data_count" {
+  description = "Number of data nodes in the cluster"
   type        = number
   default     = 3
 }

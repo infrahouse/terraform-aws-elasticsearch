@@ -46,3 +46,8 @@ data "aws_iam_policy_document" "elastic_permissions" {
 data "aws_subnet" "selected" {
   id = var.subnet_ids[0]
 }
+
+data "aws_route53_zone" "cluster" {
+  provider = aws.dns
+  zone_id  = var.zone_id
+}
