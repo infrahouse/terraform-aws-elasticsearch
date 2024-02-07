@@ -4,10 +4,22 @@ variable "asg_health_check_grace_period" {
   default     = 300
 }
 
+variable "bootstrap_mode" {
+  description = "Set this to true if the cluster is to be bootstrapped"
+  type        = bool
+  default     = true
+}
+
 variable "cluster_name" {
   description = "How to name the cluster"
   type        = string
   default     = "elastic"
+}
+
+variable "cluster_size" {
+  description = "Number of nodes in the cluster"
+  type        = number
+  default     = 3
 }
 
 variable "environment" {
@@ -37,8 +49,8 @@ variable "extra_repos" {
 
 variable "instance_type" {
   description = "Instance type to run the elasticsearch node"
-  type = string
-  default = "t3.medium"
+  type        = string
+  default     = "t3.medium"
 }
 
 variable "internet_gateway_id" { # tflint-ignore: terraform_unused_declarations
