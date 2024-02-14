@@ -1,6 +1,6 @@
 module "service-network" {
   source                = "infrahouse/service-network/aws"
-  version               = "~> 2.0"
+  version               = "~> 2.3"
   service_name          = "elastic"
   vpc_cidr_block        = "10.1.0.0/16"
   management_cidr_block = "10.1.0.0/16"

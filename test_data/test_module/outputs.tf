@@ -13,7 +13,3 @@ output "cluster_master_url" {
 output "cluster_data_url" {
   value = module.test.cluster_data_url
 }
-
-output "jumphost_asg_name" {
-  value = module.jumphost.jumphost_asg_name
-}

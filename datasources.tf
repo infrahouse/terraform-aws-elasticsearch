@@ -41,6 +41,21 @@ data "aws_iam_policy_document" "elastic_permissions" {
     actions   = ["ec2:DescribeInstances"]
     resources = ["*"]
   }
+  statement {
+    actions = [
+      "route53:GetChange",
+      "route53:ListHostedZones",
+    ]
+    resources = ["*"]
+  }
+  statement {
+    actions = [
+      "route53:ChangeResourceRecordSets",
+    ]
+    resources = [
+      data.aws_route53_zone.cluster.arn
+    ]
+  }
 }
 
 data "aws_subnet" "selected" {
