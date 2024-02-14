@@ -112,7 +112,6 @@ The module creates three endpoints to access the cluster. All three of them are 
 
 * Master nodes: `https://${var.cluster_name}-master.${data.aws_route53_zone.cluster.name}` or `https://${var.cluster_name}.${data.aws_route53_zone.cluster.name}` 
 * Data nodes: `https://${var.cluster_name}-data.${data.aws_route53_zone.cluster.name}`
-
 ## Requirements
 
 | Name | Version |
@@ -134,10 +133,12 @@ The module creates three endpoints to access the cluster. All three of them are 
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_elastic_cluster"></a> [elastic\_cluster](#module\_elastic\_cluster) | infrahouse/website-pod/aws | ~> 2.7 |
+| <a name="module_elastic_cluster"></a> [elastic\_cluster](#module\_elastic\_cluster) | infrahouse/website-pod/aws | ~> 2.8 |
 | <a name="module_elastic_cluster_data"></a> [elastic\_cluster\_data](#module\_elastic\_cluster\_data) | infrahouse/website-pod/aws | ~> 2.7 |
 | <a name="module_elastic_data_userdata"></a> [elastic\_data\_userdata](#module\_elastic\_data\_userdata) | infrahouse/cloud-init/aws | ~> 1.8 |
 | <a name="module_elastic_master_userdata"></a> [elastic\_master\_userdata](#module\_elastic\_master\_userdata) | infrahouse/cloud-init/aws | ~> 1.8 |
+| <a name="module_update-dns"></a> [update-dns](#module\_update-dns) | infrahouse/update-dns/aws | ~> 0.1 |
+| <a name="module_update-dns-data"></a> [update-dns-data](#module\_update-dns-data) | infrahouse/update-dns/aws | ~> 0.1 |
 
 ## Resources
 
