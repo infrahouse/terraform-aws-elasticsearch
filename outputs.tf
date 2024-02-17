@@ -17,3 +17,9 @@ output "kibana_system_secret_id" {
   description = "AWS secret that stores password for user kibana_system"
   value       = aws_secretsmanager_secret.kibana_system.id
 }
+
+output "kibana_system_password" {
+  description = "A password of kibana_system user"
+  sensitive   = true
+  value       = aws_secretsmanager_secret_version.kibana_system.secret_string
+}
