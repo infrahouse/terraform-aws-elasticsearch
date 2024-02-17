@@ -15,6 +15,8 @@ module "elastic_master_userdata" {
     "elasticsearch" : {
       "bootstrap_cluster" : var.bootstrap_mode
       "cluster_name" : var.cluster_name
+      "elastic_secret" : aws_secretsmanager_secret.elastic.id
+      "kibana_system_secret" : aws_secretsmanager_secret.kibana_system.id
     }
     "letsencrypt" : {
       "domain" : data.aws_route53_zone.cluster.name
@@ -41,6 +43,8 @@ module "elastic_data_userdata" {
     "elasticsearch" : {
       "bootstrap_cluster" : false
       "cluster_name" : var.cluster_name
+      "elastic_secret" : aws_secretsmanager_secret.elastic.id
+      "kibana_system_secret" : aws_secretsmanager_secret.kibana_system.id
     }
     "letsencrypt" : {
       "domain" : data.aws_route53_zone.cluster.name

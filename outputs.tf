@@ -12,3 +12,8 @@ output "cluster_data_url" {
   description = "HTTPS endpoint to access the cluster data nodes"
   value       = "https://${var.cluster_name}-data.${data.aws_route53_zone.cluster.name}"
 }
+
+output "kibana_system_secret_id" {
+  description = "AWS secret that stores password for user kibana_system"
+  value       = aws_secretsmanager_secret.kibana_system.id
+}

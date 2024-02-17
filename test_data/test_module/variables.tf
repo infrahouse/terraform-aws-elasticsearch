@@ -3,4 +3,4 @@ variable "environment" {
 }
 variable "region" {}
 variable "role_arn" {}
-variable "test_zone" {}
+variable "elastic_zone_id" {}
