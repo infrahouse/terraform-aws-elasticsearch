@@ -13,6 +13,17 @@ output "cluster_data_url" {
   value       = "https://${var.cluster_name}-data.${data.aws_route53_zone.cluster.name}"
 }
 
+output "elastic_password" {
+  description = "Password for Elasticsearch superuser elastic."
+  sensitive = true
+  value = aws_secretsmanager_secret_version.elastic.secret_string
+}
+
+output "elastic_secret_id" {
+  description = "AWS secret that stores password for user elastic."
+  value = aws_secretsmanager_secret.elastic.id
+}
+
 output "kibana_system_secret_id" {
   description = "AWS secret that stores password for user kibana_system"
   value       = aws_secretsmanager_secret.kibana_system.id

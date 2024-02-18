@@ -76,7 +76,8 @@ The size of the autoscaling group will be not three, but one node.
 ```hcl
 module "test" {
   module "test" {
-    source = "../../"
+    source    = "infrahouse/elasticsearch/aws"
+    version   = "~> 0.6"
     providers = {
       aws     = aws
       aws.dns = aws
@@ -137,15 +138,21 @@ The module creates three endpoints to access the cluster. All three of them are 
 | <a name="module_elastic_cluster_data"></a> [elastic\_cluster\_data](#module\_elastic\_cluster\_data) | infrahouse/website-pod/aws | ~> 2.7 |
 | <a name="module_elastic_data_userdata"></a> [elastic\_data\_userdata](#module\_elastic\_data\_userdata) | infrahouse/cloud-init/aws | ~> 1.8 |
 | <a name="module_elastic_master_userdata"></a> [elastic\_master\_userdata](#module\_elastic\_master\_userdata) | infrahouse/cloud-init/aws | ~> 1.8 |
-| <a name="module_update-dns"></a> [update-dns](#module\_update-dns) | infrahouse/update-dns/aws | ~> 0.1 |
-| <a name="module_update-dns-data"></a> [update-dns-data](#module\_update-dns-data) | infrahouse/update-dns/aws | ~> 0.1 |
+| <a name="module_update-dns"></a> [update-dns](#module\_update-dns) | infrahouse/update-dns/aws | ~> 0.5 |
+| <a name="module_update-dns-data"></a> [update-dns-data](#module\_update-dns-data) | infrahouse/update-dns/aws | ~> 0.5 |
 
 ## Resources
 
 | Name | Type |
 |------|------|
+| [aws_secretsmanager_secret.elastic](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret) | resource |
+| [aws_secretsmanager_secret.kibana_system](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret) | resource |
+| [aws_secretsmanager_secret_version.elastic](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret_version) | resource |
+| [aws_secretsmanager_secret_version.kibana_system](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret_version) | resource |
 | [aws_security_group.backend_extra](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_vpc_security_group_ingress_rule.backend_extra_reserved](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
+| [random_password.elastic](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
+| [random_password.kibana_system](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
 | [random_string.profile-suffix](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string) | resource |
 | [aws_ami.ubuntu](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ami) | data source |
 | [aws_availability_zones.available](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/availability_zones) | data source |
@@ -186,3 +193,7 @@ The module creates three endpoints to access the cluster. All three of them are 
 | <a name="output_cluster_data_url"></a> [cluster\_data\_url](#output\_cluster\_data\_url) | HTTPS endpoint to access the cluster data nodes |
 | <a name="output_cluster_master_url"></a> [cluster\_master\_url](#output\_cluster\_master\_url) | HTTPS endpoint to access the cluster masters |
 | <a name="output_cluster_url"></a> [cluster\_url](#output\_cluster\_url) | HTTPS endpoint to access the cluster |
+| <a name="output_elastic_password"></a> [elastic\_password](#output\_elastic\_password) | Password for Elasticsearch superuser elastic. |
+| <a name="output_elastic_secret_id"></a> [elastic\_secret\_id](#output\_elastic\_secret\_id) | AWS secret that stores password for user elastic. |
+| <a name="output_kibana_system_password"></a> [kibana\_system\_password](#output\_kibana\_system\_password) | A password of kibana\_system user |
+| <a name="output_kibana_system_secret_id"></a> [kibana\_system\_secret\_id](#output\_kibana\_system\_secret\_id) | AWS secret that stores password for user kibana\_system |
