@@ -9,9 +9,6 @@ locals {
 }
 resource "aws_s3_bucket" "snapshots-bucket" {
   bucket_prefix = substr(local.bucket_prefix, 0, 37)
-  lifecycle {
-    prevent_destroy = false
-  }
   tags = merge(
     {
       "cluster_name" : var.cluster_name
