@@ -40,7 +40,7 @@ def test_module(ec2_client, route53_client, autoscaling_client):
         subzone_id = tf_output_dns["subzone_id"]["value"]
 
         # Bootstrap ES cluster
-        bootstrap_mode = False
+        bootstrap_mode = True
         terraform_module_dir = osp.join(terraform_root_dir, "test_module")
         with open(osp.join(terraform_module_dir, "terraform.tfvars"), "w") as fp:
             fp.write(
