@@ -113,6 +113,7 @@ The module creates three endpoints to access the cluster. All three of them are 
 
 * Master nodes: `https://${var.cluster_name}-master.${data.aws_route53_zone.cluster.name}` or `https://${var.cluster_name}.${data.aws_route53_zone.cluster.name}` 
 * Data nodes: `https://${var.cluster_name}-data.${data.aws_route53_zone.cluster.name}`
+
 ## Requirements
 
 | Name | Version |
@@ -145,6 +146,8 @@ The module creates three endpoints to access the cluster. All three of them are 
 
 | Name | Type |
 |------|------|
+| [aws_s3_bucket.snapshots-bucket](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
+| [aws_s3_bucket_public_access_block.public_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_public_access_block) | resource |
 | [aws_secretsmanager_secret.elastic](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret) | resource |
 | [aws_secretsmanager_secret.kibana_system](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret) | resource |
 | [aws_secretsmanager_secret_version.elastic](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret_version) | resource |
@@ -153,6 +156,7 @@ The module creates three endpoints to access the cluster. All three of them are 
 | [aws_vpc_security_group_ingress_rule.backend_extra_reserved](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
 | [random_password.elastic](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
 | [random_password.kibana_system](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
+| [random_string.bucket_prefix](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string) | resource |
 | [random_string.profile-suffix](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string) | resource |
 | [aws_ami.ubuntu](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ami) | data source |
 | [aws_availability_zones.available](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/availability_zones) | data source |
@@ -182,6 +186,7 @@ The module creates three endpoints to access the cluster. All three of them are 
 | <a name="input_puppet_hiera_config_path"></a> [puppet\_hiera\_config\_path](#input\_puppet\_hiera\_config\_path) | Path to hiera configuration file. | `string` | `"{root_directory}/environments/{environment}/hiera.yaml"` | no |
 | <a name="input_puppet_module_path"></a> [puppet\_module\_path](#input\_puppet\_module\_path) | Path to common puppet modules. | `string` | `"{root_directory}/modules"` | no |
 | <a name="input_puppet_root_directory"></a> [puppet\_root\_directory](#input\_puppet\_root\_directory) | Path where the puppet code is hosted. | `string` | `"/opt/puppet-code"` | no |
+| <a name="input_snapshot_bucket_prefix"></a> [snapshot\_bucket\_prefix](#input\_snapshot\_bucket\_prefix) | A string prefix to a bucket name for snapshots. Random by default. | `string` | `null` | no |
 | <a name="input_subnet_ids"></a> [subnet\_ids](#input\_subnet\_ids) | List of subnet ids where the elasticsearch instances will be created | `list(string)` | n/a | yes |
 | <a name="input_ubuntu_codename"></a> [ubuntu\_codename](#input\_ubuntu\_codename) | Ubuntu version to use for the elasticsearch node | `string` | `"jammy"` | no |
 | <a name="input_zone_id"></a> [zone\_id](#input\_zone\_id) | Domain name zone ID where the website will be available | `string` | n/a | yes |
@@ -197,3 +202,4 @@ The module creates three endpoints to access the cluster. All three of them are 
 | <a name="output_elastic_secret_id"></a> [elastic\_secret\_id](#output\_elastic\_secret\_id) | AWS secret that stores password for user elastic. |
 | <a name="output_kibana_system_password"></a> [kibana\_system\_password](#output\_kibana\_system\_password) | A password of kibana\_system user |
 | <a name="output_kibana_system_secret_id"></a> [kibana\_system\_secret\_id](#output\_kibana\_system\_secret\_id) | AWS secret that stores password for user kibana\_system |
+| <a name="output_snapshots_bucket"></a> [snapshots\_bucket](#output\_snapshots\_bucket) | AWS S3 Bucket where Elasticsearch snapshots will be stored. |
