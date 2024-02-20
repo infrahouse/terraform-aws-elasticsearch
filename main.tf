@@ -17,6 +17,7 @@ module "elastic_master_userdata" {
       "cluster_name" : var.cluster_name
       "elastic_secret" : aws_secretsmanager_secret.elastic.id
       "kibana_system_secret" : aws_secretsmanager_secret.kibana_system.id
+      "snapshots_bucket": aws_s3_bucket.snapshots-bucket.bucket
     }
     "letsencrypt" : {
       "domain" : data.aws_route53_zone.cluster.name
@@ -45,6 +46,7 @@ module "elastic_data_userdata" {
       "cluster_name" : var.cluster_name
       "elastic_secret" : aws_secretsmanager_secret.elastic.id
       "kibana_system_secret" : aws_secretsmanager_secret.kibana_system.id
+      "snapshots_bucket": aws_s3_bucket.snapshots-bucket.bucket
     }
     "letsencrypt" : {
       "domain" : data.aws_route53_zone.cluster.name

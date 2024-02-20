@@ -1,8 +1,6 @@
 import json
 from os import path as osp
-from pprint import pformat
 from textwrap import dedent
-from time import sleep
 
 import pytest
 from infrahouse_toolkit.terraform import terraform_apply
@@ -17,11 +15,10 @@ from tests.conftest import (
 )
 
 
-@pytest.mark.flaky(reruns=0, reruns_delay=30)
-@pytest.mark.timeout(1800)
 def test_module(ec2_client, route53_client, autoscaling_client):
     terraform_root_dir = "test_data"
 
+    # Create DNS zone
     terraform_module_dir = osp.join(terraform_root_dir, "dns")
     with open(osp.join(terraform_module_dir, "terraform.tfvars"), "w") as fp:
         fp.write(
@@ -38,10 +35,12 @@ def test_module(ec2_client, route53_client, autoscaling_client):
         destroy_after=DESTROY_AFTER,
         json_output=True,
         enable_trace=TRACE_TERRAFORM,
-    ) as tf_output_0:
-        LOG.info(json.dumps(tf_output_0, indent=4))
-        subzone_id = tf_output_0["subzone_id"]["value"]
+    ) as tf_output_dns:
+        LOG.info(json.dumps(tf_output_dns, indent=4))
+        subzone_id = tf_output_dns["subzone_id"]["value"]
 
+        # Bootstrap ES cluster
+        bootstrap_mode = False
         terraform_module_dir = osp.join(terraform_root_dir, "test_module")
         with open(osp.join(terraform_module_dir, "terraform.tfvars"), "w") as fp:
             fp.write(
@@ -50,6 +49,7 @@ def test_module(ec2_client, route53_client, autoscaling_client):
                     role_arn = "{TEST_ROLE_ARN}"
                     region = "{REGION}"
                     elastic_zone_id = "{subzone_id}"
+                    bootstrap_mode = {str(bootstrap_mode).lower()}
                     """
                 )
             )
@@ -58,5 +58,23 @@ def test_module(ec2_client, route53_client, autoscaling_client):
             destroy_after=DESTROY_AFTER,
             json_output=True,
             enable_trace=TRACE_TERRAFORM,
-        ) as tf_output_1:
-            LOG.info(json.dumps(tf_output_1, indent=4))
+        ) as tf_output:
+            # Create remaining master & data nodes
+            with open(osp.join(terraform_module_dir, "terraform.tfvars"), "w") as fp:
+                fp.write(
+                    dedent(
+                        f"""
+                        role_arn = "{TEST_ROLE_ARN}"
+                        region = "{REGION}"
+                        elastic_zone_id = "{subzone_id}"
+                        bootstrap_mode = false
+                        """
+                    )
+                )
+            with terraform_apply(
+                terraform_module_dir,
+                destroy_after=DESTROY_AFTER,
+                json_output=True,
+                enable_trace=TRACE_TERRAFORM,
+            ):
+                LOG.info(json.dumps(tf_output, indent=4))

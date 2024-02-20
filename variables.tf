@@ -96,6 +96,12 @@ variable "puppet_root_directory" {
   default     = "/opt/puppet-code"
 }
 
+variable "snapshot_bucket_prefix" {
+  description = "A string prefix to a bucket name for snapshots. Random by default."
+  type        = string
+  default     = null
+}
+
 variable "subnet_ids" {
   description = "List of subnet ids where the elasticsearch instances will be created"
   type        = list(string)
