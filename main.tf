@@ -57,8 +57,7 @@ module "elastic_data_userdata" {
 }
 
 module "elastic_cluster" {
-  source  = "infrahouse/website-pod/aws"
-  version = "~> 2.8"
+  source = "git::https://github.com/infrahouse/terraform-aws-website-pod.git?ref=2.8.1"
   providers = {
     aws     = aws
     aws.dns = aws.dns
@@ -109,8 +108,7 @@ resource "random_string" "profile-suffix" {
 module "elastic_cluster_data" {
   # Deploy only if not in the bootstrap mode
   count   = var.bootstrap_mode ? 0 : 1
-  source  = "infrahouse/website-pod/aws"
-  version = "~> 2.7"
+  source = "git::https://github.com/infrahouse/terraform-aws-website-pod.git?ref=2.8.1"
   providers = {
     aws     = aws
     aws.dns = aws.dns
