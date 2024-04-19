@@ -1,3 +1,9 @@
+variable "asg_ami" {
+  description = "Image for EC2 instances"
+  type        = string
+  default     = null
+}
+
 variable "asg_health_check_grace_period" {
   description = "ASG will wait up to this number of seconds for instance to become healthy"
   type        = number

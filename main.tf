@@ -17,7 +17,7 @@ module "elastic_master_userdata" {
       "cluster_name" : var.cluster_name
       "elastic_secret" : aws_secretsmanager_secret.elastic.id
       "kibana_system_secret" : aws_secretsmanager_secret.kibana_system.id
-      "snapshots_bucket": aws_s3_bucket.snapshots-bucket.bucket
+      "snapshots_bucket" : aws_s3_bucket.snapshots-bucket.bucket
     }
     "letsencrypt" : {
       "domain" : data.aws_route53_zone.cluster.name
@@ -46,7 +46,7 @@ module "elastic_data_userdata" {
       "cluster_name" : var.cluster_name
       "elastic_secret" : aws_secretsmanager_secret.elastic.id
       "kibana_system_secret" : aws_secretsmanager_secret.kibana_system.id
-      "snapshots_bucket": aws_s3_bucket.snapshots-bucket.bucket
+      "snapshots_bucket" : aws_s3_bucket.snapshots-bucket.bucket
     }
     "letsencrypt" : {
       "domain" : data.aws_route53_zone.cluster.name
@@ -57,7 +57,8 @@ module "elastic_data_userdata" {
 }
 
 module "elastic_cluster" {
-  source = "git::https://github.com/infrahouse/terraform-aws-website-pod.git?ref=2.8.1"
+  source  = "registry.infrahouse.com/infrahouse/website-pod/aws"
+  version = "~> 2.8"
   providers = {
     aws     = aws
     aws.dns = aws.dns
@@ -107,7 +108,7 @@ resource "random_string" "profile-suffix" {
 
 module "elastic_cluster_data" {
   # Deploy only if not in the bootstrap mode
-  count   = var.bootstrap_mode ? 0 : 1
+  count  = var.bootstrap_mode ? 0 : 1
   source = "git::https://github.com/infrahouse/terraform-aws-website-pod.git?ref=2.8.1"
   providers = {
     aws     = aws
@@ -116,7 +117,7 @@ module "elastic_cluster_data" {
   service_name                          = var.cluster_name
   asg_name                              = "${var.cluster_name}-data"
   environment                           = var.environment
-  ami                                   = data.aws_ami.ubuntu.image_id
+  ami                                   = var.asg_ami != null ? var.asg_ami : data.aws_ami.ubuntu.image_id
   subnets                               = var.subnet_ids
   backend_subnets                       = var.subnet_ids
   zone_id                               = var.zone_id
