@@ -127,9 +127,9 @@ The module creates three endpoints to access the cluster. All three of them are 
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 5.46.0 |
-| <a name="provider_aws.dns"></a> [aws.dns](#provider\_aws.dns) | 5.46.0 |
-| <a name="provider_random"></a> [random](#provider\_random) | 3.6.1 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 5.11 |
+| <a name="provider_aws.dns"></a> [aws.dns](#provider\_aws.dns) | ~> 5.11 |
+| <a name="provider_random"></a> [random](#provider\_random) | ~> 3.6 |
 
 ## Modules
 
