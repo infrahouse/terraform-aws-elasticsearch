@@ -66,7 +66,7 @@ module "elastic_cluster" {
   service_name                          = var.cluster_name
   asg_name                              = var.cluster_name
   environment                           = var.environment
-  ami                                   = data.aws_ami.ubuntu.image_id
+  ami                                   = var.asg_ami != null ? var.asg_ami : data.aws_ami.ubuntu.image_id
   subnets                               = var.subnet_ids
   backend_subnets                       = var.subnet_ids
   zone_id                               = var.zone_id
