@@ -1,6 +1,6 @@
 module "elastic_master_userdata" {
   source                   = "infrahouse/cloud-init/aws"
-  version                  = "= 1.8.0"
+  version                  = "= 1.11.1"
   environment              = var.environment
   role                     = "elastic_master"
   puppet_hiera_config_path = var.puppet_hiera_config_path
@@ -29,7 +29,7 @@ module "elastic_master_userdata" {
 
 module "elastic_data_userdata" {
   source                   = "infrahouse/cloud-init/aws"
-  version                  = "= 1.8.0"
+  version                  = "= 1.11.1"
   environment              = var.environment
   role                     = "elastic_data"
   puppet_hiera_config_path = var.puppet_hiera_config_path
