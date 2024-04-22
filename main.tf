@@ -1,6 +1,6 @@
 module "elastic_master_userdata" {
   source                   = "infrahouse/cloud-init/aws"
-  version                  = "~> 1.8"
+  version                  = "= 1.8.0"
   environment              = var.environment
   role                     = "elastic_master"
   puppet_hiera_config_path = var.puppet_hiera_config_path
@@ -29,7 +29,7 @@ module "elastic_master_userdata" {
 
 module "elastic_data_userdata" {
   source                   = "infrahouse/cloud-init/aws"
-  version                  = "~> 1.8"
+  version                  = "= 1.8.0"
   environment              = var.environment
   role                     = "elastic_data"
   puppet_hiera_config_path = var.puppet_hiera_config_path
@@ -57,8 +57,8 @@ module "elastic_data_userdata" {
 }
 
 module "elastic_cluster" {
-  source  = "registry.infrahouse.com/infrahouse/website-pod/aws"
-  version = "~> 2.8"
+  source  = "infrahouse/website-pod/aws"
+  version = "= 2.8.3"
   providers = {
     aws     = aws
     aws.dns = aws.dns
@@ -109,7 +109,8 @@ resource "random_string" "profile-suffix" {
 module "elastic_cluster_data" {
   # Deploy only if not in the bootstrap mode
   count  = var.bootstrap_mode ? 0 : 1
-  source = "git::https://github.com/infrahouse/terraform-aws-website-pod.git?ref=2.8.1"
+  source  = "infrahouse/website-pod/aws"
+  version = "= 2.8.3"
   providers = {
     aws     = aws
     aws.dns = aws.dns
