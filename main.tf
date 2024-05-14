@@ -80,6 +80,7 @@ module "elastic_cluster" {
   stickiness_enabled                    = true
   asg_min_size                          = var.bootstrap_mode ? 1 : var.cluster_master_count
   asg_max_size                          = var.bootstrap_mode ? 1 : var.cluster_master_count
+  max_instance_lifetime_days            = 0
   instance_type                         = var.instance_type
   target_group_port                     = 9200
   alb_healthcheck_path                  = "/"
@@ -132,6 +133,7 @@ module "elastic_cluster_data" {
   stickiness_enabled                    = true
   asg_min_size                          = var.cluster_data_count
   asg_max_size                          = var.cluster_data_count
+  max_instance_lifetime_days            = 0
   instance_type                         = var.instance_type
   target_group_port                     = 9200
   alb_healthcheck_path                  = "/"
