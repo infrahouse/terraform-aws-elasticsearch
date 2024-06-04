@@ -102,6 +102,12 @@ variable "puppet_root_directory" {
   default     = "/opt/puppet-code"
 }
 
+variable "secret_elastic_readers" {
+  description = "List of role ARNs that will have permissions to read elastic superuser secret."
+  default     = null
+  type        = list(string)
+}
+
 variable "snapshot_bucket_prefix" {
   description = "A string prefix to a bucket name for snapshots. Random by default."
   type        = string

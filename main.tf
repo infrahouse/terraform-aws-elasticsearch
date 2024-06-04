@@ -109,7 +109,7 @@ resource "random_string" "profile-suffix" {
 
 module "elastic_cluster_data" {
   # Deploy only if not in the bootstrap mode
-  count  = var.bootstrap_mode ? 0 : 1
+  count   = var.bootstrap_mode ? 0 : 1
   source  = "infrahouse/website-pod/aws"
   version = "= 2.8.3"
   providers = {
