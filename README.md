@@ -136,8 +136,10 @@ The module creates three endpoints to access the cluster. All three of them are 
 |------|--------|---------|
 | <a name="module_elastic_cluster"></a> [elastic\_cluster](#module\_elastic\_cluster) | infrahouse/website-pod/aws | = 2.8.3 |
 | <a name="module_elastic_cluster_data"></a> [elastic\_cluster\_data](#module\_elastic\_cluster\_data) | infrahouse/website-pod/aws | = 2.8.3 |
-| <a name="module_elastic_data_userdata"></a> [elastic\_data\_userdata](#module\_elastic\_data\_userdata) | infrahouse/cloud-init/aws | = 1.8.0 |
-| <a name="module_elastic_master_userdata"></a> [elastic\_master\_userdata](#module\_elastic\_master\_userdata) | infrahouse/cloud-init/aws | = 1.8.0 |
+| <a name="module_elastic_data_userdata"></a> [elastic\_data\_userdata](#module\_elastic\_data\_userdata) | infrahouse/cloud-init/aws | = 1.11.1 |
+| <a name="module_elastic_master_userdata"></a> [elastic\_master\_userdata](#module\_elastic\_master\_userdata) | infrahouse/cloud-init/aws | = 1.11.1 |
+| <a name="module_secret_elastic"></a> [secret\_elastic](#module\_secret\_elastic) | registry.infrahouse.com/infrahouse/secret/aws | 0.4.0 |
+| <a name="module_secret_kibana_system"></a> [secret\_kibana\_system](#module\_secret\_kibana\_system) | registry.infrahouse.com/infrahouse/secret/aws | 0.4.0 |
 | <a name="module_update-dns"></a> [update-dns](#module\_update-dns) | infrahouse/update-dns/aws | = 0.5.1 |
 | <a name="module_update-dns-data"></a> [update-dns-data](#module\_update-dns-data) | infrahouse/update-dns/aws | = 0.5.1 |
 
@@ -147,10 +149,6 @@ The module creates three endpoints to access the cluster. All three of them are 
 |------|------|
 | [aws_s3_bucket.snapshots-bucket](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
 | [aws_s3_bucket_public_access_block.public_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_public_access_block) | resource |
-| [aws_secretsmanager_secret.elastic](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret) | resource |
-| [aws_secretsmanager_secret.kibana_system](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret) | resource |
-| [aws_secretsmanager_secret_version.elastic](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret_version) | resource |
-| [aws_secretsmanager_secret_version.kibana_system](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret_version) | resource |
 | [aws_security_group.backend_extra](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_vpc_security_group_ingress_rule.backend_extra_reserved](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
 | [random_password.elastic](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
@@ -186,6 +184,7 @@ The module creates three endpoints to access the cluster. All three of them are 
 | <a name="input_puppet_hiera_config_path"></a> [puppet\_hiera\_config\_path](#input\_puppet\_hiera\_config\_path) | Path to hiera configuration file. | `string` | `"{root_directory}/environments/{environment}/hiera.yaml"` | no |
 | <a name="input_puppet_module_path"></a> [puppet\_module\_path](#input\_puppet\_module\_path) | Path to common puppet modules. | `string` | `"{root_directory}/modules"` | no |
 | <a name="input_puppet_root_directory"></a> [puppet\_root\_directory](#input\_puppet\_root\_directory) | Path where the puppet code is hosted. | `string` | `"/opt/puppet-code"` | no |
+| <a name="input_secret_elastic_readers"></a> [secret\_elastic\_readers](#input\_secret\_elastic\_readers) | List of role ARNs that will have permissions to read elastic superuser secret. | `list(string)` | `null` | no |
 | <a name="input_snapshot_bucket_prefix"></a> [snapshot\_bucket\_prefix](#input\_snapshot\_bucket\_prefix) | A string prefix to a bucket name for snapshots. Random by default. | `string` | `null` | no |
 | <a name="input_subnet_ids"></a> [subnet\_ids](#input\_subnet\_ids) | List of subnet ids where the elasticsearch instances will be created | `list(string)` | n/a | yes |
 | <a name="input_ubuntu_codename"></a> [ubuntu\_codename](#input\_ubuntu\_codename) | Ubuntu version to use for the elasticsearch node | `string` | `"jammy"` | no |
