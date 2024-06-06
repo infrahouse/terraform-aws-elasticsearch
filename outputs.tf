@@ -16,23 +16,23 @@ output "cluster_data_url" {
 output "elastic_password" {
   description = "Password for Elasticsearch superuser elastic."
   sensitive   = true
-  value       = module.secret_elastic.secret_value
+  value       = aws_secretsmanager_secret_version.elastic.secret_string
 }
 
 output "elastic_secret_id" {
   description = "AWS secret that stores password for user elastic."
-  value       = module.secret_elastic.secret_id
+  value       = aws_secretsmanager_secret.elastic.id
 }
 
 output "kibana_system_secret_id" {
   description = "AWS secret that stores password for user kibana_system"
-  value       = module.secret_kibana_system.secret_id
+  value       = aws_secretsmanager_secret.kibana_system.id
 }
 
 output "kibana_system_password" {
   description = "A password of kibana_system user"
   sensitive   = true
-  value       = module.secret_kibana_system.secret_value
+  value       = aws_secretsmanager_secret_version.kibana_system.secret_string
 }
 
 output "snapshots_bucket" {

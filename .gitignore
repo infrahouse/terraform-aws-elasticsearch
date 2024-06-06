@@ -36,3 +36,5 @@ tf.plan
 /plan.stdout
 __pycache__
 .pytest_cache
+# Elasticsearch cluster bootstrap state file name
+.bootstrapped
