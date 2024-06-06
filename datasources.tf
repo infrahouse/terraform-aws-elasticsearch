@@ -121,7 +121,7 @@ data "aws_iam_policy_document" "secrets-permission-policy" {
           "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${local.master_profile_name}*",
           "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${local.data_profile_name}*"
         ],
-        var.secret_elastic_readers,
+        var.secret_elastic_readers == null ? [] : var.secret_elastic_readers,
       )
       variable = "aws:PrincipalArn"
     }
