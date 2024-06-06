@@ -1,3 +1,7 @@
+locals {
+  master_profile_name = "es-${var.cluster_name}-master-${random_string.profile-suffix.result}"
+  data_profile_name   = "es-${var.cluster_name}-data-${random_string.profile-suffix.result}"
+}
 module "elastic_master_userdata" {
   source                   = "infrahouse/cloud-init/aws"
   version                  = "= 1.11.1"
@@ -94,7 +98,7 @@ module "elastic_cluster" {
   ]
 
   asg_min_elb_capacity = 1
-  instance_profile     = "${var.cluster_name}-master-${random_string.profile-suffix.result}"
+  instance_profile     = local.master_profile_name
   tags = {
     Name : "${var.cluster_name} master node"
     cluster : var.cluster_name
@@ -139,7 +143,7 @@ module "elastic_cluster_data" {
   alb_healthcheck_path                  = "/"
   alb_healthcheck_port                  = 9200
   alb_healthcheck_response_code_matcher = "200"
-  alb_healthcheck_interval              = 300
+  alb_healthcheck_interval              = 60
   health_check_grace_period             = var.asg_health_check_grace_period
   wait_for_capacity_timeout             = "${var.asg_health_check_grace_period * 1.5}s"
   extra_security_groups_backend = [
@@ -147,7 +151,7 @@ module "elastic_cluster_data" {
   ]
 
   asg_min_elb_capacity = 1
-  instance_profile     = "${var.cluster_name}-data-${random_string.profile-suffix.result}"
+  instance_profile     = local.data_profile_name
   tags = {
     Name : "${var.cluster_name} data node"
     cluster : var.cluster_name
