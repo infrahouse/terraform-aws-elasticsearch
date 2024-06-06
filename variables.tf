@@ -104,7 +104,7 @@ variable "puppet_root_directory" {
 
 variable "secret_elastic_readers" {
   description = "List of role ARNs that will have permissions to read elastic superuser secret."
-  default     = []
+  default     = null
   type        = list(string)
 }
 
