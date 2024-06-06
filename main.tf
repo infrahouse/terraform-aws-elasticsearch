@@ -1,6 +1,6 @@
 locals {
   master_profile_name = "es-${var.cluster_name}-master-${random_string.profile-suffix.result}"
-  data_profile_name = "es-${var.cluster_name}-data-${random_string.profile-suffix.result}"
+  data_profile_name   = "es-${var.cluster_name}-data-${random_string.profile-suffix.result}"
 }
 module "elastic_master_userdata" {
   source                   = "infrahouse/cloud-init/aws"

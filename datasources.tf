@@ -53,7 +53,7 @@ data "aws_iam_policy_document" "secrets-permission-policy" {
       identifiers = [
         data.aws_iam_role.caller_role.arn,
       ]
-      type        = "AWS"
+      type = "AWS"
     }
     actions = [
       "secretsmanager:*"
@@ -93,7 +93,7 @@ data "aws_iam_policy_document" "secrets-permission-policy" {
       "*"
     ]
     condition {
-      test     = "ArnLike"
+      test = "ArnLike"
       values = [
         "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${local.master_profile_name}*",
         "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${local.data_profile_name}*"

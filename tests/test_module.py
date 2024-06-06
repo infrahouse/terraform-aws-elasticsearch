@@ -17,7 +17,9 @@ from tests.conftest import (
 
 
 @contextlib.contextmanager
-def bootstrap_cluster(service_network, dns, ec2_client, route53_client, autoscaling_client):
+def bootstrap_cluster(
+    service_network, dns, ec2_client, route53_client, autoscaling_client
+):
     subzone_id = dns["subzone_id"]["value"]
 
     subnet_public_ids = service_network["subnet_public_ids"]["value"]
@@ -48,10 +50,10 @@ def bootstrap_cluster(service_network, dns, ec2_client, route53_client, autoscal
                 )
             )
         with terraform_apply(
-                terraform_module_dir,
-                destroy_after=DESTROY_AFTER,
-                json_output=True,
-                enable_trace=TRACE_TERRAFORM,
+            terraform_module_dir,
+            destroy_after=DESTROY_AFTER,
+            json_output=True,
+            enable_trace=TRACE_TERRAFORM,
         ):
             open(osp.join(terraform_module_dir, bootstrap_flag_file), "w").write("")
             yield
@@ -68,7 +70,9 @@ def test_module(service_network, dns, ec2_client, route53_client, autoscaling_cl
 
     # Bootstrap ES cluster
     terraform_module_dir = osp.join(TERRAFORM_ROOT_DIR, "test_module")
-    with bootstrap_cluster(service_network, dns, ec2_client, route53_client, autoscaling_client):
+    with bootstrap_cluster(
+        service_network, dns, ec2_client, route53_client, autoscaling_client
+    ):
         # Create remaining master & data nodes
         bootstrap_mode = False
         with open(osp.join(terraform_module_dir, "terraform.tfvars"), "w") as fp:
