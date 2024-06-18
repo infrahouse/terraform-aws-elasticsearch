@@ -1,6 +1,7 @@
 locals {
-  master_profile_name = "${var.cluster_name}-master-${random_string.profile-suffix.result}"
-  data_profile_name   = "${var.cluster_name}-data-${random_string.profile-suffix.result}"
+  master_profile_name     = "${var.cluster_name}-master-${random_string.profile-suffix.result}"
+  data_profile_name       = "${var.cluster_name}-data-${random_string.profile-suffix.result}"
+  tg_healthcheck_interval = 60
 }
 module "elastic_master_userdata" {
   source                   = "infrahouse/cloud-init/aws"
@@ -61,8 +62,8 @@ module "elastic_data_userdata" {
 }
 
 module "elastic_cluster" {
-  source  = "infrahouse/website-pod/aws"
-  version = "= 2.8.3"
+  source  = "registry.infrahouse.com/infrahouse/website-pod/aws"
+  version = "3.2.1"
   providers = {
     aws     = aws
     aws.dns = aws.dns
@@ -80,17 +81,17 @@ module "elastic_cluster" {
   dns_a_records                         = [var.cluster_name, "${var.cluster_name}-master"]
   alb_name_prefix                       = substr(var.cluster_name, 0, 6) ## "name_prefix" cannot be longer than 6 characters: "elastic"
   userdata                              = module.elastic_master_userdata.userdata
-  webserver_permissions                 = data.aws_iam_policy_document.elastic_permissions.json
+  instance_profile_permissions          = data.aws_iam_policy_document.elastic_permissions.json
   stickiness_enabled                    = true
   asg_min_size                          = var.bootstrap_mode ? 1 : var.cluster_master_count
   asg_max_size                          = var.bootstrap_mode ? 1 : var.cluster_master_count
-  max_instance_lifetime_days            = 0
+  max_instance_lifetime_days            = var.max_instance_lifetime_days
   instance_type                         = var.instance_type
   target_group_port                     = 9200
-  alb_healthcheck_path                  = "/"
+  alb_healthcheck_path                  = "/_cluster/health"
   alb_healthcheck_port                  = 9200
   alb_healthcheck_response_code_matcher = "200"
-  alb_healthcheck_interval              = 300
+  alb_healthcheck_interval              = local.tg_healthcheck_interval
   health_check_grace_period             = var.asg_health_check_grace_period
   wait_for_capacity_timeout             = "${var.asg_health_check_grace_period * 1.5}m"
   extra_security_groups_backend = [
@@ -98,7 +99,7 @@ module "elastic_cluster" {
   ]
 
   asg_min_elb_capacity = 1
-  instance_profile     = local.master_profile_name
+  instance_role_name   = local.master_profile_name
   tags = {
     Name : "${var.cluster_name} master node"
     cluster : var.cluster_name
@@ -114,8 +115,8 @@ resource "random_string" "profile-suffix" {
 module "elastic_cluster_data" {
   # Deploy only if not in the bootstrap mode
   count   = var.bootstrap_mode ? 0 : 1
-  source  = "infrahouse/website-pod/aws"
-  version = "= 2.8.3"
+  source  = "registry.infrahouse.com/infrahouse/website-pod/aws"
+  version = "3.2.1"
   providers = {
     aws     = aws
     aws.dns = aws.dns
@@ -133,17 +134,17 @@ module "elastic_cluster_data" {
   dns_a_records                         = ["${var.cluster_name}-data"]
   alb_name_prefix                       = substr(var.cluster_name, 0, 6) ## "name_prefix" cannot be longer than 6 characters: "elastic"
   userdata                              = module.elastic_data_userdata.userdata
-  webserver_permissions                 = data.aws_iam_policy_document.elastic_permissions.json
+  instance_profile_permissions          = data.aws_iam_policy_document.elastic_permissions.json
   stickiness_enabled                    = true
   asg_min_size                          = var.cluster_data_count
   asg_max_size                          = var.cluster_data_count
-  max_instance_lifetime_days            = 0
+  max_instance_lifetime_days            = var.max_instance_lifetime_days
   instance_type                         = var.instance_type
   target_group_port                     = 9200
-  alb_healthcheck_path                  = "/"
+  alb_healthcheck_path                  = "/_cluster/health"
   alb_healthcheck_port                  = 9200
   alb_healthcheck_response_code_matcher = "200"
-  alb_healthcheck_interval              = 60
+  alb_healthcheck_interval              = local.tg_healthcheck_interval
   health_check_grace_period             = var.asg_health_check_grace_period
   wait_for_capacity_timeout             = "${var.asg_health_check_grace_period * 1.5}s"
   extra_security_groups_backend = [
@@ -151,7 +152,7 @@ module "elastic_cluster_data" {
   ]
 
   asg_min_elb_capacity = 1
-  instance_profile     = local.data_profile_name
+  instance_role_name   = local.data_profile_name
   tags = {
     Name : "${var.cluster_name} data node"
     cluster : var.cluster_name
