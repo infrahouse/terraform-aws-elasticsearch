@@ -2,6 +2,7 @@ locals {
   master_profile_name     = "${var.cluster_name}-master-${random_string.profile-suffix.result}"
   data_profile_name       = "${var.cluster_name}-data-${random_string.profile-suffix.result}"
   tg_healthcheck_interval = 60
+  alb_healthcheck_timeout = 4
 }
 module "elastic_master_userdata" {
   source                   = "infrahouse/cloud-init/aws"
@@ -88,8 +89,9 @@ module "elastic_cluster" {
   max_instance_lifetime_days            = var.max_instance_lifetime_days
   instance_type                         = var.instance_type
   target_group_port                     = 9200
-  alb_healthcheck_path                  = "/_cluster/health"
+  alb_healthcheck_path                  = "/_cluster/health?wait_for_status=green&timeout=${local.alb_healthcheck_timeout}s"
   alb_healthcheck_port                  = 9200
+  alb_healthcheck_timeout               = local.alb_healthcheck_timeout
   alb_healthcheck_response_code_matcher = "200"
   alb_healthcheck_interval              = local.tg_healthcheck_interval
   health_check_grace_period             = var.asg_health_check_grace_period
@@ -104,6 +106,7 @@ module "elastic_cluster" {
     Name : "${var.cluster_name} master node"
     cluster : var.cluster_name
     elastic_role : "master"
+    update_dns_lambda : module.update-dns.lambda_name
   }
 }
 
@@ -141,8 +144,9 @@ module "elastic_cluster_data" {
   max_instance_lifetime_days            = var.max_instance_lifetime_days
   instance_type                         = var.instance_type
   target_group_port                     = 9200
-  alb_healthcheck_path                  = "/_cluster/health"
+  alb_healthcheck_path                  = "/_cluster/health?wait_for_status=green&timeout=${local.alb_healthcheck_timeout}s"
   alb_healthcheck_port                  = 9200
+  alb_healthcheck_timeout               = local.alb_healthcheck_timeout
   alb_healthcheck_response_code_matcher = "200"
   alb_healthcheck_interval              = local.tg_healthcheck_interval
   health_check_grace_period             = var.asg_health_check_grace_period
@@ -157,5 +161,6 @@ module "elastic_cluster_data" {
     Name : "${var.cluster_name} data node"
     cluster : var.cluster_name
     elastic_role : "data"
+    update_dns_lambda : module.update-dns-data.lambda_name
   }
 }
