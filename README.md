@@ -77,7 +77,7 @@ The size of the autoscaling group will be not three, but one node.
 module "test" {
   module "test" {
     source    = "registry.infrahouse.com/infrahouse/elasticsearch/aws"
-    version   = "~> 1.0"
+    version   = "~> 1.3"
     providers = {
       aws     = aws
       aws.dns = aws
@@ -134,8 +134,8 @@ The module creates three endpoints to access the cluster. All three of them are 
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_elastic_cluster"></a> [elastic\_cluster](#module\_elastic\_cluster) | infrahouse/website-pod/aws | = 2.8.3 |
-| <a name="module_elastic_cluster_data"></a> [elastic\_cluster\_data](#module\_elastic\_cluster\_data) | infrahouse/website-pod/aws | = 2.8.3 |
+| <a name="module_elastic_cluster"></a> [elastic\_cluster](#module\_elastic\_cluster) | registry.infrahouse.com/infrahouse/website-pod/aws | 3.2.1 |
+| <a name="module_elastic_cluster_data"></a> [elastic\_cluster\_data](#module\_elastic\_cluster\_data) | registry.infrahouse.com/infrahouse/website-pod/aws | 3.2.1 |
 | <a name="module_elastic_data_userdata"></a> [elastic\_data\_userdata](#module\_elastic\_data\_userdata) | infrahouse/cloud-init/aws | = 1.11.1 |
 | <a name="module_elastic_master_userdata"></a> [elastic\_master\_userdata](#module\_elastic\_master\_userdata) | infrahouse/cloud-init/aws | = 1.11.1 |
 | <a name="module_update-dns"></a> [update-dns](#module\_update-dns) | infrahouse/update-dns/aws | = 0.5.1 |
@@ -183,12 +183,13 @@ The module creates three endpoints to access the cluster. All three of them are 
 | <a name="input_instance_type"></a> [instance\_type](#input\_instance\_type) | Instance type to run the elasticsearch node | `string` | `"t3.medium"` | no |
 | <a name="input_internet_gateway_id"></a> [internet\_gateway\_id](#input\_internet\_gateway\_id) | Not used, but AWS Internet Gateway must be present. Ensure by passing its id. | `string` | n/a | yes |
 | <a name="input_key_pair_name"></a> [key\_pair\_name](#input\_key\_pair\_name) | SSH keypair name to be deployed in EC2 instances | `string` | n/a | yes |
+| <a name="input_max_instance_lifetime_days"></a> [max\_instance\_lifetime\_days](#input\_max\_instance\_lifetime\_days) | The maximum amount of time, in \_days\_, that an instance can be in service, values must be either equal to 0 or between 7 and 365 days. | `number` | `0` | no |
 | <a name="input_packages"></a> [packages](#input\_packages) | List of packages to install when the instances bootstraps. | `list(string)` | `[]` | no |
 | <a name="input_puppet_debug_logging"></a> [puppet\_debug\_logging](#input\_puppet\_debug\_logging) | Enable debug logging if true. | `bool` | `false` | no |
 | <a name="input_puppet_hiera_config_path"></a> [puppet\_hiera\_config\_path](#input\_puppet\_hiera\_config\_path) | Path to hiera configuration file. | `string` | `"{root_directory}/environments/{environment}/hiera.yaml"` | no |
 | <a name="input_puppet_module_path"></a> [puppet\_module\_path](#input\_puppet\_module\_path) | Path to common puppet modules. | `string` | `"{root_directory}/modules"` | no |
 | <a name="input_puppet_root_directory"></a> [puppet\_root\_directory](#input\_puppet\_root\_directory) | Path where the puppet code is hosted. | `string` | `"/opt/puppet-code"` | no |
-| <a name="input_secret_elastic_readers"></a> [secret\_elastic\_readers](#input\_secret\_elastic\_readers) | List of role ARNs that will have permissions to read elastic superuser secret. | `list(string)` | `[]` | no |
+| <a name="input_secret_elastic_readers"></a> [secret\_elastic\_readers](#input\_secret\_elastic\_readers) | List of role ARNs that will have permissions to read elastic superuser secret. | `list(string)` | `null` | no |
 | <a name="input_snapshot_bucket_prefix"></a> [snapshot\_bucket\_prefix](#input\_snapshot\_bucket\_prefix) | A string prefix to a bucket name for snapshots. Random by default. | `string` | `null` | no |
 | <a name="input_subnet_ids"></a> [subnet\_ids](#input\_subnet\_ids) | List of subnet ids where the elasticsearch instances will be created | `list(string)` | n/a | yes |
 | <a name="input_ubuntu_codename"></a> [ubuntu\_codename](#input\_ubuntu\_codename) | Ubuntu version to use for the elasticsearch node | `string` | `"jammy"` | no |
