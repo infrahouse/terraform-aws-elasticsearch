@@ -39,3 +39,13 @@ output "snapshots_bucket" {
   description = "AWS S3 Bucket where Elasticsearch snapshots will be stored."
   value       = aws_s3_bucket.snapshots-bucket.bucket
 }
+
+output "master_instance_role_arn" {
+  description = "Master node EC2 instance profile will have this role ARN"
+  value = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${local.master_profile_name}"
+}
+
+output "data_instance_role_arn" {
+  description = "Data node EC2 instance profile will have this role ARN"
+  value = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${local.data_profile_name}"
+}
