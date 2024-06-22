@@ -2,7 +2,7 @@ locals {
   master_profile_name     = "${var.cluster_name}-master-${random_string.profile-suffix.result}"
   data_profile_name       = "${var.cluster_name}-data-${random_string.profile-suffix.result}"
   tg_healthcheck_interval = 60
-  alb_healthcheck_timeout = 4
+  alb_healthcheck_timeout = local.tg_healthcheck_interval / 2
 }
 module "elastic_master_userdata" {
   source                   = "registry.infrahouse.com/infrahouse/cloud-init/aws"
@@ -104,7 +104,7 @@ module "elastic_cluster" {
   instance_type                         = var.instance_type
   health_check_type                     = "EC2"
   target_group_port                     = 9200
-  alb_healthcheck_path                  = "/_cluster/health?wait_for_status=green&timeout=${local.alb_healthcheck_timeout}s"
+  alb_healthcheck_path                  = "/_cluster/health?wait_for_status=yellow&timeout=${local.alb_healthcheck_timeout}s"
   alb_healthcheck_port                  = 9200
   alb_healthcheck_timeout               = local.alb_healthcheck_timeout
   alb_healthcheck_response_code_matcher = "200"
@@ -160,7 +160,7 @@ module "elastic_cluster_data" {
   health_check_type                     = "EC2"
   instance_type                         = var.instance_type
   target_group_port                     = 9200
-  alb_healthcheck_path                  = "/_cluster/health?wait_for_status=green&timeout=${local.alb_healthcheck_timeout}s"
+  alb_healthcheck_path                  = "/_cluster/health?wait_for_status=yellow&timeout=${local.alb_healthcheck_timeout}s"
   alb_healthcheck_port                  = 9200
   alb_healthcheck_timeout               = local.alb_healthcheck_timeout
   alb_healthcheck_response_code_matcher = "200"
