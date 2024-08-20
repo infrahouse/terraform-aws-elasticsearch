@@ -154,7 +154,7 @@ module "elastic_cluster_data" {
   extra_security_groups_backend = [
     aws_security_group.backend_extra.id
   ]
-
+  root_volume_size     = var.root_volume_size
   asg_min_elb_capacity = 1
   instance_role_name   = local.data_profile_name
   tags = {
