@@ -2,11 +2,11 @@ locals {
   master_profile_name     = "${var.cluster_name}-master-${random_string.profile-suffix.result}"
   data_profile_name       = "${var.cluster_name}-data-${random_string.profile-suffix.result}"
   tg_healthcheck_interval = 60
-  alb_healthcheck_timeout = 4
+  alb_healthcheck_timeout = local.tg_healthcheck_interval / 2
 }
 module "elastic_master_userdata" {
-  source                   = "infrahouse/cloud-init/aws"
-  version                  = "= 1.11.1"
+  source                   = "registry.infrahouse.com/infrahouse/cloud-init/aws"
+  version                  = "1.12.4"
   environment              = var.environment
   role                     = "elastic_master"
   puppet_hiera_config_path = var.puppet_hiera_config_path
@@ -17,25 +17,32 @@ module "elastic_master_userdata" {
   extra_files = var.extra_files
   extra_repos = var.extra_repos
 
-  custom_facts = {
-    "elasticsearch" : {
-      "bootstrap_cluster" : var.bootstrap_mode
-      "cluster_name" : var.cluster_name
-      "elastic_secret" : aws_secretsmanager_secret.elastic.id
-      "kibana_system_secret" : aws_secretsmanager_secret.kibana_system.id
-      "snapshots_bucket" : aws_s3_bucket.snapshots-bucket.bucket
-    }
-    "letsencrypt" : {
-      "domain" : data.aws_route53_zone.cluster.name
-      "email" : "hostmaster@${data.aws_route53_zone.cluster.name}"
-      "production" : true
-    }
-  }
+  custom_facts = merge(
+    {
+      "elasticsearch" : {
+        "bootstrap_cluster" : var.bootstrap_mode
+        "cluster_name" : var.cluster_name
+        "elastic_secret" : aws_secretsmanager_secret.elastic.id
+        "kibana_system_secret" : aws_secretsmanager_secret.kibana_system.id
+        "snapshots_bucket" : aws_s3_bucket.snapshots-bucket.bucket
+      }
+      "letsencrypt" : {
+        "domain" : data.aws_route53_zone.cluster.name
+        "email" : "hostmaster@${data.aws_route53_zone.cluster.name}"
+        "production" : true
+      }
+    },
+    var.smtp_credentials_secret != null ? {
+      postfix : {
+        smtp_credentials : var.smtp_credentials_secret
+      }
+    } : {}
+  )
 }
 
 module "elastic_data_userdata" {
-  source                   = "infrahouse/cloud-init/aws"
-  version                  = "= 1.11.1"
+  source                   = "registry.infrahouse.com/infrahouse/cloud-init/aws"
+  version                  = "1.12.4"
   environment              = var.environment
   role                     = "elastic_data"
   puppet_hiera_config_path = var.puppet_hiera_config_path
@@ -46,20 +53,27 @@ module "elastic_data_userdata" {
   extra_files = var.extra_files
   extra_repos = var.extra_repos
 
-  custom_facts = {
-    "elasticsearch" : {
-      "bootstrap_cluster" : false
-      "cluster_name" : var.cluster_name
-      "elastic_secret" : aws_secretsmanager_secret.elastic.id
-      "kibana_system_secret" : aws_secretsmanager_secret.kibana_system.id
-      "snapshots_bucket" : aws_s3_bucket.snapshots-bucket.bucket
-    }
-    "letsencrypt" : {
-      "domain" : data.aws_route53_zone.cluster.name
-      "email" : "hostmaster@${data.aws_route53_zone.cluster.name}"
-      "production" : true
-    }
-  }
+  custom_facts = merge(
+    {
+      "elasticsearch" : {
+        "bootstrap_cluster" : false
+        "cluster_name" : var.cluster_name
+        "elastic_secret" : aws_secretsmanager_secret.elastic.id
+        "kibana_system_secret" : aws_secretsmanager_secret.kibana_system.id
+        "snapshots_bucket" : aws_s3_bucket.snapshots-bucket.bucket
+      }
+      "letsencrypt" : {
+        "domain" : data.aws_route53_zone.cluster.name
+        "email" : "hostmaster@${data.aws_route53_zone.cluster.name}"
+        "production" : true
+      }
+    },
+    var.smtp_credentials_secret != null ? {
+      postfix : {
+        smtp_credentials : var.smtp_credentials_secret
+      }
+    } : {}
+  )
 }
 
 module "elastic_cluster" {
@@ -88,8 +102,9 @@ module "elastic_cluster" {
   asg_max_size                          = var.bootstrap_mode ? 1 : var.cluster_master_count
   max_instance_lifetime_days            = var.max_instance_lifetime_days
   instance_type                         = var.instance_type
+  health_check_type                     = "EC2"
   target_group_port                     = 9200
-  alb_healthcheck_path                  = "/_cluster/health?wait_for_status=green&timeout=${local.alb_healthcheck_timeout}s"
+  alb_healthcheck_path                  = "/_cluster/health?wait_for_status=yellow&timeout=${local.alb_healthcheck_timeout}s"
   alb_healthcheck_port                  = 9200
   alb_healthcheck_timeout               = local.alb_healthcheck_timeout
   alb_healthcheck_response_code_matcher = "200"
@@ -142,9 +157,10 @@ module "elastic_cluster_data" {
   asg_min_size                          = var.cluster_data_count
   asg_max_size                          = var.cluster_data_count
   max_instance_lifetime_days            = var.max_instance_lifetime_days
+  health_check_type                     = "EC2"
   instance_type                         = var.instance_type
   target_group_port                     = 9200
-  alb_healthcheck_path                  = "/_cluster/health?wait_for_status=green&timeout=${local.alb_healthcheck_timeout}s"
+  alb_healthcheck_path                  = "/_cluster/health?wait_for_status=yellow&timeout=${local.alb_healthcheck_timeout}s"
   alb_healthcheck_port                  = 9200
   alb_healthcheck_timeout               = local.alb_healthcheck_timeout
   alb_healthcheck_response_code_matcher = "200"

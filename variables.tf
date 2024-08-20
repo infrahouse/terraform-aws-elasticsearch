@@ -121,6 +121,12 @@ variable "secret_elastic_readers" {
   type        = list(string)
 }
 
+variable "smtp_credentials_secret" {
+  description = "AWS secret name with SMTP credentials. The secret must contain a JSON with user and password keys."
+  type        = string
+  default     = null
+}
+
 variable "snapshot_bucket_prefix" {
   description = "A string prefix to a bucket name for snapshots. Random by default."
   type        = string
