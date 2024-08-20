@@ -136,10 +136,10 @@ The module creates three endpoints to access the cluster. All three of them are 
 |------|--------|---------|
 | <a name="module_elastic_cluster"></a> [elastic\_cluster](#module\_elastic\_cluster) | registry.infrahouse.com/infrahouse/website-pod/aws | 3.2.1 |
 | <a name="module_elastic_cluster_data"></a> [elastic\_cluster\_data](#module\_elastic\_cluster\_data) | registry.infrahouse.com/infrahouse/website-pod/aws | 3.2.1 |
-| <a name="module_elastic_data_userdata"></a> [elastic\_data\_userdata](#module\_elastic\_data\_userdata) | registry.infrahouse.com/infrahouse/cloud-init/aws | 1.12.4 |
-| <a name="module_elastic_master_userdata"></a> [elastic\_master\_userdata](#module\_elastic\_master\_userdata) | registry.infrahouse.com/infrahouse/cloud-init/aws | 1.12.4 |
-| <a name="module_update-dns"></a> [update-dns](#module\_update-dns) | infrahouse/update-dns/aws | = 0.5.1 |
-| <a name="module_update-dns-data"></a> [update-dns-data](#module\_update-dns-data) | infrahouse/update-dns/aws | = 0.5.1 |
+| <a name="module_elastic_data_userdata"></a> [elastic\_data\_userdata](#module\_elastic\_data\_userdata) | infrahouse/cloud-init/aws | = 1.11.1 |
+| <a name="module_elastic_master_userdata"></a> [elastic\_master\_userdata](#module\_elastic\_master\_userdata) | infrahouse/cloud-init/aws | = 1.11.1 |
+| <a name="module_update-dns"></a> [update-dns](#module\_update-dns) | registry.infrahouse.com/infrahouse/update-dns/aws | 0.6.0 |
+| <a name="module_update-dns-data"></a> [update-dns-data](#module\_update-dns-data) | registry.infrahouse.com/infrahouse/update-dns/aws | 0.6.0 |
 
 ## Resources
 
@@ -189,6 +189,7 @@ The module creates three endpoints to access the cluster. All three of them are 
 | <a name="input_puppet_hiera_config_path"></a> [puppet\_hiera\_config\_path](#input\_puppet\_hiera\_config\_path) | Path to hiera configuration file. | `string` | `"{root_directory}/environments/{environment}/hiera.yaml"` | no |
 | <a name="input_puppet_module_path"></a> [puppet\_module\_path](#input\_puppet\_module\_path) | Path to common puppet modules. | `string` | `"{root_directory}/modules"` | no |
 | <a name="input_puppet_root_directory"></a> [puppet\_root\_directory](#input\_puppet\_root\_directory) | Path where the puppet code is hosted. | `string` | `"/opt/puppet-code"` | no |
+| <a name="input_root_volume_size"></a> [root\_volume\_size](#input\_root\_volume\_size) | Root volume size in EC2 instance in Gigabytes | `number` | `30` | no |
 | <a name="input_secret_elastic_readers"></a> [secret\_elastic\_readers](#input\_secret\_elastic\_readers) | List of role ARNs that will have permissions to read elastic superuser secret. | `list(string)` | `null` | no |
 | <a name="input_smtp_credentials_secret"></a> [smtp\_credentials\_secret](#input\_smtp\_credentials\_secret) | AWS secret name with SMTP credentials. The secret must contain a JSON with user and password keys. | `string` | `null` | no |
 | <a name="input_snapshot_bucket_prefix"></a> [snapshot\_bucket\_prefix](#input\_snapshot\_bucket\_prefix) | A string prefix to a bucket name for snapshots. Random by default. | `string` | `null` | no |

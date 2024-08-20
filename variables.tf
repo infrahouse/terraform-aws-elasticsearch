@@ -109,6 +109,12 @@ variable "puppet_root_directory" {
   default     = "/opt/puppet-code"
 }
 
+variable "root_volume_size" {
+  description = "Root volume size in EC2 instance in Gigabytes"
+  type        = number
+  default     = 30
+}
+
 variable "secret_elastic_readers" {
   description = "List of role ARNs that will have permissions to read elastic superuser secret."
   default     = null
