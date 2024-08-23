@@ -133,6 +133,12 @@ variable "snapshot_bucket_prefix" {
   default     = null
 }
 
+variable "ssh_cidr_block" {
+  description = "CIDR range that is allowed to SSH into the elastic instances."
+  type        = string
+  default     = "0.0.0.0/0"
+}
+
 variable "subnet_ids" {
   description = "List of subnet ids where the elasticsearch instances will be created"
   type        = list(string)

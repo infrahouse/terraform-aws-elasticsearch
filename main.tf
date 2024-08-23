@@ -78,7 +78,7 @@ module "elastic_data_userdata" {
 
 module "elastic_cluster" {
   source  = "registry.infrahouse.com/infrahouse/website-pod/aws"
-  version = "3.2.1"
+  version = "3.3.9"
   providers = {
     aws     = aws
     aws.dns = aws.dns
@@ -93,6 +93,7 @@ module "elastic_cluster" {
   alb_internal                          = true
   internet_gateway_id                   = var.internet_gateway_id
   key_pair_name                         = var.key_pair_name
+  ssh_cidr_block                        = var.ssh_cidr_block
   dns_a_records                         = [var.cluster_name, "${var.cluster_name}-master"]
   alb_name_prefix                       = substr(var.cluster_name, 0, 6) ## "name_prefix" cannot be longer than 6 characters: "elastic"
   userdata                              = module.elastic_master_userdata.userdata
@@ -134,7 +135,7 @@ module "elastic_cluster_data" {
   # Deploy only if not in the bootstrap mode
   count   = var.bootstrap_mode ? 0 : 1
   source  = "registry.infrahouse.com/infrahouse/website-pod/aws"
-  version = "3.2.1"
+  version = "3.3.9"
   providers = {
     aws     = aws
     aws.dns = aws.dns
@@ -149,6 +150,7 @@ module "elastic_cluster_data" {
   alb_internal                          = true
   internet_gateway_id                   = var.internet_gateway_id
   key_pair_name                         = var.key_pair_name
+  ssh_cidr_block                        = var.ssh_cidr_block
   dns_a_records                         = ["${var.cluster_name}-data"]
   alb_name_prefix                       = substr(var.cluster_name, 0, 6) ## "name_prefix" cannot be longer than 6 characters: "elastic"
   userdata                              = module.elastic_data_userdata.userdata
