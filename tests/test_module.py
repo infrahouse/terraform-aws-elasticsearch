@@ -38,13 +38,13 @@ def bootstrap_cluster(
             fp.write(
                 dedent(
                     f"""
-                    role_arn = "{TEST_ROLE_ARN}"
-                    region = "{REGION}"
+                    role_arn        = "{TEST_ROLE_ARN}"
+                    region          = "{REGION}"
                     elastic_zone_id = "{subzone_id}"
-                    bootstrap_mode = {str(bootstrap_mode).lower()}
+                    bootstrap_mode  = {str(bootstrap_mode).lower()}
 
-                    lb_subnet_ids = {json.dumps(subnet_public_ids)}
-                    backend_subnet_ids = {json.dumps(subnet_private_ids)}
+                    lb_subnet_ids       = {json.dumps(subnet_public_ids)}
+                    backend_subnet_ids  = {json.dumps(subnet_private_ids)}
                     internet_gateway_id = "{internet_gateway_id}"
                     """
                 )
@@ -79,13 +79,13 @@ def test_module(service_network, dns, ec2_client, route53_client, autoscaling_cl
             fp.write(
                 dedent(
                     f"""
-                    role_arn = "{TEST_ROLE_ARN}"
-                    region = "{REGION}"
+                    role_arn        = "{TEST_ROLE_ARN}"
+                    region          = "{REGION}"
                     elastic_zone_id = "{subzone_id}"
-                    bootstrap_mode = {str(bootstrap_mode).lower()}
+                    bootstrap_mode  = {str(bootstrap_mode).lower()}
 
-                    lb_subnet_ids = {json.dumps(subnet_public_ids)}
-                    backend_subnet_ids = {json.dumps(subnet_private_ids)}
+                    lb_subnet_ids       = {json.dumps(subnet_public_ids)}
+                    backend_subnet_ids  = {json.dumps(subnet_private_ids)}
                     internet_gateway_id = "{internet_gateway_id}"
                     """
                 )
