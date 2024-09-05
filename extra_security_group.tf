@@ -9,12 +9,12 @@ resource "aws_security_group" "backend_extra" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "backend_extra_reserved" {
-  description       = "Elasticsearch ${var.cluster_name} transport"
-  security_group_id = aws_security_group.backend_extra.id
-  from_port         = 9300
-  to_port           = 9300
-  ip_protocol       = "tcp"
-  cidr_ipv4         = "0.0.0.0/0"
+  description                  = "Elasticsearch ${var.cluster_name} transport"
+  security_group_id            = aws_security_group.backend_extra.id
+  from_port                    = 9300
+  to_port                      = 9300
+  ip_protocol                  = "tcp"
+  referenced_security_group_id = aws_security_group.backend_extra.id
   tags = {
     Name = "Elasticsearch transport"
   }
