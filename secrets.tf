@@ -3,7 +3,7 @@ resource "aws_secretsmanager_secret" "elastic" {
   description             = "Password for user elastic in cluster ${var.cluster_name}"
   recovery_window_in_days = 0
   policy                  = data.aws_iam_policy_document.secrets-permission-policy.json
-  tags = local.default_module_tags
+  tags                    = local.default_module_tags
 }
 
 resource "random_password" "elastic" {
@@ -21,7 +21,7 @@ resource "aws_secretsmanager_secret" "kibana_system" {
   description             = "Password for user kibana_system in cluster ${var.cluster_name}"
   recovery_window_in_days = 0
   policy                  = data.aws_iam_policy_document.secrets-permission-policy.json
-  tags = local.default_module_tags
+  tags                    = local.default_module_tags
 }
 
 resource "random_password" "kibana_system" {
