@@ -12,7 +12,8 @@ resource "aws_s3_bucket" "snapshots-bucket" {
   tags = merge(
     {
       "cluster_name" : var.cluster_name
-    }
+    },
+    local.default_module_tags
   )
 }
 
