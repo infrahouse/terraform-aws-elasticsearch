@@ -78,19 +78,18 @@ module "elastic_data_userdata" {
 
 module "elastic_cluster" {
   source  = "registry.infrahouse.com/infrahouse/website-pod/aws"
-  version = "3.3.9"
+  version = "4.1.0"
   providers = {
     aws     = aws
     aws.dns = aws.dns
   }
-  service_name                          = var.cluster_name
+  service_name                          = local.service_name
   asg_name                              = var.cluster_name
   environment                           = var.environment
   ami                                   = var.asg_ami != null ? var.asg_ami : data.aws_ami.ubuntu.image_id
   subnets                               = var.subnet_ids
   backend_subnets                       = var.subnet_ids
   zone_id                               = var.zone_id
-  alb_internal                          = true
   internet_gateway_id                   = var.internet_gateway_id
   key_pair_name                         = var.key_pair_name
   ssh_cidr_block                        = var.ssh_cidr_block
@@ -135,19 +134,18 @@ module "elastic_cluster_data" {
   # Deploy only if not in the bootstrap mode
   count   = var.bootstrap_mode ? 0 : 1
   source  = "registry.infrahouse.com/infrahouse/website-pod/aws"
-  version = "3.3.9"
+  version = "4.1.0"
   providers = {
     aws     = aws
     aws.dns = aws.dns
   }
-  service_name                          = var.cluster_name
+  service_name                          = local.service_name
   asg_name                              = "${var.cluster_name}-data"
   environment                           = var.environment
   ami                                   = var.asg_ami != null ? var.asg_ami : data.aws_ami.ubuntu.image_id
   subnets                               = var.subnet_ids
   backend_subnets                       = var.subnet_ids
   zone_id                               = var.zone_id
-  alb_internal                          = true
   internet_gateway_id                   = var.internet_gateway_id
   key_pair_name                         = var.key_pair_name
   ssh_cidr_block                        = var.ssh_cidr_block

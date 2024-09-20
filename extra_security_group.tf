@@ -3,9 +3,12 @@ resource "aws_security_group" "backend_extra" {
   name_prefix = "${var.cluster_name}-"
   vpc_id      = data.aws_subnet.selected.vpc_id
 
-  tags = {
-    Name : "Elasticseach ${var.cluster_name} transport"
-  }
+  tags = merge(
+    {
+      Name : "Elasticseach ${var.cluster_name} transport"
+    },
+    local.default_module_tags
+  )
 }
 
 resource "aws_vpc_security_group_ingress_rule" "backend_extra_reserved" {
@@ -15,7 +18,10 @@ resource "aws_vpc_security_group_ingress_rule" "backend_extra_reserved" {
   to_port                      = 9300
   ip_protocol                  = "tcp"
   referenced_security_group_id = aws_security_group.backend_extra.id
-  tags = {
-    Name = "Elasticsearch transport"
-  }
+  tags = merge(
+    {
+      Name = "Elasticsearch transport"
+    },
+    local.default_module_tags
+  )
 }
