@@ -65,6 +65,18 @@ variable "instance_type" {
   default     = "t3.medium"
 }
 
+variable "instance_type_master" {
+  description = "Instance type to run the elasticsearch master node. If null, use var.instance_type."
+  type        = string
+  default     = null
+}
+
+variable "instance_type_data" {
+  description = "Instance type to run the elasticsearch data node. If null, use var.instance_type."
+  type        = string
+  default     = null
+}
+
 variable "internet_gateway_id" { # tflint-ignore: terraform_unused_declarations
   description = "Not used, but AWS Internet Gateway must be present. Ensure by passing its id."
   type        = string

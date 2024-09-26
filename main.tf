@@ -101,7 +101,7 @@ module "elastic_cluster" {
   asg_min_size                          = var.bootstrap_mode ? 1 : var.cluster_master_count
   asg_max_size                          = var.bootstrap_mode ? 1 : var.cluster_master_count
   max_instance_lifetime_days            = var.max_instance_lifetime_days
-  instance_type                         = var.instance_type
+  instance_type                         = var.instance_type_master != null ? var.instance_type_master: var.instance_type
   health_check_type                     = "EC2"
   target_group_port                     = 9200
   alb_healthcheck_path                  = "/_cluster/health?wait_for_status=yellow&timeout=${local.alb_healthcheck_timeout}s"
@@ -158,7 +158,7 @@ module "elastic_cluster_data" {
   asg_max_size                          = var.cluster_data_count
   max_instance_lifetime_days            = var.max_instance_lifetime_days
   health_check_type                     = "EC2"
-  instance_type                         = var.instance_type
+  instance_type                         = var.instance_type_data != null ? var.instance_type_data: var.instance_type
   target_group_port                     = 9200
   alb_healthcheck_path                  = "/_cluster/health?wait_for_status=yellow&timeout=${local.alb_healthcheck_timeout}s"
   alb_healthcheck_port                  = 9200
