@@ -6,7 +6,7 @@ locals {
 }
 module "elastic_master_userdata" {
   source                   = "registry.infrahouse.com/infrahouse/cloud-init/aws"
-  version                  = "1.12.4"
+  version                  = "1.13.1"
   environment              = var.environment
   role                     = "elastic_master"
   puppet_hiera_config_path = var.puppet_hiera_config_path
@@ -38,11 +38,12 @@ module "elastic_master_userdata" {
       }
     } : {}
   )
+  cancel_instance_refresh_on_error = true
 }
 
 module "elastic_data_userdata" {
   source                   = "registry.infrahouse.com/infrahouse/cloud-init/aws"
-  version                  = "1.12.4"
+  version                  = "1.13.1"
   environment              = var.environment
   role                     = "elastic_data"
   puppet_hiera_config_path = var.puppet_hiera_config_path
@@ -74,11 +75,12 @@ module "elastic_data_userdata" {
       }
     } : {}
   )
+  cancel_instance_refresh_on_error = true
 }
 
 module "elastic_cluster" {
   source  = "registry.infrahouse.com/infrahouse/website-pod/aws"
-  version = "4.1.0"
+  version = "4.3.0"
   providers = {
     aws     = aws
     aws.dns = aws.dns
@@ -101,7 +103,7 @@ module "elastic_cluster" {
   asg_min_size                          = var.bootstrap_mode ? 1 : var.cluster_master_count
   asg_max_size                          = var.bootstrap_mode ? 1 : var.cluster_master_count
   max_instance_lifetime_days            = var.max_instance_lifetime_days
-  instance_type                         = var.instance_type_master != null ? var.instance_type_master: var.instance_type
+  instance_type                         = var.instance_type_master != null ? var.instance_type_master : var.instance_type
   health_check_type                     = "EC2"
   target_group_port                     = 9200
   alb_healthcheck_path                  = "/_cluster/health?wait_for_status=yellow&timeout=${local.alb_healthcheck_timeout}s"
@@ -134,7 +136,7 @@ module "elastic_cluster_data" {
   # Deploy only if not in the bootstrap mode
   count   = var.bootstrap_mode ? 0 : 1
   source  = "registry.infrahouse.com/infrahouse/website-pod/aws"
-  version = "4.1.0"
+  version = "4.3.0"
   providers = {
     aws     = aws
     aws.dns = aws.dns
@@ -156,9 +158,10 @@ module "elastic_cluster_data" {
   stickiness_enabled                    = true
   asg_min_size                          = var.cluster_data_count
   asg_max_size                          = var.cluster_data_count
+  asg_lifecycle_hook_terminating        = true
   max_instance_lifetime_days            = var.max_instance_lifetime_days
   health_check_type                     = "EC2"
-  instance_type                         = var.instance_type_data != null ? var.instance_type_data: var.instance_type
+  instance_type                         = var.instance_type_data != null ? var.instance_type_data : var.instance_type
   target_group_port                     = 9200
   alb_healthcheck_path                  = "/_cluster/health?wait_for_status=yellow&timeout=${local.alb_healthcheck_timeout}s"
   alb_healthcheck_port                  = 9200

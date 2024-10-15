@@ -1,8 +1,24 @@
 data "aws_iam_policy_document" "elastic_permissions" {
   # https://www.elastic.co/guide/en/elasticsearch/plugins/current/discovery-ec2-usage.html#discovery-ec2-permissions
   statement {
-    actions   = ["ec2:DescribeInstances"]
+    actions = [
+      "ec2:DescribeInstances",
+      "autoscaling:DescribeAutoScalingInstances",
+
+    ]
     resources = ["*"]
+  }
+  statement {
+    actions = [
+      "autoscaling:CompleteLifecycleAction",
+      "autoscaling:CancelInstanceRefresh",
+      "autoscaling:SetInstanceHealth",
+
+    ]
+    resources = [
+      "arn:aws:autoscaling:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:autoScalingGroup:*:autoScalingGroupName/${var.cluster_name}-data",
+      "arn:aws:autoscaling:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:autoScalingGroup:*:autoScalingGroupName/${var.cluster_name}",
+    ]
   }
   statement {
     actions = [
