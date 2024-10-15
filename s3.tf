@@ -15,6 +15,7 @@ resource "aws_s3_bucket" "snapshots-bucket" {
     },
     local.default_module_tags
   )
+  force_destroy = var.snapshot_force_destroy
 }
 
 resource "aws_s3_bucket_public_access_block" "public_access" {

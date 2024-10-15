@@ -113,7 +113,7 @@ variable "puppet_hiera_config_path" {
 
 variable "puppet_module_path" {
   description = "Path to common puppet modules."
-  default     = "{root_directory}/modules"
+  default     = "{root_directory}/environments/{environment}/modules:{root_directory}/modules"
 }
 
 variable "puppet_root_directory" {
@@ -143,6 +143,12 @@ variable "snapshot_bucket_prefix" {
   description = "A string prefix to a bucket name for snapshots. Random by default."
   type        = string
   default     = null
+}
+
+variable "snapshot_force_destroy" {
+  description = "Destroy S3 bucket with Elasticsearch snapshots even if non-empty"
+  type        = bool
+  default     = false
 }
 
 variable "ssh_cidr_block" {

@@ -134,12 +134,12 @@ The module creates three endpoints to access the cluster. All three of them are 
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_elastic_cluster"></a> [elastic\_cluster](#module\_elastic\_cluster) | registry.infrahouse.com/infrahouse/website-pod/aws | 4.1.0 |
-| <a name="module_elastic_cluster_data"></a> [elastic\_cluster\_data](#module\_elastic\_cluster\_data) | registry.infrahouse.com/infrahouse/website-pod/aws | 4.1.0 |
-| <a name="module_elastic_data_userdata"></a> [elastic\_data\_userdata](#module\_elastic\_data\_userdata) | registry.infrahouse.com/infrahouse/cloud-init/aws | 1.12.4 |
-| <a name="module_elastic_master_userdata"></a> [elastic\_master\_userdata](#module\_elastic\_master\_userdata) | registry.infrahouse.com/infrahouse/cloud-init/aws | 1.12.4 |
-| <a name="module_update-dns"></a> [update-dns](#module\_update-dns) | registry.infrahouse.com/infrahouse/update-dns/aws | 0.6.0 |
-| <a name="module_update-dns-data"></a> [update-dns-data](#module\_update-dns-data) | registry.infrahouse.com/infrahouse/update-dns/aws | 0.6.0 |
+| <a name="module_elastic_cluster"></a> [elastic\_cluster](#module\_elastic\_cluster) | registry.infrahouse.com/infrahouse/website-pod/aws | 4.3.0 |
+| <a name="module_elastic_cluster_data"></a> [elastic\_cluster\_data](#module\_elastic\_cluster\_data) | registry.infrahouse.com/infrahouse/website-pod/aws | 4.3.0 |
+| <a name="module_elastic_data_userdata"></a> [elastic\_data\_userdata](#module\_elastic\_data\_userdata) | registry.infrahouse.com/infrahouse/cloud-init/aws | 1.13.1 |
+| <a name="module_elastic_master_userdata"></a> [elastic\_master\_userdata](#module\_elastic\_master\_userdata) | registry.infrahouse.com/infrahouse/cloud-init/aws | 1.13.1 |
+| <a name="module_update-dns"></a> [update-dns](#module\_update-dns) | registry.infrahouse.com/infrahouse/update-dns/aws | 0.6.1 |
+| <a name="module_update-dns-data"></a> [update-dns-data](#module\_update-dns-data) | registry.infrahouse.com/infrahouse/update-dns/aws | 0.6.1 |
 
 ## Resources
 
@@ -178,8 +178,8 @@ The module creates three endpoints to access the cluster. All three of them are 
 | <a name="input_cluster_master_count"></a> [cluster\_master\_count](#input\_cluster\_master\_count) | Number of master nodes in the cluster | `number` | `3` | no |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | How to name the cluster | `string` | `"elastic"` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | Name of environment. | `string` | `"development"` | no |
-| <a name="input_extra_files"></a> [extra\_files](#input\_extra\_files) | Additional files to create on an instance. | <pre>list(object({<br>    content     = string<br>    path        = string<br>    permissions = string<br>  }))</pre> | `[]` | no |
-| <a name="input_extra_repos"></a> [extra\_repos](#input\_extra\_repos) | Additional APT repositories to configure on an instance. | <pre>map(object({<br>    source = string<br>    key    = string<br>  }))</pre> | `{}` | no |
+| <a name="input_extra_files"></a> [extra\_files](#input\_extra\_files) | Additional files to create on an instance. | <pre>list(object({<br/>    content     = string<br/>    path        = string<br/>    permissions = string<br/>  }))</pre> | `[]` | no |
+| <a name="input_extra_repos"></a> [extra\_repos](#input\_extra\_repos) | Additional APT repositories to configure on an instance. | <pre>map(object({<br/>    source = string<br/>    key    = string<br/>  }))</pre> | `{}` | no |
 | <a name="input_instance_type"></a> [instance\_type](#input\_instance\_type) | Instance type to run the elasticsearch node | `string` | `"t3.medium"` | no |
 | <a name="input_instance_type_data"></a> [instance\_type\_data](#input\_instance\_type\_data) | Instance type to run the elasticsearch data node. If null, use var.instance\_type. | `string` | `null` | no |
 | <a name="input_instance_type_master"></a> [instance\_type\_master](#input\_instance\_type\_master) | Instance type to run the elasticsearch master node. If null, use var.instance\_type. | `string` | `null` | no |
@@ -189,12 +189,13 @@ The module creates three endpoints to access the cluster. All three of them are 
 | <a name="input_packages"></a> [packages](#input\_packages) | List of packages to install when the instances bootstraps. | `list(string)` | `[]` | no |
 | <a name="input_puppet_debug_logging"></a> [puppet\_debug\_logging](#input\_puppet\_debug\_logging) | Enable debug logging if true. | `bool` | `false` | no |
 | <a name="input_puppet_hiera_config_path"></a> [puppet\_hiera\_config\_path](#input\_puppet\_hiera\_config\_path) | Path to hiera configuration file. | `string` | `"{root_directory}/environments/{environment}/hiera.yaml"` | no |
-| <a name="input_puppet_module_path"></a> [puppet\_module\_path](#input\_puppet\_module\_path) | Path to common puppet modules. | `string` | `"{root_directory}/modules"` | no |
+| <a name="input_puppet_module_path"></a> [puppet\_module\_path](#input\_puppet\_module\_path) | Path to common puppet modules. | `string` | `"{root_directory}/environments/{environment}/modules:{root_directory}/modules"` | no |
 | <a name="input_puppet_root_directory"></a> [puppet\_root\_directory](#input\_puppet\_root\_directory) | Path where the puppet code is hosted. | `string` | `"/opt/puppet-code"` | no |
 | <a name="input_root_volume_size"></a> [root\_volume\_size](#input\_root\_volume\_size) | Root volume size in EC2 instance in Gigabytes | `number` | `30` | no |
 | <a name="input_secret_elastic_readers"></a> [secret\_elastic\_readers](#input\_secret\_elastic\_readers) | List of role ARNs that will have permissions to read elastic superuser secret. | `list(string)` | `null` | no |
 | <a name="input_smtp_credentials_secret"></a> [smtp\_credentials\_secret](#input\_smtp\_credentials\_secret) | AWS secret name with SMTP credentials. The secret must contain a JSON with user and password keys. | `string` | `null` | no |
 | <a name="input_snapshot_bucket_prefix"></a> [snapshot\_bucket\_prefix](#input\_snapshot\_bucket\_prefix) | A string prefix to a bucket name for snapshots. Random by default. | `string` | `null` | no |
+| <a name="input_snapshot_force_destroy"></a> [snapshot\_force\_destroy](#input\_snapshot\_force\_destroy) | Destroy S3 bucket with Elasticsearch snapshots even if non-empty | `bool` | `false` | no |
 | <a name="input_ssh_cidr_block"></a> [ssh\_cidr\_block](#input\_ssh\_cidr\_block) | CIDR range that is allowed to SSH into the elastic instances. | `string` | `"0.0.0.0/0"` | no |
 | <a name="input_subnet_ids"></a> [subnet\_ids](#input\_subnet\_ids) | List of subnet ids where the elasticsearch instances will be created | `list(string)` | n/a | yes |
 | <a name="input_ubuntu_codename"></a> [ubuntu\_codename](#input\_ubuntu\_codename) | Ubuntu version to use for the elasticsearch node | `string` | `"jammy"` | no |
