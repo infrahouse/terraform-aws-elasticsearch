@@ -157,6 +157,12 @@ variable "ssh_cidr_block" {
   default     = "0.0.0.0/0"
 }
 
+variable "monitoring_cidr_block" {
+  description = "CIDR range that is allowed to monitor elastic instances."
+  type        = string
+  default     = null
+}
+
 variable "subnet_ids" {
   description = "List of subnet ids where the elasticsearch instances will be created"
   type        = list(string)
