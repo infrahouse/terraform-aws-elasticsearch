@@ -9,17 +9,12 @@ from infrahouse_toolkit.terraform import terraform_apply
 from tests.conftest import (
     LOG,
     TRACE_TERRAFORM,
-    DESTROY_AFTER,
-    TEST_ROLE_ARN,
-    REGION,
     TERRAFORM_ROOT_DIR,
 )
 
 
 @contextlib.contextmanager
-def bootstrap_cluster(
-    service_network, dns, ec2_client, route53_client, autoscaling_client
-):
+def bootstrap_cluster(service_network, dns, keep_after, aws_region, test_role_arn):
     subzone_id = dns["subzone_id"]["value"]
 
     subnet_public_ids = service_network["subnet_public_ids"]["value"]
@@ -38,8 +33,7 @@ def bootstrap_cluster(
             fp.write(
                 dedent(
                     f"""
-                    role_arn        = "{TEST_ROLE_ARN}"
-                    region          = "{REGION}"
+                    region          = "{aws_region}"
                     elastic_zone_id = "{subzone_id}"
                     bootstrap_mode  = {str(bootstrap_mode).lower()}
 
@@ -49,19 +43,33 @@ def bootstrap_cluster(
                     """
                 )
             )
+            if test_role_arn:
+                fp.write(
+                    dedent(
+                        f"""
+                        role_arn        = "{test_role_arn}"
+                        """
+                    )
+                )
         with terraform_apply(
             terraform_module_dir,
-            destroy_after=DESTROY_AFTER,
+            destroy_after=not keep_after,
             json_output=True,
             enable_trace=TRACE_TERRAFORM,
         ):
             open(osp.join(terraform_module_dir, bootstrap_flag_file), "w").write("")
             yield
-            if DESTROY_AFTER:
+            if not keep_after:
                 os.remove(osp.join(terraform_module_dir, bootstrap_flag_file))
 
 
-def test_module(service_network, dns, ec2_client, route53_client, autoscaling_client):
+def test_module(
+    service_network,
+    dns,
+    aws_region,
+    keep_after,
+    test_role_arn,
+):
     subzone_id = dns["subzone_id"]["value"]
 
     subnet_public_ids = service_network["subnet_public_ids"]["value"]
@@ -71,7 +79,7 @@ def test_module(service_network, dns, ec2_client, route53_client, autoscaling_cl
     # Bootstrap ES cluster
     terraform_module_dir = osp.join(TERRAFORM_ROOT_DIR, "test_module")
     with bootstrap_cluster(
-        service_network, dns, ec2_client, route53_client, autoscaling_client
+        service_network, dns, keep_after, aws_region, test_role_arn
     ):
         # Create remaining master & data nodes
         bootstrap_mode = False
@@ -79,8 +87,7 @@ def test_module(service_network, dns, ec2_client, route53_client, autoscaling_cl
             fp.write(
                 dedent(
                     f"""
-                    role_arn        = "{TEST_ROLE_ARN}"
-                    region          = "{REGION}"
+                    region          = "{aws_region}"
                     elastic_zone_id = "{subzone_id}"
                     bootstrap_mode  = {str(bootstrap_mode).lower()}
 
@@ -90,9 +97,18 @@ def test_module(service_network, dns, ec2_client, route53_client, autoscaling_cl
                     """
                 )
             )
+            if test_role_arn:
+                fp.write(
+                    dedent(
+                        f"""
+                        role_arn        = "{test_role_arn}"
+                        """
+                    )
+                )
+
         with terraform_apply(
             terraform_module_dir,
-            destroy_after=DESTROY_AFTER,
+            destroy_after=not keep_after,
             json_output=True,
             enable_trace=TRACE_TERRAFORM,
         ) as tf_output:
