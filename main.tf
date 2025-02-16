@@ -25,6 +25,8 @@ module "elastic_master_userdata" {
         "elastic_secret" : aws_secretsmanager_secret.elastic.id
         "kibana_system_secret" : aws_secretsmanager_secret.kibana_system.id
         "snapshots_bucket" : aws_s3_bucket.snapshots-bucket.bucket
+        "ca_key_secret" : module.ca_key_secret.secret_id
+        "ca_cert_secret" : module.ca_cert_secret.secret_id
       }
       "letsencrypt" : {
         "domain" : data.aws_route53_zone.cluster.name
@@ -62,6 +64,8 @@ module "elastic_data_userdata" {
         "elastic_secret" : aws_secretsmanager_secret.elastic.id
         "kibana_system_secret" : aws_secretsmanager_secret.kibana_system.id
         "snapshots_bucket" : aws_s3_bucket.snapshots-bucket.bucket
+        "ca_key_secret" : module.ca_key_secret.secret_id
+        "ca_cert_secret" : module.ca_cert_secret.secret_id
       }
       "letsencrypt" : {
         "domain" : data.aws_route53_zone.cluster.name
@@ -80,7 +84,7 @@ module "elastic_data_userdata" {
 
 module "elastic_cluster" {
   source  = "registry.infrahouse.com/infrahouse/website-pod/aws"
-  version = "4.10.0"
+  version = "5.0.0"
   providers = {
     aws     = aws
     aws.dns = aws.dns
@@ -102,6 +106,9 @@ module "elastic_cluster" {
   stickiness_enabled                    = true
   asg_min_size                          = var.bootstrap_mode ? 1 : var.cluster_master_count
   asg_max_size                          = var.bootstrap_mode ? 1 : var.cluster_master_count
+  asg_lifecycle_hook_initial            = module.update-dns.lifecycle_name_launching
+  asg_lifecycle_hook_launching          = module.update-dns.lifecycle_name_launching
+  asg_lifecycle_hook_terminating        = module.update-dns.lifecycle_name_terminating
   max_instance_lifetime_days            = var.max_instance_lifetime_days
   instance_type                         = var.instance_type_master != null ? var.instance_type_master : var.instance_type
   health_check_type                     = "EC2"
@@ -123,7 +130,6 @@ module "elastic_cluster" {
     Name : "${var.cluster_name} master node"
     cluster : var.cluster_name
     elastic_role : "master"
-    update_dns_lambda : module.update-dns.lambda_name
   }
 }
 
@@ -136,7 +142,7 @@ module "elastic_cluster_data" {
   # Deploy only if not in the bootstrap mode
   count   = var.bootstrap_mode ? 0 : 1
   source  = "registry.infrahouse.com/infrahouse/website-pod/aws"
-  version = "4.10.0"
+  version = "5.0.0"
   providers = {
     aws     = aws
     aws.dns = aws.dns
@@ -158,7 +164,9 @@ module "elastic_cluster_data" {
   stickiness_enabled                    = true
   asg_min_size                          = var.cluster_data_count
   asg_max_size                          = var.cluster_data_count
-  asg_lifecycle_hook_terminating        = true
+  asg_lifecycle_hook_initial            = module.update-dns-data.lifecycle_name_launching
+  asg_lifecycle_hook_launching          = module.update-dns-data.lifecycle_name_launching
+  asg_lifecycle_hook_terminating        = module.update-dns-data.lifecycle_name_terminating
   max_instance_lifetime_days            = var.max_instance_lifetime_days
   health_check_type                     = "EC2"
   instance_type                         = var.instance_type_data != null ? var.instance_type_data : var.instance_type
@@ -180,6 +188,5 @@ module "elastic_cluster_data" {
     Name : "${var.cluster_name} data node"
     cluster : var.cluster_name
     elastic_role : "data"
-    update_dns_lambda : module.update-dns-data.lambda_name
   }
 }
