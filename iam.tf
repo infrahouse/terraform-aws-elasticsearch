@@ -42,6 +42,8 @@ data "aws_iam_policy_document" "elastic_permissions" {
     resources = [
       aws_secretsmanager_secret.elastic.arn,
       aws_secretsmanager_secret.kibana_system.arn,
+      module.ca_cert_secret.secret_arn,
+      module.ca_key_secret.secret_arn,
     ]
   }
   statement {
