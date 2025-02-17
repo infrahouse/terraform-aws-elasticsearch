@@ -106,7 +106,7 @@ module "elastic_cluster" {
   stickiness_enabled                    = true
   asg_min_size                          = var.bootstrap_mode ? 1 : var.cluster_master_count
   asg_max_size                          = var.bootstrap_mode ? 1 : var.cluster_master_count
-  asg_lifecycle_hook_initial            = module.update-dns.lifecycle_name_launching
+  asg_lifecycle_hook_initial            = var.asg_create_initial_lifecycle_hook ? module.update-dns.lifecycle_name_launching : null
   asg_lifecycle_hook_launching          = module.update-dns.lifecycle_name_launching
   asg_lifecycle_hook_terminating        = module.update-dns.lifecycle_name_terminating
   max_instance_lifetime_days            = var.max_instance_lifetime_days
@@ -164,7 +164,7 @@ module "elastic_cluster_data" {
   stickiness_enabled                    = true
   asg_min_size                          = var.cluster_data_count
   asg_max_size                          = var.cluster_data_count
-  asg_lifecycle_hook_initial            = module.update-dns-data.lifecycle_name_launching
+  asg_lifecycle_hook_initial            = var.asg_create_initial_lifecycle_hook ? module.update-dns.lifecycle_name_launching : null
   asg_lifecycle_hook_launching          = module.update-dns-data.lifecycle_name_launching
   asg_lifecycle_hook_terminating        = module.update-dns-data.lifecycle_name_terminating
   max_instance_lifetime_days            = var.max_instance_lifetime_days

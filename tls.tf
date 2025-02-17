@@ -26,6 +26,7 @@ module "ca_key_secret" {
   source             = "registry.infrahouse.com/infrahouse/secret/aws"
   version            = "~> 1.0"
   environment        = var.environment
+  service_name       = var.cluster_name
   secret_description = "CA secret key for cluster ${var.cluster_name}"
   secret_name_prefix = "${var.cluster_name}-ca-key-"
   secret_value       = tls_private_key.ca_key.private_key_pem
@@ -43,6 +44,7 @@ module "ca_cert_secret" {
   source             = "registry.infrahouse.com/infrahouse/secret/aws"
   version            = "~> 1.0"
   environment        = var.environment
+  service_name       = var.cluster_name
   secret_description = "CA certificate for cluster ${var.cluster_name}"
   secret_name_prefix = "${var.cluster_name}-ca-cert-"
   secret_value       = tls_self_signed_cert.ca_cert.cert_pem
