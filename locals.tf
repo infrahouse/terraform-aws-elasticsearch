@@ -1,5 +1,5 @@
 locals {
-  service_name = var.cluster_name
+  service_name   = var.cluster_name
   module_version = "2.0.0"
 
   default_module_tags = {
