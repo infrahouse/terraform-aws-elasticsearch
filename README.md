@@ -76,8 +76,9 @@ The size of the autoscaling group will be not three, but one node.
 ```hcl
 module "test" {
   module "test" {
-    source    = "registry.infrahouse.com/infrahouse/elasticsearch/aws"
-    version   = "~> 1.3"
+    source  = "registry.infrahouse.com/infrahouse/elasticsearch/aws"
+    version = "2.0.0"
+    
     providers = {
       aws     = aws
       aws.dns = aws
@@ -142,8 +143,8 @@ The module creates three endpoints to access the cluster. All three of them are 
 | <a name="module_elastic_cluster_data"></a> [elastic\_cluster\_data](#module\_elastic\_cluster\_data) | registry.infrahouse.com/infrahouse/website-pod/aws | 5.0.0 |
 | <a name="module_elastic_data_userdata"></a> [elastic\_data\_userdata](#module\_elastic\_data\_userdata) | registry.infrahouse.com/infrahouse/cloud-init/aws | 1.13.1 |
 | <a name="module_elastic_master_userdata"></a> [elastic\_master\_userdata](#module\_elastic\_master\_userdata) | registry.infrahouse.com/infrahouse/cloud-init/aws | 1.13.1 |
-| <a name="module_update-dns"></a> [update-dns](#module\_update-dns) | registry.infrahouse.com/infrahouse/update-dns/aws | 0.8.0 |
-| <a name="module_update-dns-data"></a> [update-dns-data](#module\_update-dns-data) | registry.infrahouse.com/infrahouse/update-dns/aws | 0.8.0 |
+| <a name="module_update-dns"></a> [update-dns](#module\_update-dns) | registry.infrahouse.com/infrahouse/update-dns/aws | 0.9.0 |
+| <a name="module_update-dns-data"></a> [update-dns-data](#module\_update-dns-data) | registry.infrahouse.com/infrahouse/update-dns/aws | 0.9.0 |
 
 ## Resources
 
@@ -180,6 +181,7 @@ The module creates three endpoints to access the cluster. All three of them are 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_asg_ami"></a> [asg\_ami](#input\_asg\_ami) | Image for EC2 instances | `string` | `null` | no |
+| <a name="input_asg_create_initial_lifecycle_hook"></a> [asg\_create\_initial\_lifecycle\_hook](#input\_asg\_create\_initial\_lifecycle\_hook) | Used for migration from version 1.* | `bool` | `true` | no |
 | <a name="input_asg_health_check_grace_period"></a> [asg\_health\_check\_grace\_period](#input\_asg\_health\_check\_grace\_period) | ASG will wait up to this number of seconds for instance to become healthy | `number` | `900` | no |
 | <a name="input_bootstrap_mode"></a> [bootstrap\_mode](#input\_bootstrap\_mode) | Set this to true if the cluster is to be bootstrapped | `bool` | `true` | no |
 | <a name="input_cluster_data_count"></a> [cluster\_data\_count](#input\_cluster\_data\_count) | Number of data nodes in the cluster | `number` | `3` | no |

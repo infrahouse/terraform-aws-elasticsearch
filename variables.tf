@@ -10,6 +10,12 @@ variable "asg_health_check_grace_period" {
   default     = 900
 }
 
+variable "asg_create_initial_lifecycle_hook" {
+  description = "Used for migration from version 1.*"
+  type        = bool
+  default     = true
+}
+
 variable "bootstrap_mode" {
   description = "Set this to true if the cluster is to be bootstrapped"
   type        = bool
