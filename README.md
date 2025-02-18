@@ -77,7 +77,7 @@ The size of the autoscaling group will be not three, but one node.
 module "test" {
   module "test" {
     source  = "registry.infrahouse.com/infrahouse/elasticsearch/aws"
-    version = "2.1.3"
+    version = "2.1.4"
     
     providers = {
       aws     = aws
