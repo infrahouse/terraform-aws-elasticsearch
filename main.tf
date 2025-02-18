@@ -200,9 +200,10 @@ module "elastic_cluster_data" {
 }
 
 resource "aws_autoscaling_lifecycle_hook" "terminating" {
-  count   = var.bootstrap_mode ? 0 : 1
+  count                  = var.bootstrap_mode ? 0 : 1
   autoscaling_group_name = module.elastic_cluster_data[0].asg_name
   lifecycle_transition   = "autoscaling:EC2_INSTANCE_TERMINATING"
   name                   = "terminating"
   default_result         = "CONTINUE"
+  heartbeat_timeout      = 3600
 }
