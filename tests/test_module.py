@@ -1,6 +1,4 @@
-import contextlib
 import json
-import os
 from os import path as osp
 from textwrap import dedent
 
@@ -29,7 +27,9 @@ def test_module(
 
     # Bootstrap ES cluster
     terraform_module_dir = osp.join(TERRAFORM_ROOT_DIR, "test_module")
-    with bootstrap_cluster(service_network, dns, keep_after, aws_region, test_role_arn):
+    with bootstrap_cluster(
+        service_network, dns, keep_after, aws_region, test_role_arn, "test_module"
+    ):
         # Create remaining master & data nodes
         bootstrap_mode = False
         with open(osp.join(terraform_module_dir, "terraform.tfvars"), "w") as fp:
