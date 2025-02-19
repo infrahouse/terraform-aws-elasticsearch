@@ -13,6 +13,7 @@ data "aws_iam_policy_document" "elastic_permissions" {
       "autoscaling:CompleteLifecycleAction",
       "autoscaling:CancelInstanceRefresh",
       "autoscaling:SetInstanceHealth",
+      "autoscaling:RecordLifecycleActionHeartbeat",
 
     ]
     resources = [
