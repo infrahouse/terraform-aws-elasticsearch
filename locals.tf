@@ -1,6 +1,6 @@
 locals {
   service_name   = var.cluster_name
-  module_version = "2.1.4"
+  module_version = "2.1.5"
 
   default_module_tags = {
     environment : var.environment
