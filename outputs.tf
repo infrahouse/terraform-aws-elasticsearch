@@ -20,7 +20,7 @@ output "cluster_data_url" {
 
 output "cluster_data_load_balancer_arn" {
   description = "ARN of the load balancer for the cluster data nodes"
-  value       = module.elastic_cluster_data.load_balancer_arn
+  value       = var.bootstrap_mode ? null : module.elastic_cluster_data[0].load_balancer_arn
 }
 
 output "elastic_password" {
