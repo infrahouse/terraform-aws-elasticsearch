@@ -8,9 +8,19 @@ output "cluster_master_url" {
   value       = "https://${var.cluster_name}-master.${data.aws_route53_zone.cluster.name}"
 }
 
+output "cluster_master_load_balancer_arn" {
+  description = "ARN of the load balancer for the cluster masters"
+  value       = module.elastic_cluster.load_balancer_arn
+}
+
 output "cluster_data_url" {
   description = "HTTPS endpoint to access the cluster data nodes"
   value       = "https://${var.cluster_name}-data.${data.aws_route53_zone.cluster.name}"
+}
+
+output "cluster_data_load_balancer_arn" {
+  description = "ARN of the load balancer for the cluster data nodes"
+  value       = module.elastic_cluster_data.load_balancer_arn
 }
 
 output "elastic_password" {

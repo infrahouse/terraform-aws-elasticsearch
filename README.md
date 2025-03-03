@@ -214,10 +214,12 @@ The module creates three endpoints to access the cluster. All three of them are 
 
 ## Outputs
 
-| Name | Description |
-|------|-------------|
-| <a name="output_cluster_data_url"></a> [cluster\_data\_url](#output\_cluster\_data\_url) | HTTPS endpoint to access the cluster data nodes |
+| Name                                                                                                                   | Description |
+|------------------------------------------------------------------------------------------------------------------------|-------------|
+| <a name="output_cluster_data_url"></a> [cluster\_data\_url](#output\_cluster\_data\_url)                               | HTTPS endpoint to access the cluster data nodes |
+| <a name="output_cluster_data_load_balancer_arn"></a> [cluster\_data\_load\_balancer\_arn](#output\_cluster\_data\_load\_balancer\_arn) | ARN of the load balancer for the cluster masters |
 | <a name="output_cluster_master_url"></a> [cluster\_master\_url](#output\_cluster\_master\_url) | HTTPS endpoint to access the cluster masters |
+| <a name="output_cluster_master_load_balancer_arn"></a> [cluster\_master\_load\_balancer\_arn](#output\_cluster\_master\_load\_balancer\_arn) | ARN of the load balancer for the cluster data nodes |
 | <a name="output_cluster_url"></a> [cluster\_url](#output\_cluster\_url) | HTTPS endpoint to access the cluster |
 | <a name="output_data_instance_role_arn"></a> [data\_instance\_role\_arn](#output\_data\_instance\_role\_arn) | Data node EC2 instance profile will have this role ARN |
 | <a name="output_elastic_password"></a> [elastic\_password](#output\_elastic\_password) | Password for Elasticsearch superuser elastic. |
