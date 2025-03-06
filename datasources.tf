@@ -14,7 +14,7 @@ data "aws_ami" "ubuntu" {
 
   filter {
     name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-${var.ubuntu_codename}-*"]
+    values = [local.ami_name_pattern]
   }
 
   filter {

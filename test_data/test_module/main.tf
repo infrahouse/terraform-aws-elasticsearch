@@ -5,6 +5,7 @@ module "test" {
     aws.dns = aws
   }
   cluster_name           = "main-cluster"
+  ubuntu_codename        = "noble"
   cluster_master_count   = 3
   cluster_data_count     = 2
   environment            = var.environment
