@@ -6,12 +6,13 @@ locals {
 }
 module "elastic_master_userdata" {
   source                   = "registry.infrahouse.com/infrahouse/cloud-init/aws"
-  version                  = "1.16.0"
+  version                  = "1.17.0"
   environment              = var.environment
   role                     = "elastic_master"
   puppet_hiera_config_path = var.puppet_hiera_config_path
   puppet_module_path       = var.puppet_module_path
   ubuntu_codename          = var.ubuntu_codename
+  gzip_userdata            = true
 
   packages = var.packages
 
@@ -46,12 +47,13 @@ module "elastic_master_userdata" {
 
 module "elastic_data_userdata" {
   source                   = "registry.infrahouse.com/infrahouse/cloud-init/aws"
-  version                  = "1.16.0"
+  version                  = "1.17.0"
   environment              = var.environment
   role                     = "elastic_data"
   puppet_hiera_config_path = var.puppet_hiera_config_path
   puppet_module_path       = var.puppet_module_path
   ubuntu_codename          = var.ubuntu_codename
+  gzip_userdata            = true
 
   packages = var.packages
 
