@@ -18,6 +18,7 @@ DEFAULT_PROGRESS_INTERVAL = 10
 TRACE_TERRAFORM = False
 UBUNTU_CODENAME = "jammy"
 TERRAFORM_ROOT_DIR = "test_data"
+# TEST_ROLE_ARN = "arn:aws:iam::303467602807:role/elasticsearch-tester"
 
 LOG = logging.getLogger(__name__)
 
