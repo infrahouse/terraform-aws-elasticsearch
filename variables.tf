@@ -122,11 +122,6 @@ variable "puppet_module_path" {
   default     = "{root_directory}/environments/{environment}/modules:{root_directory}/modules"
 }
 
-variable "puppet_root_directory" {
-  description = "Path where the puppet code is hosted."
-  default     = "/opt/puppet-code"
-}
-
 variable "root_volume_size" {
   description = "Root volume size in EC2 instance in Gigabytes"
   type        = number

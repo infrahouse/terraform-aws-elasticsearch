@@ -88,7 +88,7 @@ module "elastic_data_userdata" {
 
 module "elastic_cluster" {
   source  = "registry.infrahouse.com/infrahouse/website-pod/aws"
-  version = "5.1.0"
+  version = "5.1.1"
   providers = {
     aws     = aws
     aws.dns = aws.dns
@@ -132,7 +132,7 @@ module "elastic_cluster" {
   extra_security_groups_backend = [
     aws_security_group.backend_extra.id
   ]
-
+  root_volume_size     = var.root_volume_size
   asg_min_elb_capacity = 1
   instance_role_name   = local.master_profile_name
   tags = {
@@ -151,7 +151,7 @@ module "elastic_cluster_data" {
   # Deploy only if not in the bootstrap mode
   count   = var.bootstrap_mode ? 0 : 1
   source  = "registry.infrahouse.com/infrahouse/website-pod/aws"
-  version = "5.1.0"
+  version = "5.1.1"
   providers = {
     aws     = aws
     aws.dns = aws.dns
