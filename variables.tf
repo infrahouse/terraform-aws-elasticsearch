@@ -122,8 +122,14 @@ variable "puppet_module_path" {
   default     = "{root_directory}/environments/{environment}/modules:{root_directory}/modules"
 }
 
-variable "root_volume_size" {
-  description = "Root volume size in EC2 instance in Gigabytes"
+variable "master_nodes_root_volume_size" {
+  description = "Root volume size in master EC2 instance in Gigabytes"
+  type        = number
+  default     = null
+}
+
+variable "data_nodes_root_volume_size" {
+  description = "Root volume size in data EC2 instance in Gigabytes"
   type        = number
   default     = 30
 }

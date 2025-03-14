@@ -132,7 +132,7 @@ module "elastic_cluster" {
   extra_security_groups_backend = [
     aws_security_group.backend_extra.id
   ]
-  root_volume_size     = var.root_volume_size
+  root_volume_size     = var.master_nodes_root_volume_size
   asg_min_elb_capacity = 1
   instance_role_name   = local.master_profile_name
   tags = {
@@ -195,7 +195,7 @@ module "elastic_cluster_data" {
   extra_security_groups_backend = [
     aws_security_group.backend_extra.id
   ]
-  root_volume_size     = var.root_volume_size
+  root_volume_size     = var.data_nodes_root_volume_size
   asg_min_elb_capacity = 1
   instance_role_name   = local.data_profile_name
   tags = {
