@@ -2,6 +2,7 @@ resource "random_string" "bucket_prefix" {
   length  = 12
   special = false
   numeric = false
+  upper   = false
 }
 
 locals {
