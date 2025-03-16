@@ -128,9 +128,9 @@ The module creates three endpoints to access the cluster. All three of them are 
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 5.68.0 |
-| <a name="provider_aws.dns"></a> [aws.dns](#provider\_aws.dns) | 5.68.0 |
-| <a name="provider_random"></a> [random](#provider\_random) | 3.6.3 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 5.11 |
+| <a name="provider_aws.dns"></a> [aws.dns](#provider\_aws.dns) | ~> 5.11 |
+| <a name="provider_random"></a> [random](#provider\_random) | ~> 3.6 |
 | <a name="provider_tls"></a> [tls](#provider\_tls) | ~> 4.0 |
 
 ## Modules
@@ -139,8 +139,8 @@ The module creates three endpoints to access the cluster. All three of them are 
 |------|--------|---------|
 | <a name="module_ca_cert_secret"></a> [ca\_cert\_secret](#module\_ca\_cert\_secret) | registry.infrahouse.com/infrahouse/secret/aws | ~> 1.0 |
 | <a name="module_ca_key_secret"></a> [ca\_key\_secret](#module\_ca\_key\_secret) | registry.infrahouse.com/infrahouse/secret/aws | ~> 1.0 |
-| <a name="module_elastic_cluster"></a> [elastic\_cluster](#module\_elastic\_cluster) | registry.infrahouse.com/infrahouse/website-pod/aws | 5.1.1 |
-| <a name="module_elastic_cluster_data"></a> [elastic\_cluster\_data](#module\_elastic\_cluster\_data) | registry.infrahouse.com/infrahouse/website-pod/aws | 5.1.1 |
+| <a name="module_elastic_cluster"></a> [elastic\_cluster](#module\_elastic\_cluster) | registry.infrahouse.com/infrahouse/website-pod/aws | 5.1.3 |
+| <a name="module_elastic_cluster_data"></a> [elastic\_cluster\_data](#module\_elastic\_cluster\_data) | registry.infrahouse.com/infrahouse/website-pod/aws | 5.1.3 |
 | <a name="module_elastic_data_userdata"></a> [elastic\_data\_userdata](#module\_elastic\_data\_userdata) | registry.infrahouse.com/infrahouse/cloud-init/aws | 1.17.0 |
 | <a name="module_elastic_master_userdata"></a> [elastic\_master\_userdata](#module\_elastic\_master\_userdata) | registry.infrahouse.com/infrahouse/cloud-init/aws | 1.17.0 |
 | <a name="module_update-dns"></a> [update-dns](#module\_update-dns) | registry.infrahouse.com/infrahouse/update-dns/aws | 0.9.1 |
@@ -192,6 +192,8 @@ The module creates three endpoints to access the cluster. All three of them are 
 | <a name="input_environment"></a> [environment](#input\_environment) | Name of environment. | `string` | `"development"` | no |
 | <a name="input_extra_files"></a> [extra\_files](#input\_extra\_files) | Additional files to create on an instance. | <pre>list(object({<br/>    content     = string<br/>    path        = string<br/>    permissions = string<br/>  }))</pre> | `[]` | no |
 | <a name="input_extra_repos"></a> [extra\_repos](#input\_extra\_repos) | Additional APT repositories to configure on an instance. | <pre>map(object({<br/>    source = string<br/>    key    = string<br/>  }))</pre> | `{}` | no |
+| <a name="input_idle_timeout_data"></a> [idle\_timeout\_data](#input\_idle\_timeout\_data) | The amount of time a client or target connection can be idle before the load balancer (that fronts data nodes) closes it. | `number` | `4000` | no |
+| <a name="input_idle_timeout_master"></a> [idle\_timeout\_master](#input\_idle\_timeout\_master) | The amount of time a client or target connection can be idle before the load balancer (that fronts master nodes) closes it. | `number` | `4000` | no |
 | <a name="input_instance_type"></a> [instance\_type](#input\_instance\_type) | Instance type to run the elasticsearch node | `string` | `"t3.medium"` | no |
 | <a name="input_instance_type_data"></a> [instance\_type\_data](#input\_instance\_type\_data) | Instance type to run the elasticsearch data node. If null, use var.instance\_type. | `string` | `null` | no |
 | <a name="input_instance_type_master"></a> [instance\_type\_master](#input\_instance\_type\_master) | Instance type to run the elasticsearch master node. If null, use var.instance\_type. | `string` | `null` | no |
@@ -225,6 +227,8 @@ The module creates three endpoints to access the cluster. All three of them are 
 | <a name="output_data_instance_role_arn"></a> [data\_instance\_role\_arn](#output\_data\_instance\_role\_arn) | Data node EC2 instance profile will have this role ARN |
 | <a name="output_elastic_password"></a> [elastic\_password](#output\_elastic\_password) | Password for Elasticsearch superuser elastic. |
 | <a name="output_elastic_secret_id"></a> [elastic\_secret\_id](#output\_elastic\_secret\_id) | AWS secret that stores password for user elastic. |
+| <a name="output_idle_timeout_data"></a> [idle\_timeout\_data](#output\_idle\_timeout\_data) | The amount of time a client or target connection can be idle before the load balancer (that fronts data nodes) closes it. |
+| <a name="output_idle_timeout_master"></a> [idle\_timeout\_master](#output\_idle\_timeout\_master) | The amount of time a client or target connection can be idle before the load balancer (that fronts master nodes) closes it. |
 | <a name="output_kibana_system_password"></a> [kibana\_system\_password](#output\_kibana\_system\_password) | A password of kibana\_system user |
 | <a name="output_kibana_system_secret_id"></a> [kibana\_system\_secret\_id](#output\_kibana\_system\_secret\_id) | AWS secret that stores password for user kibana\_system |
 | <a name="output_master_instance_role_arn"></a> [master\_instance\_role\_arn](#output\_master\_instance\_role\_arn) | Master node EC2 instance profile will have this role ARN |

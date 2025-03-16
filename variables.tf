@@ -65,6 +65,18 @@ variable "extra_repos" {
   default = {}
 }
 
+variable "idle_timeout_data" {
+  description = "The amount of time a client or target connection can be idle before the load balancer (that fronts data nodes) closes it."
+  type        = number
+  default     = 4000
+}
+
+variable "idle_timeout_master" {
+  description = "The amount of time a client or target connection can be idle before the load balancer (that fronts master nodes) closes it."
+  type        = number
+  default     = 4000
+}
+
 variable "instance_type" {
   description = "Instance type to run the elasticsearch node"
   type        = string
