@@ -88,7 +88,7 @@ module "elastic_data_userdata" {
 
 module "elastic_cluster" {
   source  = "registry.infrahouse.com/infrahouse/website-pod/aws"
-  version = "5.1.2"
+  version = "5.1.3"
   providers = {
     aws     = aws
     aws.dns = aws.dns
@@ -125,7 +125,7 @@ module "elastic_cluster" {
   alb_healthcheck_port                  = 9200
   alb_healthcheck_timeout               = local.alb_healthcheck_timeout
   alb_healthcheck_response_code_matcher = "200"
-  alb_idle_timeout                      = 4000
+  alb_idle_timeout                      = var.idle_timeout_master
   alb_healthcheck_interval              = local.tg_healthcheck_interval
   health_check_grace_period             = var.asg_health_check_grace_period
   wait_for_capacity_timeout             = "${var.asg_health_check_grace_period * 1.5}m"
@@ -151,7 +151,7 @@ module "elastic_cluster_data" {
   # Deploy only if not in the bootstrap mode
   count   = var.bootstrap_mode ? 0 : 1
   source  = "registry.infrahouse.com/infrahouse/website-pod/aws"
-  version = "5.1.2"
+  version = "5.1.3"
   providers = {
     aws     = aws
     aws.dns = aws.dns
@@ -174,7 +174,7 @@ module "elastic_cluster_data" {
 
   asg_min_size                                  = var.cluster_data_count
   asg_max_size                                  = var.cluster_data_count
-  alb_idle_timeout                              = 4000
+  alb_idle_timeout                              = var.idle_timeout_data
   asg_lifecycle_hook_initial                    = var.asg_create_initial_lifecycle_hook ? module.update-dns-data.lifecycle_name_launching : null
   asg_lifecycle_hook_launching                  = module.update-dns-data.lifecycle_name_launching
   asg_lifecycle_hook_terminating                = module.update-dns-data.lifecycle_name_terminating

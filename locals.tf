@@ -7,7 +7,6 @@ locals {
     service : local.service_name
     account : data.aws_caller_identity.current.account_id
     created_by_module : "infrahouse/elasticsearch/aws"
-    module_version : local.module_version
   }
   ami_name_pattern = contains(
     ["focal", "jammy"], var.ubuntu_codename

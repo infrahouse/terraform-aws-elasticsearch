@@ -34,6 +34,16 @@ output "elastic_secret_id" {
   value       = aws_secretsmanager_secret.elastic.id
 }
 
+output "idle_timeout_data" {
+  description = "The amount of time a client or target connection can be idle before the load balancer (that fronts data nodes) closes it."
+  value       = var.idle_timeout_data
+}
+
+output "idle_timeout_master" {
+  description = "The amount of time a client or target connection can be idle before the load balancer (that fronts master nodes) closes it."
+  value       = var.idle_timeout_master
+}
+
 output "kibana_system_secret_id" {
   description = "AWS secret that stores password for user kibana_system"
   value       = aws_secretsmanager_secret.kibana_system.id
