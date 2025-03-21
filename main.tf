@@ -88,27 +88,27 @@ module "elastic_data_userdata" {
 
 module "elastic_cluster" {
   source  = "registry.infrahouse.com/infrahouse/website-pod/aws"
-  version = "5.1.3"
+  version = "5.2.0"
   providers = {
     aws     = aws
     aws.dns = aws.dns
   }
-  service_name                 = local.service_name
-  asg_name                     = var.cluster_name
-  environment                  = var.environment
-  ami                          = var.asg_ami != null ? var.asg_ami : data.aws_ami.ubuntu.image_id
-  subnets                      = var.subnet_ids
-  backend_subnets              = var.subnet_ids
-  zone_id                      = var.zone_id
-  internet_gateway_id          = var.internet_gateway_id
-  key_pair_name                = var.key_pair_name
-  ssh_cidr_block               = var.ssh_cidr_block
-  dns_a_records                = [var.cluster_name, "${var.cluster_name}-master"]
-  alb_name_prefix              = substr(var.cluster_name, 0, 6) ## "name_prefix" cannot be longer than 6 characters: "elastic"
-  userdata                     = module.elastic_master_userdata.userdata
-  instance_profile_permissions = data.aws_iam_policy_document.elastic_permissions.json
-  stickiness_enabled           = true
-
+  service_name                                  = local.service_name
+  asg_name                                      = var.cluster_name
+  environment                                   = var.environment
+  ami                                           = var.asg_ami != null ? var.asg_ami : data.aws_ami.ubuntu.image_id
+  subnets                                       = var.subnet_ids
+  backend_subnets                               = var.subnet_ids
+  zone_id                                       = var.zone_id
+  internet_gateway_id                           = var.internet_gateway_id
+  key_pair_name                                 = var.key_pair_name
+  ssh_cidr_block                                = var.ssh_cidr_block
+  dns_a_records                                 = [var.cluster_name, "${var.cluster_name}-master"]
+  alb_name_prefix                               = substr(var.cluster_name, 0, 6) ## "name_prefix" cannot be longer than 6 characters: "elastic"
+  userdata                                      = module.elastic_master_userdata.userdata
+  instance_profile_permissions                  = data.aws_iam_policy_document.elastic_permissions.json
+  stickiness_enabled                            = true
+  sns_topic_alarm_arn                           = var.sns_topic_alarm_arn
   asg_min_size                                  = var.bootstrap_mode ? 1 : var.cluster_master_count
   asg_max_size                                  = var.bootstrap_mode ? 1 : var.cluster_master_count
   asg_lifecycle_hook_initial                    = var.asg_create_initial_lifecycle_hook ? module.update-dns.lifecycle_name_launching : null
@@ -151,27 +151,27 @@ module "elastic_cluster_data" {
   # Deploy only if not in the bootstrap mode
   count   = var.bootstrap_mode ? 0 : 1
   source  = "registry.infrahouse.com/infrahouse/website-pod/aws"
-  version = "5.1.3"
+  version = "5.2.0"
   providers = {
     aws     = aws
     aws.dns = aws.dns
   }
-  service_name                 = local.service_name
-  asg_name                     = "${var.cluster_name}-data"
-  environment                  = var.environment
-  ami                          = var.asg_ami != null ? var.asg_ami : data.aws_ami.ubuntu.image_id
-  subnets                      = var.subnet_ids
-  backend_subnets              = var.subnet_ids
-  zone_id                      = var.zone_id
-  internet_gateway_id          = var.internet_gateway_id
-  key_pair_name                = var.key_pair_name
-  ssh_cidr_block               = var.ssh_cidr_block
-  dns_a_records                = ["${var.cluster_name}-data"]
-  alb_name_prefix              = substr(var.cluster_name, 0, 6) ## "name_prefix" cannot be longer than 6 characters: "elastic"
-  userdata                     = module.elastic_data_userdata.userdata
-  instance_profile_permissions = data.aws_iam_policy_document.elastic_permissions.json
-  stickiness_enabled           = true
-
+  service_name                                  = local.service_name
+  asg_name                                      = "${var.cluster_name}-data"
+  environment                                   = var.environment
+  ami                                           = var.asg_ami != null ? var.asg_ami : data.aws_ami.ubuntu.image_id
+  subnets                                       = var.subnet_ids
+  backend_subnets                               = var.subnet_ids
+  zone_id                                       = var.zone_id
+  internet_gateway_id                           = var.internet_gateway_id
+  key_pair_name                                 = var.key_pair_name
+  ssh_cidr_block                                = var.ssh_cidr_block
+  dns_a_records                                 = ["${var.cluster_name}-data"]
+  alb_name_prefix                               = substr(var.cluster_name, 0, 6) ## "name_prefix" cannot be longer than 6 characters: "elastic"
+  userdata                                      = module.elastic_data_userdata.userdata
+  instance_profile_permissions                  = data.aws_iam_policy_document.elastic_permissions.json
+  stickiness_enabled                            = true
+  sns_topic_alarm_arn                           = var.sns_topic_alarm_arn
   asg_min_size                                  = var.cluster_data_count
   asg_max_size                                  = var.cluster_data_count
   alb_idle_timeout                              = var.idle_timeout_data
