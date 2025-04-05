@@ -46,42 +46,54 @@ def bootstrap_cluster(
     bootstrap_flag_file = ".bootstrapped"
     terraform_module_dir = osp.join(TERRAFORM_ROOT_DIR, module_path)
 
-    if osp.exists(osp.join(terraform_module_dir, bootstrap_flag_file)):
-        yield
-    else:
-        with open(osp.join(terraform_module_dir, "terraform.tfvars"), "w") as fp:
-            fp.write(
-                dedent(
-                    f"""
-                    region          = "{aws_region}"
-                    environment     = "{environment}"
-                    elastic_zone_id = "{subzone_id}"
-                    bootstrap_mode  = {str(bootstrap_mode).lower()}
-
-                    lb_subnet_ids       = {json.dumps(subnet_public_ids)}
-                    backend_subnet_ids  = {json.dumps(subnet_private_ids)}
-                    internet_gateway_id = "{internet_gateway_id}"
-                    """
-                )
-            )
-            if test_role_arn:
+    try:
+        if osp.exists(osp.join(terraform_module_dir, bootstrap_flag_file)):
+            yield
+        else:
+            with open(osp.join(terraform_module_dir, "terraform.tfvars"), "w") as fp:
                 fp.write(
                     dedent(
                         f"""
-                        role_arn        = "{test_role_arn}"
+                        region          = "{aws_region}"
+                        environment     = "{environment}"
+                        elastic_zone_id = "{subzone_id}"
+                        bootstrap_mode  = {str(bootstrap_mode).lower()}
+
+                        lb_subnet_ids       = {json.dumps(subnet_public_ids)}
+                        backend_subnet_ids  = {json.dumps(subnet_private_ids)}
+                        internet_gateway_id = "{internet_gateway_id}"
                         """
                     )
                 )
-        with terraform_apply(
-            terraform_module_dir,
-            destroy_after=not keep_after,
-            json_output=True,
-            enable_trace=TRACE_TERRAFORM,
-        ):
-            open(osp.join(terraform_module_dir, bootstrap_flag_file), "w").write("")
-            yield
-            if not keep_after:
-                os.remove(osp.join(terraform_module_dir, bootstrap_flag_file))
+                if test_role_arn:
+                    fp.write(
+                        dedent(
+                            f"""
+                            role_arn        = "{test_role_arn}"
+                            """
+                        )
+                    )
+            with terraform_apply(
+                terraform_module_dir,
+                destroy_after=not keep_after,
+                json_output=True,
+                enable_trace=TRACE_TERRAFORM,
+            ):
+                open(osp.join(terraform_module_dir, bootstrap_flag_file), "w").write("")
+                yield
+    finally:
+        full_path = osp.join(terraform_module_dir, bootstrap_flag_file)
+        if not keep_after:
+            LOG.info(
+                "Will delete %s file because we're destroying resources after the test.",
+                full_path,
+            )
+            os.remove(full_path)
+        else:
+            LOG.info(
+                "Will keep %s around because we're keeping resources after the test.",
+                full_path,
+            )
 
 
 @pytest.fixture()

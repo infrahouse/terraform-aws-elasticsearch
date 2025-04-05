@@ -3,16 +3,20 @@ locals {
   data_profile_name       = "${var.cluster_name}-data-${random_string.profile-suffix.result}"
   tg_healthcheck_interval = 60
   alb_healthcheck_timeout = local.tg_healthcheck_interval / 2
+  launching_hook_name     = "launching-${random_string.launching_suffix.result}"
 }
 module "elastic_master_userdata" {
   source                   = "registry.infrahouse.com/infrahouse/cloud-init/aws"
-  version                  = "1.17.0"
+  version                  = "1.18.0"
   environment              = var.environment
   role                     = "elastic_master"
   puppet_hiera_config_path = var.puppet_hiera_config_path
   puppet_module_path       = var.puppet_module_path
   ubuntu_codename          = var.ubuntu_codename
   gzip_userdata            = true
+  post_runcmd = [
+    "ih-elastic cluster commission-node --complete-lifecycle-action ${local.launching_hook_name}"
+  ]
 
   packages = var.packages
 
@@ -47,13 +51,16 @@ module "elastic_master_userdata" {
 
 module "elastic_data_userdata" {
   source                   = "registry.infrahouse.com/infrahouse/cloud-init/aws"
-  version                  = "1.17.0"
+  version                  = "1.18.0"
   environment              = var.environment
   role                     = "elastic_data"
   puppet_hiera_config_path = var.puppet_hiera_config_path
   puppet_module_path       = var.puppet_module_path
   ubuntu_codename          = var.ubuntu_codename
   gzip_userdata            = true
+  post_runcmd = var.bootstrap_mode ? [] : [
+    "ih-elastic cluster commission-node --complete-lifecycle-action ${local.launching_hook_name}"
+  ]
 
   packages = var.packages
 
@@ -205,7 +212,39 @@ module "elastic_cluster_data" {
   }
 }
 
-resource "aws_autoscaling_lifecycle_hook" "terminating" {
+resource "random_string" "launching_suffix" {
+  length  = 6
+  special = false
+  numeric = false
+  upper   = false
+}
+
+resource "aws_autoscaling_lifecycle_hook" "launching-master" {
+  autoscaling_group_name = module.elastic_cluster.asg_name
+  lifecycle_transition   = "autoscaling:EC2_INSTANCE_LAUNCHING"
+  name                   = local.launching_hook_name
+  default_result         = "ABANDON"
+  heartbeat_timeout      = 3600
+}
+
+resource "aws_autoscaling_lifecycle_hook" "launching-data" {
+  count                  = var.bootstrap_mode ? 0 : 1
+  autoscaling_group_name = module.elastic_cluster_data[0].asg_name
+  lifecycle_transition   = "autoscaling:EC2_INSTANCE_LAUNCHING"
+  name                   = local.launching_hook_name
+  default_result         = "ABANDON"
+  heartbeat_timeout      = 3600
+}
+
+resource "aws_autoscaling_lifecycle_hook" "terminating-master" {
+  autoscaling_group_name = module.elastic_cluster.asg_name
+  lifecycle_transition   = "autoscaling:EC2_INSTANCE_TERMINATING"
+  name                   = "terminating"
+  default_result         = "CONTINUE"
+  heartbeat_timeout      = 3600
+}
+
+resource "aws_autoscaling_lifecycle_hook" "terminating-data" {
   count                  = var.bootstrap_mode ? 0 : 1
   autoscaling_group_name = module.elastic_cluster_data[0].asg_name
   lifecycle_transition   = "autoscaling:EC2_INSTANCE_TERMINATING"
