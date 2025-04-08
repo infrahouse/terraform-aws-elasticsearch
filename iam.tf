@@ -1,5 +1,6 @@
 data "aws_iam_policy_document" "elastic_permissions" {
   # https://www.elastic.co/guide/en/elasticsearch/plugins/current/discovery-ec2-usage.html#discovery-ec2-permissions
+  source_policy_documents = var.extra_instance_profile_permissions != null ? [var.extra_instance_profile_permissions] : []
   statement {
     actions = [
       "ec2:DescribeInstances",
