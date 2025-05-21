@@ -124,6 +124,13 @@ variable "puppet_debug_logging" {
   default     = false
 }
 
+variable "puppet_environmentpath" {
+  description = "A path for directory environments."
+  type        = string
+  default     = "{root_directory}/environments"
+}
+
+
 variable "puppet_hiera_config_path" {
   description = "Path to hiera configuration file."
   default     = "{root_directory}/environments/{environment}/hiera.yaml"
