@@ -10,6 +10,7 @@ module "elastic_master_userdata" {
   version                  = "1.18.0"
   environment              = var.environment
   role                     = "elastic_master"
+  puppet_environmentpath   = var.puppet_environmentpath
   puppet_hiera_config_path = var.puppet_hiera_config_path
   puppet_module_path       = var.puppet_module_path
   ubuntu_codename          = var.ubuntu_codename
@@ -54,6 +55,7 @@ module "elastic_data_userdata" {
   version                  = "1.18.0"
   environment              = var.environment
   role                     = "elastic_data"
+  puppet_environmentpath   = var.puppet_environmentpath
   puppet_hiera_config_path = var.puppet_hiera_config_path
   puppet_module_path       = var.puppet_module_path
   ubuntu_codename          = var.ubuntu_codename
@@ -95,7 +97,7 @@ module "elastic_data_userdata" {
 
 module "elastic_cluster" {
   source  = "registry.infrahouse.com/infrahouse/website-pod/aws"
-  version = "5.2.0"
+  version = "5.3.0"
   providers = {
     aws     = aws
     aws.dns = aws.dns
@@ -158,7 +160,7 @@ module "elastic_cluster_data" {
   # Deploy only if not in the bootstrap mode
   count   = var.bootstrap_mode ? 0 : 1
   source  = "registry.infrahouse.com/infrahouse/website-pod/aws"
-  version = "5.2.0"
+  version = "5.3.0"
   providers = {
     aws     = aws
     aws.dns = aws.dns
