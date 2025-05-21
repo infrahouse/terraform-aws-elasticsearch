@@ -136,6 +136,12 @@ variable "puppet_hiera_config_path" {
   default     = "{root_directory}/environments/{environment}/hiera.yaml"
 }
 
+variable "puppet_manifest" {
+  description = "Path to puppet manifest. By default ih-puppet will apply {root_directory}/environments/{environment}/manifests/site.pp."
+  type        = string
+  default     = null
+}
+
 variable "puppet_module_path" {
   description = "Path to common puppet modules."
   default     = "{root_directory}/environments/{environment}/modules:{root_directory}/modules"

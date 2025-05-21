@@ -12,6 +12,7 @@ module "elastic_master_userdata" {
   role                     = "elastic_master"
   puppet_environmentpath   = var.puppet_environmentpath
   puppet_hiera_config_path = var.puppet_hiera_config_path
+  puppet_manifest          = var.puppet_manifest
   puppet_module_path       = var.puppet_module_path
   ubuntu_codename          = var.ubuntu_codename
   gzip_userdata            = true
@@ -57,6 +58,7 @@ module "elastic_data_userdata" {
   role                     = "elastic_data"
   puppet_environmentpath   = var.puppet_environmentpath
   puppet_hiera_config_path = var.puppet_hiera_config_path
+  puppet_manifest          = var.puppet_manifest
   puppet_module_path       = var.puppet_module_path
   ubuntu_codename          = var.ubuntu_codename
   gzip_userdata            = true
