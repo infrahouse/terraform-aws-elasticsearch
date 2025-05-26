@@ -150,6 +150,7 @@ module "elastic_cluster" {
     Name : "${var.cluster_name} master node"
     cluster : var.cluster_name
     elastic_role : "master"
+    update_dns_lambda : module.update-dns.lambda_name
   }
 }
 
@@ -213,6 +214,7 @@ module "elastic_cluster_data" {
     Name : "${var.cluster_name} data node"
     cluster : var.cluster_name
     elastic_role : "data"
+    update_dns_lambda : module.update-dns-data.lambda_name
   }
 }
 
