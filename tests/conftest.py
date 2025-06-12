@@ -3,14 +3,13 @@ import json
 import os
 from textwrap import dedent
 
-import boto3
 import pytest
 import logging
 
 from os import path as osp
 
-from infrahouse_toolkit.logging import setup_logging
-from infrahouse_toolkit.terraform import terraform_apply
+from infrahouse_core.logging import setup_logging
+from pytest_infrahouse import terraform_apply
 
 # "303467602807" is our test account
 TEST_ACCOUNT = "303467602807"

@@ -1,10 +1,8 @@
-import contextlib
 import json
-import os
 from os import path as osp
 from textwrap import dedent
 
-from infrahouse_toolkit.terraform import terraform_apply
+from pytest_infrahouse import terraform_apply
 
 from tests.conftest import (
     LOG,
