@@ -27,3 +27,38 @@ resource "aws_s3_bucket_public_access_block" "public_access" {
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
+
+resource "aws_s3_bucket_policy" "snapshots-bucket" {
+  bucket = aws_s3_bucket.snapshots-bucket.id
+  policy = data.aws_iam_policy_document.bucket_policy.json
+}
+
+data "aws_iam_policy_document" "bucket_policy" {
+  statement {
+    sid    = "AllowSSLRequestsOnly"
+    effect = "Deny"
+
+    actions = [
+      "s3:*",
+    ]
+
+    resources = [
+      aws_s3_bucket.snapshots-bucket.arn,
+      "${aws_s3_bucket.snapshots-bucket.arn}/*",
+    ]
+
+    principals {
+      type        = "*"
+      identifiers = ["*"]
+    }
+
+    condition {
+      test     = "Bool"
+      variable = "aws:SecureTransport"
+      values = [
+        "false"
+      ]
+    }
+  }
+
+}
