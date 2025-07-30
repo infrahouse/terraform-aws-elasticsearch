@@ -13,6 +13,11 @@ output "cluster_master_load_balancer_arn" {
   value       = module.elastic_cluster.load_balancer_arn
 }
 
+output "cluster_master_target_group_arn" {
+  description = "ARN of the target group for the cluster master nodes"
+  value       = module.elastic_cluster.target_group_arn
+}
+
 output "cluster_master_ssl_listener_arn" {
   description = "ARN of cluster masters ssl listener of balancer"
   value       = module.elastic_cluster.ssl_listener_arn
@@ -26,6 +31,11 @@ output "cluster_data_url" {
 output "cluster_data_load_balancer_arn" {
   description = "ARN of the load balancer for the cluster data nodes"
   value       = var.bootstrap_mode ? null : module.elastic_cluster_data[0].load_balancer_arn
+}
+
+output "cluster_data_target_group_arn" {
+  description = "ARN of the target group for the cluster data nodes"
+  value       = var.bootstrap_mode ? null : module.elastic_cluster_data[0].target_group_arn
 }
 
 output "cluster_data_ssl_listener_arn" {
