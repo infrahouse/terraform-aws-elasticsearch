@@ -13,6 +13,11 @@ output "cluster_master_load_balancer_arn" {
   value       = module.elastic_cluster.load_balancer_arn
 }
 
+output "cluster_master_ssl_listener_arn" {
+  description = "ARN of cluster masters ssl listener of balancer"
+  value       = module.elastic_cluster.ssl_listener_arn
+}
+
 output "cluster_data_url" {
   description = "HTTPS endpoint to access the cluster data nodes"
   value       = "https://${var.cluster_name}-data.${data.aws_route53_zone.cluster.name}"
@@ -21,6 +26,11 @@ output "cluster_data_url" {
 output "cluster_data_load_balancer_arn" {
   description = "ARN of the load balancer for the cluster data nodes"
   value       = var.bootstrap_mode ? null : module.elastic_cluster_data[0].load_balancer_arn
+}
+
+output "cluster_data_ssl_listener_arn" {
+  description = "ARN of cluster data ssl listener of balancer"
+  value       = var.bootstrap_mode ? null : module.elastic_cluster_data[0].ssl_listener_arn
 }
 
 output "elastic_password" {
