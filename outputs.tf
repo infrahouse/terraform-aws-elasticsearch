@@ -46,12 +46,12 @@ output "cluster_data_ssl_listener_arn" {
 output "elastic_password" {
   description = "Password for Elasticsearch superuser elastic."
   sensitive   = true
-  value       = aws_secretsmanager_secret_version.elastic.secret_string
+  value       = module.elastic-password.secret_value
 }
 
 output "elastic_secret_id" {
   description = "AWS secret that stores password for user elastic."
-  value       = aws_secretsmanager_secret.elastic.id
+  value       = module.elastic-password.secret_id
 }
 
 output "idle_timeout_data" {
@@ -66,13 +66,13 @@ output "idle_timeout_master" {
 
 output "kibana_system_secret_id" {
   description = "AWS secret that stores password for user kibana_system"
-  value       = aws_secretsmanager_secret.kibana_system.id
+  value       = module.kibana_system-password.secret_id
 }
 
 output "kibana_system_password" {
   description = "A password of kibana_system user"
   sensitive   = true
-  value       = aws_secretsmanager_secret_version.kibana_system.secret_string
+  value       = module.kibana_system-password.secret_value
 }
 
 output "snapshots_bucket" {

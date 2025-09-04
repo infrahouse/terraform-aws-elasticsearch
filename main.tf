@@ -7,7 +7,7 @@ locals {
 }
 module "elastic_master_userdata" {
   source                   = "registry.infrahouse.com/infrahouse/cloud-init/aws"
-  version                  = "1.18.0"
+  version                  = "2.1.0"
   environment              = var.environment
   role                     = "elastic_master"
   puppet_environmentpath   = var.puppet_environmentpath
@@ -30,8 +30,8 @@ module "elastic_master_userdata" {
       "elasticsearch" : {
         "bootstrap_cluster" : var.bootstrap_mode
         "cluster_name" : var.cluster_name
-        "elastic_secret" : aws_secretsmanager_secret.elastic.id
-        "kibana_system_secret" : aws_secretsmanager_secret.kibana_system.id
+        "elastic_secret" : module.elastic-password.secret_id
+        "kibana_system_secret" : module.kibana_system-password.secret_id
         "snapshots_bucket" : aws_s3_bucket.snapshots-bucket.bucket
         "ca_key_secret" : module.ca_key_secret.secret_id
         "ca_cert_secret" : module.ca_cert_secret.secret_id
@@ -53,7 +53,7 @@ module "elastic_master_userdata" {
 
 module "elastic_data_userdata" {
   source                   = "registry.infrahouse.com/infrahouse/cloud-init/aws"
-  version                  = "1.18.0"
+  version                  = "2.1.0"
   environment              = var.environment
   role                     = "elastic_data"
   puppet_environmentpath   = var.puppet_environmentpath
@@ -76,8 +76,8 @@ module "elastic_data_userdata" {
       "elasticsearch" : {
         "bootstrap_cluster" : false
         "cluster_name" : var.cluster_name
-        "elastic_secret" : aws_secretsmanager_secret.elastic.id
-        "kibana_system_secret" : aws_secretsmanager_secret.kibana_system.id
+        "elastic_secret" : module.elastic-password.secret_id
+        "kibana_system_secret" : module.kibana_system-password.secret_id
         "snapshots_bucket" : aws_s3_bucket.snapshots-bucket.bucket
         "ca_key_secret" : module.ca_key_secret.secret_id
         "ca_cert_secret" : module.ca_cert_secret.secret_id
@@ -107,7 +107,7 @@ module "elastic_cluster" {
   service_name                                  = local.service_name
   asg_name                                      = var.cluster_name
   environment                                   = var.environment
-  ami                                           = var.asg_ami != null ? var.asg_ami : data.aws_ami.ubuntu.image_id
+  ami                                           = var.asg_ami != null ? var.asg_ami : data.aws_ami.ubuntu_pro.image_id
   subnets                                       = var.subnet_ids
   backend_subnets                               = var.subnet_ids
   zone_id                                       = var.zone_id
@@ -171,7 +171,7 @@ module "elastic_cluster_data" {
   service_name                                  = local.service_name
   asg_name                                      = "${var.cluster_name}-data"
   environment                                   = var.environment
-  ami                                           = var.asg_ami != null ? var.asg_ami : data.aws_ami.ubuntu.image_id
+  ami                                           = var.asg_ami != null ? var.asg_ami : data.aws_ami.ubuntu_pro.image_id
   subnets                                       = var.subnet_ids
   backend_subnets                               = var.subnet_ids
   zone_id                                       = var.zone_id
