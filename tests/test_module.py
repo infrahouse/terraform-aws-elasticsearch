@@ -15,9 +15,7 @@ from tests.conftest import (
 
 
 @pytest.mark.parametrize(
-    "aws_provider_version",
-    ["~> 5.11", "~> 6.0"],
-    ids=["aws-5", "aws-6"]
+    "aws_provider_version", ["~> 5.11", "~> 6.0"], ids=["aws-5", "aws-6"]
 )
 def test_module(
     service_network,
@@ -52,7 +50,7 @@ def test_module(
     with open(terraform_tf_path, "w") as fp:
         fp.write(
             dedent(
-                f'''
+                f"""
                 terraform {{
                   //noinspection HILUnresolvedReference
                   required_providers {{
@@ -62,7 +60,7 @@ def test_module(
                     }}
                   }}
                 }}
-                '''
+                """
             )
         )
 
