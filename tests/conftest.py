@@ -11,13 +11,9 @@ from os import path as osp
 from infrahouse_core.logging import setup_logging
 from pytest_infrahouse import terraform_apply
 
-# "303467602807" is our test account
-TEST_ACCOUNT = "303467602807"
 DEFAULT_PROGRESS_INTERVAL = 10
-TRACE_TERRAFORM = False
-UBUNTU_CODENAME = "jammy"
+UBUNTU_CODENAME = "noble"
 TERRAFORM_ROOT_DIR = "test_data"
-# TEST_ROLE_ARN = "arn:aws:iam::303467602807:role/elasticsearch-tester"
 
 LOG = logging.getLogger(__name__)
 
@@ -76,7 +72,6 @@ def bootstrap_cluster(
                 terraform_module_dir,
                 destroy_after=not keep_after,
                 json_output=True,
-                enable_trace=TRACE_TERRAFORM,
             ):
                 open(osp.join(terraform_module_dir, bootstrap_flag_file), "w").write("")
                 yield
@@ -93,35 +88,3 @@ def bootstrap_cluster(
                 "Will keep %s around because we're keeping resources after the test.",
                 full_path,
             )
-
-
-@pytest.fixture()
-def dns(test_role_arn, aws_region, test_zone_name, keep_after):
-    """
-    Create DNS zone
-    """
-    terraform_module_dir = osp.join(TERRAFORM_ROOT_DIR, "dns")
-    with open(osp.join(terraform_module_dir, "terraform.tfvars"), "w") as fp:
-        fp.write(
-            dedent(
-                f"""
-                parent_zone_name = "{test_zone_name}"
-                region = "{aws_region}"
-                """
-            )
-        )
-        if test_role_arn:
-            fp.write(
-                dedent(
-                    f"""
-                    role_arn = "{test_role_arn}"
-                    """
-                )
-            )
-    with terraform_apply(
-        terraform_module_dir,
-        destroy_after=not keep_after,
-        json_output=True,
-        enable_trace=TRACE_TERRAFORM,
-    ) as tf_output:
-        yield tf_output

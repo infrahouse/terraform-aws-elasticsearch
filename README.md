@@ -22,7 +22,7 @@ Typical configuration would include at least two public and two private subnets.
 ```hcl
 module "service-network" {
   source                = "infrahouse/service-network/aws"
-  version               = "~> 2.0"
+  version               = "~> 3.2"
   service_name          = "elastic"
   vpc_cidr_block        = "10.1.0.0/16"
   management_cidr_block = "10.1.0.0/16"
@@ -75,20 +75,18 @@ Declare the cluster and add `bootstrap_mode = true` to the module inputs.
 The size of the autoscaling group will be not three, but one node.
 ```hcl
 module "test" {
-  module "test" {
-    source  = "registry.infrahouse.com/infrahouse/elasticsearch/aws"
-    version = "3.8.0"
-    
-    providers = {
-      aws     = aws
-      aws.dns = aws
-    }
-    internet_gateway_id = module.service-network.internet_gateway_id
-    key_pair_name       = aws_key_pair.test.key_name
-    subnet_ids          = module.service-network.subnet_public_ids
-    zone_id             = data.aws_route53_zone.cicd.zone_id
-    bootstrap_mode      = true
+  source  = "registry.infrahouse.com/infrahouse/elasticsearch/aws"
+  version = "3.8.0"
+
+  providers = {
+    aws     = aws
+    aws.dns = aws
   }
+  internet_gateway_id = module.service-network.internet_gateway_id
+  key_pair_name       = aws_key_pair.test.key_name
+  subnet_ids          = module.service-network.subnet_public_ids
+  zone_id             = data.aws_route53_zone.cicd.zone_id
+  bootstrap_mode      = true
 }
 ```
 
@@ -110,17 +108,28 @@ index c13df0d..33cf0d3 100644
 
 ## Accessing the cluster
 
-The module creates three endpoints to access the cluster. All three of them are output variables of the module.
+The module creates HTTPS endpoints to access different parts of the Elasticsearch cluster. All endpoints are available as output variables.
 
-* Master nodes: `https://${var.cluster_name}-master.${data.aws_route53_zone.cluster.name}` or `https://${var.cluster_name}.${data.aws_route53_zone.cluster.name}` 
-* Data nodes: `https://${var.cluster_name}-data.${data.aws_route53_zone.cluster.name}`
+### Endpoints
+
+* **Cluster endpoint**: ``https://${var.cluster_name}.${data.aws_route53_zone.cluster.name}``
+    - Primary endpoint for general cluster access
+    - Points to master nodes
+* **Master nodes**: ``https://${var.cluster_name}-master.${data.aws_route53_zone.cluster.name}``
+    - Direct access to master nodes
+    - Used for cluster management operations
+* **Data nodes**: ``https://${var.cluster_name}-data.${data.aws_route53_zone.cluster.name}``
+    - Direct access to data nodes
+    - Used for search and indexing operations
+
+All endpoints use HTTPS with automatically provisioned SSL certificates.
+
 ## Requirements
 
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.5 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5.11 |
-| <a name="requirement_cloudinit"></a> [cloudinit](#requirement\_cloudinit) | ~> 2.3 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.11, < 7.0 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | ~> 3.6 |
 | <a name="requirement_tls"></a> [tls](#requirement\_tls) | ~> 4.0 |
 
@@ -128,8 +137,8 @@ The module creates three endpoints to access the cluster. All three of them are 
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 5.11 |
-| <a name="provider_aws.dns"></a> [aws.dns](#provider\_aws.dns) | ~> 5.11 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.11, < 7.0 |
+| <a name="provider_aws.dns"></a> [aws.dns](#provider\_aws.dns) | >= 5.11, < 7.0 |
 | <a name="provider_random"></a> [random](#provider\_random) | ~> 3.6 |
 | <a name="provider_tls"></a> [tls](#provider\_tls) | ~> 4.0 |
 
@@ -139,12 +148,14 @@ The module creates three endpoints to access the cluster. All three of them are 
 |------|--------|---------|
 | <a name="module_ca_cert_secret"></a> [ca\_cert\_secret](#module\_ca\_cert\_secret) | registry.infrahouse.com/infrahouse/secret/aws | ~> 1.0 |
 | <a name="module_ca_key_secret"></a> [ca\_key\_secret](#module\_ca\_key\_secret) | registry.infrahouse.com/infrahouse/secret/aws | ~> 1.0 |
-| <a name="module_elastic_cluster"></a> [elastic\_cluster](#module\_elastic\_cluster) | registry.infrahouse.com/infrahouse/website-pod/aws | 5.3.0 |
-| <a name="module_elastic_cluster_data"></a> [elastic\_cluster\_data](#module\_elastic\_cluster\_data) | registry.infrahouse.com/infrahouse/website-pod/aws | 5.3.0 |
-| <a name="module_elastic_data_userdata"></a> [elastic\_data\_userdata](#module\_elastic\_data\_userdata) | registry.infrahouse.com/infrahouse/cloud-init/aws | 1.18.0 |
-| <a name="module_elastic_master_userdata"></a> [elastic\_master\_userdata](#module\_elastic\_master\_userdata) | registry.infrahouse.com/infrahouse/cloud-init/aws | 1.18.0 |
-| <a name="module_update-dns"></a> [update-dns](#module\_update-dns) | registry.infrahouse.com/infrahouse/update-dns/aws | 0.9.1 |
-| <a name="module_update-dns-data"></a> [update-dns-data](#module\_update-dns-data) | registry.infrahouse.com/infrahouse/update-dns/aws | 0.9.1 |
+| <a name="module_elastic-password"></a> [elastic-password](#module\_elastic-password) | registry.infrahouse.com/infrahouse/secret/aws | 1.1.0 |
+| <a name="module_elastic_cluster"></a> [elastic\_cluster](#module\_elastic\_cluster) | registry.infrahouse.com/infrahouse/website-pod/aws | 5.8.1 |
+| <a name="module_elastic_cluster_data"></a> [elastic\_cluster\_data](#module\_elastic\_cluster\_data) | registry.infrahouse.com/infrahouse/website-pod/aws | 5.8.1 |
+| <a name="module_elastic_data_userdata"></a> [elastic\_data\_userdata](#module\_elastic\_data\_userdata) | registry.infrahouse.com/infrahouse/cloud-init/aws | 2.1.0 |
+| <a name="module_elastic_master_userdata"></a> [elastic\_master\_userdata](#module\_elastic\_master\_userdata) | registry.infrahouse.com/infrahouse/cloud-init/aws | 2.1.0 |
+| <a name="module_kibana_system-password"></a> [kibana\_system-password](#module\_kibana\_system-password) | registry.infrahouse.com/infrahouse/secret/aws | 1.1.0 |
+| <a name="module_update-dns"></a> [update-dns](#module\_update-dns) | registry.infrahouse.com/infrahouse/update-dns/aws | 0.11.1 |
+| <a name="module_update-dns-data"></a> [update-dns-data](#module\_update-dns-data) | registry.infrahouse.com/infrahouse/update-dns/aws | 0.11.1 |
 
 ## Resources
 
@@ -155,11 +166,8 @@ The module creates three endpoints to access the cluster. All three of them are 
 | [aws_autoscaling_lifecycle_hook.terminating-data](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_lifecycle_hook) | resource |
 | [aws_autoscaling_lifecycle_hook.terminating-master](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_lifecycle_hook) | resource |
 | [aws_s3_bucket.snapshots-bucket](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
+| [aws_s3_bucket_policy.snapshots-bucket](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_policy) | resource |
 | [aws_s3_bucket_public_access_block.public_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_public_access_block) | resource |
-| [aws_secretsmanager_secret.elastic](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret) | resource |
-| [aws_secretsmanager_secret.kibana_system](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret) | resource |
-| [aws_secretsmanager_secret_version.elastic](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret_version) | resource |
-| [aws_secretsmanager_secret_version.kibana_system](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret_version) | resource |
 | [aws_security_group.backend_extra](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_vpc_security_group_ingress_rule.backend_extra_reserved](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
 | [aws_vpc_security_group_ingress_rule.elastic_exporter](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
@@ -171,11 +179,11 @@ The module creates three endpoints to access the cluster. All three of them are 
 | [random_string.profile-suffix](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string) | resource |
 | [tls_private_key.ca_key](https://registry.terraform.io/providers/hashicorp/tls/latest/docs/resources/private_key) | resource |
 | [tls_self_signed_cert.ca_cert](https://registry.terraform.io/providers/hashicorp/tls/latest/docs/resources/self_signed_cert) | resource |
-| [aws_ami.ubuntu](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ami) | data source |
+| [aws_ami.ubuntu_pro](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ami) | data source |
 | [aws_availability_zones.available](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/availability_zones) | data source |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
+| [aws_iam_policy_document.bucket_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.elastic_permissions](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
-| [aws_iam_policy_document.secrets-permission-policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_role.caller_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_role) | data source |
 | [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
 | [aws_route53_zone.cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/route53_zone) | data source |
@@ -228,8 +236,12 @@ The module creates three endpoints to access the cluster. All three of them are 
 | Name | Description |
 |------|-------------|
 | <a name="output_cluster_data_load_balancer_arn"></a> [cluster\_data\_load\_balancer\_arn](#output\_cluster\_data\_load\_balancer\_arn) | ARN of the load balancer for the cluster data nodes |
+| <a name="output_cluster_data_ssl_listener_arn"></a> [cluster\_data\_ssl\_listener\_arn](#output\_cluster\_data\_ssl\_listener\_arn) | ARN of cluster data ssl listener of balancer |
+| <a name="output_cluster_data_target_group_arn"></a> [cluster\_data\_target\_group\_arn](#output\_cluster\_data\_target\_group\_arn) | ARN of the target group for the cluster data nodes |
 | <a name="output_cluster_data_url"></a> [cluster\_data\_url](#output\_cluster\_data\_url) | HTTPS endpoint to access the cluster data nodes |
 | <a name="output_cluster_master_load_balancer_arn"></a> [cluster\_master\_load\_balancer\_arn](#output\_cluster\_master\_load\_balancer\_arn) | ARN of the load balancer for the cluster masters |
+| <a name="output_cluster_master_ssl_listener_arn"></a> [cluster\_master\_ssl\_listener\_arn](#output\_cluster\_master\_ssl\_listener\_arn) | ARN of cluster masters ssl listener of balancer |
+| <a name="output_cluster_master_target_group_arn"></a> [cluster\_master\_target\_group\_arn](#output\_cluster\_master\_target\_group\_arn) | ARN of the target group for the cluster master nodes |
 | <a name="output_cluster_master_url"></a> [cluster\_master\_url](#output\_cluster\_master\_url) | HTTPS endpoint to access the cluster masters |
 | <a name="output_cluster_url"></a> [cluster\_url](#output\_cluster\_url) | HTTPS endpoint to access the cluster |
 | <a name="output_data_instance_role_arn"></a> [data\_instance\_role\_arn](#output\_data\_instance\_role\_arn) | Data node EC2 instance profile will have this role ARN |

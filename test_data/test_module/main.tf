@@ -18,7 +18,7 @@ module "test" {
   snapshot_force_destroy = true
   monitoring_cidr_block  = "0.0.0.0/0"
   secret_elastic_readers = [
-    "arn:aws:iam::${data.aws_caller_identity.this.account_id}:role/aws-reserved/sso.amazonaws.com/us-west-1/AWSReservedSSO_AWSAdministratorAccess_422821c726d81c14",
+    tolist(data.aws_iam_roles.sso-admin.arns)[0],
     "arn:aws:iam::990466748045:user/aleks"
   ]
 }
