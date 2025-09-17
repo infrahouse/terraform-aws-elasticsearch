@@ -7,7 +7,7 @@ locals {
 }
 module "elastic_master_userdata" {
   source                   = "registry.infrahouse.com/infrahouse/cloud-init/aws"
-  version                  = "2.1.0"
+  version                  = "2.2.0"
   environment              = var.environment
   role                     = "elastic_master"
   puppet_environmentpath   = var.puppet_environmentpath
@@ -53,7 +53,7 @@ module "elastic_master_userdata" {
 
 module "elastic_data_userdata" {
   source                   = "registry.infrahouse.com/infrahouse/cloud-init/aws"
-  version                  = "2.1.0"
+  version                  = "2.2.0"
   environment              = var.environment
   role                     = "elastic_data"
   puppet_environmentpath   = var.puppet_environmentpath
