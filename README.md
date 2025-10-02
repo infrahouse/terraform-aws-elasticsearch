@@ -123,7 +123,6 @@ The module creates HTTPS endpoints to access different parts of the Elasticsearc
     - Used for search and indexing operations
 
 All endpoints use HTTPS with automatically provisioned SSL certificates.
-
 ## Requirements
 
 | Name | Version |
@@ -149,10 +148,10 @@ All endpoints use HTTPS with automatically provisioned SSL certificates.
 | <a name="module_ca_cert_secret"></a> [ca\_cert\_secret](#module\_ca\_cert\_secret) | registry.infrahouse.com/infrahouse/secret/aws | ~> 1.0 |
 | <a name="module_ca_key_secret"></a> [ca\_key\_secret](#module\_ca\_key\_secret) | registry.infrahouse.com/infrahouse/secret/aws | ~> 1.0 |
 | <a name="module_elastic-password"></a> [elastic-password](#module\_elastic-password) | registry.infrahouse.com/infrahouse/secret/aws | 1.1.0 |
-| <a name="module_elastic_cluster"></a> [elastic\_cluster](#module\_elastic\_cluster) | registry.infrahouse.com/infrahouse/website-pod/aws | 5.8.1 |
-| <a name="module_elastic_cluster_data"></a> [elastic\_cluster\_data](#module\_elastic\_cluster\_data) | registry.infrahouse.com/infrahouse/website-pod/aws | 5.8.1 |
-| <a name="module_elastic_data_userdata"></a> [elastic\_data\_userdata](#module\_elastic\_data\_userdata) | registry.infrahouse.com/infrahouse/cloud-init/aws | 2.1.0 |
-| <a name="module_elastic_master_userdata"></a> [elastic\_master\_userdata](#module\_elastic\_master\_userdata) | registry.infrahouse.com/infrahouse/cloud-init/aws | 2.1.0 |
+| <a name="module_elastic_cluster"></a> [elastic\_cluster](#module\_elastic\_cluster) | registry.infrahouse.com/infrahouse/website-pod/aws | 5.8.2 |
+| <a name="module_elastic_cluster_data"></a> [elastic\_cluster\_data](#module\_elastic\_cluster\_data) | registry.infrahouse.com/infrahouse/website-pod/aws | 5.8.2 |
+| <a name="module_elastic_data_userdata"></a> [elastic\_data\_userdata](#module\_elastic\_data\_userdata) | registry.infrahouse.com/infrahouse/cloud-init/aws | 2.2.2 |
+| <a name="module_elastic_master_userdata"></a> [elastic\_master\_userdata](#module\_elastic\_master\_userdata) | registry.infrahouse.com/infrahouse/cloud-init/aws | 2.2.2 |
 | <a name="module_kibana_system-password"></a> [kibana\_system-password](#module\_kibana\_system-password) | registry.infrahouse.com/infrahouse/secret/aws | 1.1.0 |
 | <a name="module_update-dns"></a> [update-dns](#module\_update-dns) | registry.infrahouse.com/infrahouse/update-dns/aws | 0.11.1 |
 | <a name="module_update-dns-data"></a> [update-dns-data](#module\_update-dns-data) | registry.infrahouse.com/infrahouse/update-dns/aws | 0.11.1 |
@@ -204,7 +203,7 @@ All endpoints use HTTPS with automatically provisioned SSL certificates.
 | <a name="input_environment"></a> [environment](#input\_environment) | Name of environment. | `string` | `"development"` | no |
 | <a name="input_extra_files"></a> [extra\_files](#input\_extra\_files) | Additional files to create on an instance. | <pre>list(object({<br/>    content     = string<br/>    path        = string<br/>    permissions = string<br/>  }))</pre> | `[]` | no |
 | <a name="input_extra_instance_profile_permissions"></a> [extra\_instance\_profile\_permissions](#input\_extra\_instance\_profile\_permissions) | A JSON with a permissions policy document. The policy will be attached to the ASG instance profile. | `string` | `null` | no |
-| <a name="input_extra_repos"></a> [extra\_repos](#input\_extra\_repos) | Additional APT repositories to configure on an instance. | <pre>map(object({<br/>    source = string<br/>    key    = string<br/>  }))</pre> | `{}` | no |
+| <a name="input_extra_repos"></a> [extra\_repos](#input\_extra\_repos) | Additional APT repositories to configure on an instance. | <pre>map(<br/>    object(<br/>      {<br/>        source   = string<br/>        key      = string<br/>        machine  = optional(string)<br/>        authFrom = optional(string)<br/>        priority = optional(number)<br/>      }<br/>    )<br/>  )</pre> | `{}` | no |
 | <a name="input_idle_timeout_data"></a> [idle\_timeout\_data](#input\_idle\_timeout\_data) | The amount of time a client or target connection can be idle before the load balancer (that fronts data nodes) closes it. | `number` | `4000` | no |
 | <a name="input_idle_timeout_master"></a> [idle\_timeout\_master](#input\_idle\_timeout\_master) | The amount of time a client or target connection can be idle before the load balancer (that fronts master nodes) closes it. | `number` | `4000` | no |
 | <a name="input_instance_type"></a> [instance\_type](#input\_instance\_type) | Instance type to run the elasticsearch node | `string` | `"t3.medium"` | no |
