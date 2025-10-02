@@ -76,7 +76,7 @@ The size of the autoscaling group will be not three, but one node.
 ```hcl
 module "test" {
   source  = "registry.infrahouse.com/infrahouse/elasticsearch/aws"
-  version = "3.10.0"
+  version = "3.11.0"
 
   providers = {
     aws     = aws
