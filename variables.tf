@@ -58,10 +58,17 @@ variable "extra_files" {
 
 variable "extra_repos" {
   description = "Additional APT repositories to configure on an instance."
-  type = map(object({
-    source = string
-    key    = string
-  }))
+  type = map(
+    object(
+      {
+        source   = string
+        key      = string
+        machine  = optional(string)
+        authFrom = optional(string)
+        priority = optional(number)
+      }
+    )
+  )
   default = {}
 }
 
