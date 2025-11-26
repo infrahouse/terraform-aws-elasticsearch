@@ -3,11 +3,16 @@ resource "aws_kms_key" "cloudwatch_logs" {
   description             = "KMS key for encrypting CloudWatch logs for Elasticsearch cluster ${var.cluster_name}"
   deletion_window_in_days = 10
   enable_key_rotation     = true
+  rotation_period_in_days = var.cloudwatch_kms_rotation_period_days
 
-  tags = {
-    Name        = "${var.cluster_name}-cloudwatch-logs"
-    Environment = var.environment
-  }
+  tags = merge(
+    local.default_module_tags,
+    {
+      Name        = "${var.cluster_name}-cloudwatch-logs"
+      environment = var.environment
+      cluster     = var.cluster_name
+    }
+  )
 }
 
 resource "aws_kms_alias" "cloudwatch_logs" {
@@ -66,28 +71,38 @@ resource "aws_cloudwatch_log_group" "elasticsearch" {
   retention_in_days = var.cloudwatch_log_retention_days
   kms_key_id        = aws_kms_key.cloudwatch_logs[0].arn
 
-  tags = {
-    Name        = "${var.cluster_name}-elasticsearch"
-    Environment = var.environment
-    Cluster     = var.cluster_name
-  }
+  tags = merge(
+    local.default_module_tags,
+    {
+      Name        = "${var.cluster_name}-elasticsearch"
+      environment = var.environment
+      cluster     = var.cluster_name
+    }
+  )
 }
 
 data "aws_iam_policy_document" "cloudwatch_logs_permissions" {
   count = var.enable_cloudwatch_logging ? 1 : 0
 
   statement {
-    sid = "CloudWatchLogsAccess"
+    sid = "CloudWatchLogsWriteAccess"
     actions = [
       "logs:CreateLogStream",
-      "logs:PutLogEvents",
-      "logs:DescribeLogGroups",
-      "logs:DescribeLogStreams"
+      "logs:PutLogEvents"
     ]
     resources = [
       aws_cloudwatch_log_group.elasticsearch[0].arn,
       "${aws_cloudwatch_log_group.elasticsearch[0].arn}:*"
     ]
+  }
+
+  statement {
+    sid = "CloudWatchLogsDescribeAccess"
+    actions = [
+      "logs:DescribeLogGroups",
+      "logs:DescribeLogStreams"
+    ]
+    resources = ["*"]
   }
 
   statement {

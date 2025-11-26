@@ -242,7 +242,7 @@ variable "cloudwatch_log_retention_days" {
 
   validation {
     condition     = var.cloudwatch_log_retention_days >= 365
-    error_message = "CloudWatch log retention must be at least 365 days for compliance requirements. Current value: ${var.cloudwatch_log_retention_days} days."
+    error_message = "CloudWatch log retention must be at least 365 days for compliance requirements"
   }
 
   validation {
@@ -252,14 +252,14 @@ variable "cloudwatch_log_retention_days" {
 }
 
 
-variable "cloudwatch_log_rotation_period_days" {
-  description = "KMS key automatic rotation period in days (90-2560)"
+variable "cloudwatch_kms_rotation_period_days" {
+  description = "Number of days between automatic KMS key rotations for CloudWatch logs encryption"
   type        = number
   default     = 90
 
   validation {
-    condition     = var.cloudwatch_log_rotation_period_days >= 90 && var.cloudwatch_log_rotation_period_days <= 2560
-    error_message = "KMS rotation period must be between 90 and 2560 days"
+    condition     = var.cloudwatch_kms_rotation_period_days >= 90 && var.cloudwatch_kms_rotation_period_days <= 2560
+    error_message = "KMS key rotation period must be between 90 and 2560 days"
   }
 }
 
