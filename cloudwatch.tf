@@ -70,6 +70,10 @@ resource "aws_cloudwatch_log_group" "elasticsearch" {
   retention_in_days = var.cloudwatch_log_retention_days
   kms_key_id        = aws_kms_key.cloudwatch_logs[0].arn
 
+  depends_on = [
+    aws_kms_key_policy.cloudwatch_logs
+  ]
+
   tags = merge(
     local.default_module_tags,
     {
