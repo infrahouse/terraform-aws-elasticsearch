@@ -8,9 +8,8 @@ resource "aws_kms_key" "cloudwatch_logs" {
   tags = merge(
     local.default_module_tags,
     {
-      Name        = "${var.cluster_name}-cloudwatch-logs"
-      environment = var.environment
-      cluster     = var.cluster_name
+      Name    = "${var.cluster_name}-cloudwatch-logs"
+      cluster = var.cluster_name
     }
   )
 }
@@ -74,9 +73,8 @@ resource "aws_cloudwatch_log_group" "elasticsearch" {
   tags = merge(
     local.default_module_tags,
     {
-      Name        = "${var.cluster_name}-elasticsearch"
-      environment = var.environment
-      cluster     = var.cluster_name
+      Name    = "${var.cluster_name}-elasticsearch"
+      cluster = var.cluster_name
     }
   )
 }
