@@ -96,8 +96,6 @@ module "elastic_data_userdata" {
     var.enable_cloudwatch_logging ? {
       "cloudwatch" : {
         "log_group" : local.log_group_name
-        "log_stream_prefix" : "elasticsearch"
-        "region" : data.aws_region.current.name
       }
     } : {},
     var.smtp_credentials_secret != null ? {
