@@ -228,3 +228,38 @@ variable "extra_instance_profile_permissions" {
   type        = string
   default     = null
 }
+
+variable "enable_cloudwatch_logging" {
+  description = "Enable CloudWatch logging for the Elasticsearch cluster"
+  type        = bool
+  default     = true
+}
+
+variable "cloudwatch_log_retention_days" {
+  description = "CloudWatch log retention in days (minimum 365 days required for compliance)"
+  type        = number
+  default     = 365
+
+  validation {
+    condition     = var.cloudwatch_log_retention_days >= 365
+    error_message = "CloudWatch log retention must be at least 365 days for compliance requirements. Current value: ${var.cloudwatch_log_retention_days} days."
+  }
+
+  validation {
+    condition     = contains([365, 400, 545, 731, 1096, 1827, 2192, 2557, 2922, 3288, 3653], var.cloudwatch_log_retention_days)
+    error_message = "CloudWatch log retention must be one of the AWS-supported values: 365, 400, 545, 731, 1096, 1827, 2192, 2557, 2922, 3288, or 3653 days."
+  }
+}
+
+
+variable "cloudwatch_log_rotation_period_days" {
+  description = "KMS key automatic rotation period in days (90-2560)"
+  type        = number
+  default     = 90
+
+  validation {
+    condition     = var.cloudwatch_log_rotation_period_days >= 90 && var.cloudwatch_log_rotation_period_days <= 2560
+    error_message = "KMS rotation period must be between 90 and 2560 days"
+  }
+}
+

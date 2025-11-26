@@ -42,6 +42,11 @@ module "elastic_master_userdata" {
         "production" : true
       }
     },
+    var.enable_cloudwatch_logging ? {
+      "cloudwatch" : {
+        "log_group" : local.log_group_name
+      }
+    } : {},
     var.smtp_credentials_secret != null ? {
       postfix : {
         smtp_credentials : var.smtp_credentials_secret
@@ -88,6 +93,13 @@ module "elastic_data_userdata" {
         "production" : true
       }
     },
+    var.enable_cloudwatch_logging ? {
+      "cloudwatch" : {
+        "log_group" : local.log_group_name
+        "log_stream_prefix" : "elasticsearch"
+        "region" : data.aws_region.current.name
+      }
+    } : {},
     var.smtp_credentials_secret != null ? {
       postfix : {
         smtp_credentials : var.smtp_credentials_secret
