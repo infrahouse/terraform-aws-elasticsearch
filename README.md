@@ -144,7 +144,7 @@ When enabled (default), the module creates:
   - Example: `/elasticsearch/production/main-cluster`
 - **KMS Key**: Customer-managed key with automatic rotation for log encryption
 - **IAM Permissions**: Least-privilege permissions for instances to write logs
-- **Log Retention**: 7 days (configurable via `cloudwatch_log_retention_days`)
+- **Log Retention**: 365 days (configurable via `cloudwatch_log_retention_days`, minimum 365 for compliance)
 - **Key Rotation**: 365 days (configurable via `cloudwatch_kms_rotation_period_days`)
 
 ### Cost Implications
@@ -160,9 +160,9 @@ CloudWatch Logs pricing consists of:
 - Large cluster (12+ nodes, ~50 GB/month logs): **$26.50-$30.00/month**
 
 **Cost optimization tips**:
-- Adjust `cloudwatch_log_retention_days` to balance observability needs with costs
-- Use shorter retention for development/staging environments
-- Consider CloudWatch Logs Insights queries instead of exporting all logs
+- Retention period is fixed at 365 days minimum for compliance requirements
+- Consider using log filtering and CloudWatch Logs Insights queries to reduce data ingestion
+- Archive older logs to S3 Glacier for long-term storage at lower cost
 
 ### Configuration Variables
 
@@ -174,7 +174,7 @@ module "elasticsearch" {
 
   # CloudWatch Logging Configuration
   enable_cloudwatch_logging          = true  # Enable/disable CloudWatch logging (default: true)
-  cloudwatch_log_retention_days      = 7     # Log retention period in days (default: 7)
+  cloudwatch_log_retention_days      = 365   # Log retention period in days (default: 365, minimum: 365)
   cloudwatch_kms_rotation_period_days = 365  # KMS key rotation period (default: 365)
 
   # ... other variables
