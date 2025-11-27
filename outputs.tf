@@ -80,6 +80,26 @@ output "snapshots_bucket" {
   value       = aws_s3_bucket.snapshots-bucket.bucket
 }
 
+output "cloudwatch_log_group_name" {
+  description = "Name of the CloudWatch log group for Elasticsearch logs"
+  value       = var.enable_cloudwatch_logging ? aws_cloudwatch_log_group.elasticsearch[0].name : null
+}
+
+output "cloudwatch_log_group_arn" {
+  description = "ARN of the CloudWatch log group for Elasticsearch logs"
+  value       = var.enable_cloudwatch_logging ? aws_cloudwatch_log_group.elasticsearch[0].arn : null
+}
+
+output "cloudwatch_kms_key_id" {
+  description = "ID of the KMS key used for CloudWatch log encryption"
+  value       = var.enable_cloudwatch_logging ? aws_kms_key.cloudwatch_logs[0].id : null
+}
+
+output "cloudwatch_kms_key_arn" {
+  description = "ARN of the KMS key used for CloudWatch log encryption"
+  value       = var.enable_cloudwatch_logging ? aws_kms_key.cloudwatch_logs[0].arn : null
+}
+
 output "master_instance_role_arn" {
   description = "Master node EC2 instance profile will have this role ARN"
   value       = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${local.master_profile_name}"
@@ -88,4 +108,14 @@ output "master_instance_role_arn" {
 output "data_instance_role_arn" {
   description = "Data node EC2 instance profile will have this role ARN"
   value       = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${local.data_profile_name}"
+}
+
+output "master_asg_name" {
+  description = "Name of the Auto Scaling Group for master nodes"
+  value       = module.elastic_cluster.asg_name
+}
+
+output "data_asg_name" {
+  description = "Name of the Auto Scaling Group for data nodes"
+  value       = var.bootstrap_mode ? null : module.elastic_cluster_data[0].asg_name
 }

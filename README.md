@@ -123,6 +123,157 @@ The module creates HTTPS endpoints to access different parts of the Elasticsearc
     - Used for search and indexing operations
 
 All endpoints use HTTPS with automatically provisioned SSL certificates.
+
+## CloudWatch Logging
+
+The module includes integrated CloudWatch Logs support for centralized log aggregation and monitoring of your Elasticsearch cluster.
+
+### Overview
+
+CloudWatch logging is **enabled by default** and provides:
+- Centralized log storage for all cluster nodes (master and data)
+- KMS encryption at rest for log data
+- Configurable retention periods
+- Integration with CloudWatch Insights for log analysis
+- Automatic log stream creation per instance
+
+### Default Configuration
+
+When enabled (default), the module creates:
+- **CloudWatch Log Group**: `/elasticsearch/${var.environment}/${var.cluster_name}`
+  - Example: `/elasticsearch/production/main-cluster`
+- **KMS Key**: Customer-managed key with automatic rotation for log encryption
+- **IAM Permissions**: Least-privilege permissions for instances to write logs
+- **Log Retention**: 365 days (configurable via `cloudwatch_log_retention_days`, minimum 365 for compliance)
+- **Key Rotation**: 365 days (configurable via `cloudwatch_kms_rotation_period_days`)
+
+### Cost Implications
+
+CloudWatch Logs pricing consists of:
+1. **Data Ingestion**: ~$0.50 per GB ingested
+2. **Storage**: ~$0.03 per GB per month
+3. **KMS Key**: ~$1.00 per month per key
+
+**Estimated Monthly Costs** (approximate, varies by region and usage):
+- Small cluster (3 nodes, ~5 GB/month logs): **$3.50-$5.00/month**
+- Medium cluster (6 nodes, ~15 GB/month logs): **$8.50-$10.00/month**
+- Large cluster (12+ nodes, ~50 GB/month logs): **$26.50-$30.00/month**
+
+**Cost optimization tips**:
+- Retention period is fixed at 365 days minimum for compliance requirements
+- Consider using log filtering and CloudWatch Logs Insights queries to reduce data ingestion
+- Archive older logs to S3 Glacier for long-term storage at lower cost
+
+### Configuration Variables
+
+Control CloudWatch logging behavior with these variables:
+
+```hcl
+module "elasticsearch" {
+  source = "infrahouse/elasticsearch/aws"
+
+  # CloudWatch Logging Configuration
+  enable_cloudwatch_logging          = true  # Enable/disable CloudWatch logging (default: true)
+  cloudwatch_log_retention_days      = 365   # Log retention period in days (default: 365, minimum: 365)
+  cloudwatch_kms_rotation_period_days = 365  # KMS key rotation period (default: 365)
+
+  # ... other variables
+}
+```
+
+See the [Inputs](#inputs) section below for complete variable documentation.
+
+### Disabling CloudWatch Logging
+
+To disable CloudWatch logging (not recommended for production):
+
+```hcl
+module "elasticsearch" {
+  source = "infrahouse/elasticsearch/aws"
+
+  enable_cloudwatch_logging = false
+
+  # ... other variables
+}
+```
+
+**Note**: Disabling CloudWatch logging removes centralized log visibility and may impact troubleshooting capabilities.
+
+### Accessing Logs
+
+After deployment, access logs through:
+
+1. **AWS Console**:
+   - Navigate to CloudWatch → Log groups
+   - Find log group: `/elasticsearch/${environment}/${cluster_name}`
+   - Each instance creates its own log stream
+
+2. **AWS CLI**:
+   ```bash
+   # List recent log streams
+   aws logs describe-log-streams \
+     --log-group-name "/elasticsearch/production/main-cluster" \
+     --order-by LastEventTime \
+     --descending \
+     --max-items 10
+
+   # Tail logs in real-time
+   aws logs tail "/elasticsearch/production/main-cluster" --follow
+   ```
+
+3. **CloudWatch Insights**:
+   - Use CloudWatch Logs Insights for advanced log queries
+   - Example query to find errors:
+     ```
+     fields @timestamp, @message
+     | filter @message like /ERROR/
+     | sort @timestamp desc
+     | limit 100
+     ```
+
+### Outputs
+
+The module provides these CloudWatch-related outputs:
+
+- `cloudwatch_log_group_name`: Name of the CloudWatch log group
+- `cloudwatch_log_group_arn`: ARN of the CloudWatch log group
+- `cloudwatch_kms_key_id`: ID of the KMS key used for log encryption
+- `cloudwatch_kms_key_arn`: ARN of the KMS key used for log encryption
+
+See the [Outputs](#outputs) section below for complete output documentation.
+
+### Integration with Existing Clusters
+
+CloudWatch logging can be added to existing clusters:
+
+1. **Add the configuration** to your Terraform module
+2. **Apply the changes** - The module will:
+   - Create the CloudWatch log group and KMS key
+   - Update instance IAM roles with logging permissions
+   - Refresh instances to pick up the new configuration (via instance refresh)
+3. **Verify logging** - Check the CloudWatch console for new log streams
+
+**Note**: Instance refresh will cause a rolling replacement of instances, planned to minimize disruption.
+
+### Security
+
+CloudWatch logging follows security best practices:
+- **Encryption at Rest**: All logs encrypted with customer-managed KMS key
+- **Key Rotation**: Automatic annual key rotation enabled by default
+- **Least Privilege IAM**: Instances can only write logs, not read them
+- **Write-Only Access**: Instances cannot read logs from CloudWatch (read access requires separate permissions)
+
+### Monitoring and Alarms
+
+Consider setting up CloudWatch alarms for:
+- High error rates in logs
+- Missing log streams (indicating instance issues)
+- Log ingestion rate anomalies
+
+Example alarm configuration is not included but can be added using the `cloudwatch_log_group_name` output.
+
+<!-- BEGIN_TF_DOCS -->
+
 ## Requirements
 
 | Name | Version |
@@ -148,8 +299,8 @@ All endpoints use HTTPS with automatically provisioned SSL certificates.
 | <a name="module_ca_cert_secret"></a> [ca\_cert\_secret](#module\_ca\_cert\_secret) | registry.infrahouse.com/infrahouse/secret/aws | ~> 1.0 |
 | <a name="module_ca_key_secret"></a> [ca\_key\_secret](#module\_ca\_key\_secret) | registry.infrahouse.com/infrahouse/secret/aws | ~> 1.0 |
 | <a name="module_elastic-password"></a> [elastic-password](#module\_elastic-password) | registry.infrahouse.com/infrahouse/secret/aws | 1.1.0 |
-| <a name="module_elastic_cluster"></a> [elastic\_cluster](#module\_elastic\_cluster) | registry.infrahouse.com/infrahouse/website-pod/aws | 5.8.2 |
-| <a name="module_elastic_cluster_data"></a> [elastic\_cluster\_data](#module\_elastic\_cluster\_data) | registry.infrahouse.com/infrahouse/website-pod/aws | 5.8.2 |
+| <a name="module_elastic_cluster"></a> [elastic\_cluster](#module\_elastic\_cluster) | registry.infrahouse.com/infrahouse/website-pod/aws | 5.10.0 |
+| <a name="module_elastic_cluster_data"></a> [elastic\_cluster\_data](#module\_elastic\_cluster\_data) | registry.infrahouse.com/infrahouse/website-pod/aws | 5.10.0 |
 | <a name="module_elastic_data_userdata"></a> [elastic\_data\_userdata](#module\_elastic\_data\_userdata) | registry.infrahouse.com/infrahouse/cloud-init/aws | 2.2.2 |
 | <a name="module_elastic_master_userdata"></a> [elastic\_master\_userdata](#module\_elastic\_master\_userdata) | registry.infrahouse.com/infrahouse/cloud-init/aws | 2.2.2 |
 | <a name="module_kibana_system-password"></a> [kibana\_system-password](#module\_kibana\_system-password) | registry.infrahouse.com/infrahouse/secret/aws | 1.1.0 |
@@ -164,6 +315,10 @@ All endpoints use HTTPS with automatically provisioned SSL certificates.
 | [aws_autoscaling_lifecycle_hook.launching-master](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_lifecycle_hook) | resource |
 | [aws_autoscaling_lifecycle_hook.terminating-data](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_lifecycle_hook) | resource |
 | [aws_autoscaling_lifecycle_hook.terminating-master](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_lifecycle_hook) | resource |
+| [aws_cloudwatch_log_group.elasticsearch](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
+| [aws_kms_alias.cloudwatch_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_alias) | resource |
+| [aws_kms_key.cloudwatch_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_key) | resource |
+| [aws_kms_key_policy.cloudwatch_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_key_policy) | resource |
 | [aws_s3_bucket.snapshots-bucket](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
 | [aws_s3_bucket_policy.snapshots-bucket](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_policy) | resource |
 | [aws_s3_bucket_public_access_block.public_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_public_access_block) | resource |
@@ -182,6 +337,8 @@ All endpoints use HTTPS with automatically provisioned SSL certificates.
 | [aws_availability_zones.available](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/availability_zones) | data source |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
 | [aws_iam_policy_document.bucket_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.cloudwatch_logs_key_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.cloudwatch_logs_permissions](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.elastic_permissions](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_role.caller_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_role) | data source |
 | [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
@@ -196,10 +353,13 @@ All endpoints use HTTPS with automatically provisioned SSL certificates.
 | <a name="input_asg_create_initial_lifecycle_hook"></a> [asg\_create\_initial\_lifecycle\_hook](#input\_asg\_create\_initial\_lifecycle\_hook) | Used for migration from version 1.* | `bool` | `true` | no |
 | <a name="input_asg_health_check_grace_period"></a> [asg\_health\_check\_grace\_period](#input\_asg\_health\_check\_grace\_period) | ASG will wait up to this number of seconds for instance to become healthy | `number` | `900` | no |
 | <a name="input_bootstrap_mode"></a> [bootstrap\_mode](#input\_bootstrap\_mode) | Set this to true if the cluster is to be bootstrapped | `bool` | `true` | no |
+| <a name="input_cloudwatch_kms_rotation_period_days"></a> [cloudwatch\_kms\_rotation\_period\_days](#input\_cloudwatch\_kms\_rotation\_period\_days) | Number of days between automatic KMS key rotations for CloudWatch logs encryption | `number` | `90` | no |
+| <a name="input_cloudwatch_log_retention_days"></a> [cloudwatch\_log\_retention\_days](#input\_cloudwatch\_log\_retention\_days) | CloudWatch log retention in days (minimum 365 days required for compliance) | `number` | `365` | no |
 | <a name="input_cluster_data_count"></a> [cluster\_data\_count](#input\_cluster\_data\_count) | Number of data nodes in the cluster | `number` | `3` | no |
 | <a name="input_cluster_master_count"></a> [cluster\_master\_count](#input\_cluster\_master\_count) | Number of master nodes in the cluster | `number` | `3` | no |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | How to name the cluster | `string` | `"elastic"` | no |
 | <a name="input_data_nodes_root_volume_size"></a> [data\_nodes\_root\_volume\_size](#input\_data\_nodes\_root\_volume\_size) | Root volume size in data EC2 instance in Gigabytes | `number` | `30` | no |
+| <a name="input_enable_cloudwatch_logging"></a> [enable\_cloudwatch\_logging](#input\_enable\_cloudwatch\_logging) | Enable CloudWatch logging for the Elasticsearch cluster | `bool` | `true` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | Name of environment. | `string` | `"development"` | no |
 | <a name="input_extra_files"></a> [extra\_files](#input\_extra\_files) | Additional files to create on an instance. | <pre>list(object({<br/>    content     = string<br/>    path        = string<br/>    permissions = string<br/>  }))</pre> | `[]` | no |
 | <a name="input_extra_instance_profile_permissions"></a> [extra\_instance\_profile\_permissions](#input\_extra\_instance\_profile\_permissions) | A JSON with a permissions policy document. The policy will be attached to the ASG instance profile. | `string` | `null` | no |
@@ -234,6 +394,10 @@ All endpoints use HTTPS with automatically provisioned SSL certificates.
 
 | Name | Description |
 |------|-------------|
+| <a name="output_cloudwatch_kms_key_arn"></a> [cloudwatch\_kms\_key\_arn](#output\_cloudwatch\_kms\_key\_arn) | ARN of the KMS key used for CloudWatch log encryption |
+| <a name="output_cloudwatch_kms_key_id"></a> [cloudwatch\_kms\_key\_id](#output\_cloudwatch\_kms\_key\_id) | ID of the KMS key used for CloudWatch log encryption |
+| <a name="output_cloudwatch_log_group_arn"></a> [cloudwatch\_log\_group\_arn](#output\_cloudwatch\_log\_group\_arn) | ARN of the CloudWatch log group for Elasticsearch logs |
+| <a name="output_cloudwatch_log_group_name"></a> [cloudwatch\_log\_group\_name](#output\_cloudwatch\_log\_group\_name) | Name of the CloudWatch log group for Elasticsearch logs |
 | <a name="output_cluster_data_load_balancer_arn"></a> [cluster\_data\_load\_balancer\_arn](#output\_cluster\_data\_load\_balancer\_arn) | ARN of the load balancer for the cluster data nodes |
 | <a name="output_cluster_data_ssl_listener_arn"></a> [cluster\_data\_ssl\_listener\_arn](#output\_cluster\_data\_ssl\_listener\_arn) | ARN of cluster data ssl listener of balancer |
 | <a name="output_cluster_data_target_group_arn"></a> [cluster\_data\_target\_group\_arn](#output\_cluster\_data\_target\_group\_arn) | ARN of the target group for the cluster data nodes |
@@ -243,6 +407,7 @@ All endpoints use HTTPS with automatically provisioned SSL certificates.
 | <a name="output_cluster_master_target_group_arn"></a> [cluster\_master\_target\_group\_arn](#output\_cluster\_master\_target\_group\_arn) | ARN of the target group for the cluster master nodes |
 | <a name="output_cluster_master_url"></a> [cluster\_master\_url](#output\_cluster\_master\_url) | HTTPS endpoint to access the cluster masters |
 | <a name="output_cluster_url"></a> [cluster\_url](#output\_cluster\_url) | HTTPS endpoint to access the cluster |
+| <a name="output_data_asg_name"></a> [data\_asg\_name](#output\_data\_asg\_name) | Name of the Auto Scaling Group for data nodes |
 | <a name="output_data_instance_role_arn"></a> [data\_instance\_role\_arn](#output\_data\_instance\_role\_arn) | Data node EC2 instance profile will have this role ARN |
 | <a name="output_elastic_password"></a> [elastic\_password](#output\_elastic\_password) | Password for Elasticsearch superuser elastic. |
 | <a name="output_elastic_secret_id"></a> [elastic\_secret\_id](#output\_elastic\_secret\_id) | AWS secret that stores password for user elastic. |
@@ -250,5 +415,7 @@ All endpoints use HTTPS with automatically provisioned SSL certificates.
 | <a name="output_idle_timeout_master"></a> [idle\_timeout\_master](#output\_idle\_timeout\_master) | The amount of time a client or target connection can be idle before the load balancer (that fronts master nodes) closes it. |
 | <a name="output_kibana_system_password"></a> [kibana\_system\_password](#output\_kibana\_system\_password) | A password of kibana\_system user |
 | <a name="output_kibana_system_secret_id"></a> [kibana\_system\_secret\_id](#output\_kibana\_system\_secret\_id) | AWS secret that stores password for user kibana\_system |
+| <a name="output_master_asg_name"></a> [master\_asg\_name](#output\_master\_asg\_name) | Name of the Auto Scaling Group for master nodes |
 | <a name="output_master_instance_role_arn"></a> [master\_instance\_role\_arn](#output\_master\_instance\_role\_arn) | Master node EC2 instance profile will have this role ARN |
 | <a name="output_snapshots_bucket"></a> [snapshots\_bucket](#output\_snapshots\_bucket) | AWS S3 Bucket where Elasticsearch snapshots will be stored. |
+<!-- END_TF_DOCS -->

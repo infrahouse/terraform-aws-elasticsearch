@@ -38,4 +38,7 @@ __pycache__
 .pytest_cache
 # Elasticsearch cluster bootstrap state file name
 .bootstrapped
-.claude
+
+# Claude Code local settings
+.claude/*.local.json
+.claude/reviews/
