@@ -109,3 +109,13 @@ output "data_instance_role_arn" {
   description = "Data node EC2 instance profile will have this role ARN"
   value       = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${local.data_profile_name}"
 }
+
+output "master_asg_name" {
+  description = "Name of the Auto Scaling Group for master nodes"
+  value       = module.elastic_cluster.asg_name
+}
+
+output "data_asg_name" {
+  description = "Name of the Auto Scaling Group for data nodes"
+  value       = var.bootstrap_mode ? null : module.elastic_cluster_data[0].asg_name
+}

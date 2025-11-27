@@ -27,26 +27,26 @@ module "elastic_master_userdata" {
 
   custom_facts = merge(
     {
-      "elasticsearch" : {
-        "bootstrap_cluster" : var.bootstrap_mode
-        "cluster_name" : var.cluster_name
-        "elastic_secret" : module.elastic-password.secret_id
-        "kibana_system_secret" : module.kibana_system-password.secret_id
-        "snapshots_bucket" : aws_s3_bucket.snapshots-bucket.bucket
-        "ca_key_secret" : module.ca_key_secret.secret_id
-        "ca_cert_secret" : module.ca_cert_secret.secret_id
-      }
+      "elasticsearch" : merge(
+        {
+          "bootstrap_cluster" : var.bootstrap_mode
+          "cluster_name" : var.cluster_name
+          "elastic_secret" : module.elastic-password.secret_id
+          "kibana_system_secret" : module.kibana_system-password.secret_id
+          "snapshots_bucket" : aws_s3_bucket.snapshots-bucket.bucket
+          "ca_key_secret" : module.ca_key_secret.secret_id
+          "ca_cert_secret" : module.ca_cert_secret.secret_id
+        },
+        var.enable_cloudwatch_logging ? {
+          "cloudwatch_log_group" : local.log_group_name
+        } : {}
+      )
       "letsencrypt" : {
         "domain" : data.aws_route53_zone.cluster.name
         "email" : "hostmaster@${data.aws_route53_zone.cluster.name}"
         "production" : true
       }
     },
-    var.enable_cloudwatch_logging ? {
-      "cloudwatch" : {
-        "log_group" : local.log_group_name
-      }
-    } : {},
     var.smtp_credentials_secret != null ? {
       postfix : {
         smtp_credentials : var.smtp_credentials_secret
@@ -78,26 +78,26 @@ module "elastic_data_userdata" {
 
   custom_facts = merge(
     {
-      "elasticsearch" : {
-        "bootstrap_cluster" : false
-        "cluster_name" : var.cluster_name
-        "elastic_secret" : module.elastic-password.secret_id
-        "kibana_system_secret" : module.kibana_system-password.secret_id
-        "snapshots_bucket" : aws_s3_bucket.snapshots-bucket.bucket
-        "ca_key_secret" : module.ca_key_secret.secret_id
-        "ca_cert_secret" : module.ca_cert_secret.secret_id
-      }
+      "elasticsearch" : merge(
+        {
+          "bootstrap_cluster" : false
+          "cluster_name" : var.cluster_name
+          "elastic_secret" : module.elastic-password.secret_id
+          "kibana_system_secret" : module.kibana_system-password.secret_id
+          "snapshots_bucket" : aws_s3_bucket.snapshots-bucket.bucket
+          "ca_key_secret" : module.ca_key_secret.secret_id
+          "ca_cert_secret" : module.ca_cert_secret.secret_id
+        },
+        var.enable_cloudwatch_logging ? {
+          "cloudwatch_log_group" : local.log_group_name
+        } : {}
+      )
       "letsencrypt" : {
         "domain" : data.aws_route53_zone.cluster.name
         "email" : "hostmaster@${data.aws_route53_zone.cluster.name}"
         "production" : true
       }
     },
-    var.enable_cloudwatch_logging ? {
-      "cloudwatch" : {
-        "log_group" : local.log_group_name
-      }
-    } : {},
     var.smtp_credentials_secret != null ? {
       postfix : {
         smtp_credentials : var.smtp_credentials_secret
