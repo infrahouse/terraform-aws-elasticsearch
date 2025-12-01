@@ -4,7 +4,7 @@ resource "random_password" "elastic" {
 
 module "elastic-password" {
   source  = "registry.infrahouse.com/infrahouse/secret/aws"
-  version = "1.1.0"
+  version = "1.1.1"
 
   environment        = var.environment
   secret_description = "Password for user elastic in cluster ${var.cluster_name}"
@@ -29,7 +29,7 @@ resource "random_password" "kibana_system" {
 
 module "kibana_system-password" {
   source  = "registry.infrahouse.com/infrahouse/secret/aws"
-  version = "1.1.0"
+  version = "1.1.1"
   # insert the 2 required variables here
   environment        = var.environment
   secret_description = "Password for user kibana_system in cluster ${var.cluster_name}"
