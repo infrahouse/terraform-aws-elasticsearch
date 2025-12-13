@@ -23,6 +23,8 @@ install-hooks:  ## Install repo hooks
 	@test -d .git/hooks || (echo "Looks like you are not in a Git repo" ; exit 1)
 	@test -L .git/hooks/pre-commit || ln -fs ../../hooks/pre-commit .git/hooks/pre-commit
 	@chmod +x .git/hooks/pre-commit
+	@test -L .git/hooks/commit-msg || ln -fs ../../hooks/commit-msg .git/hooks/commit-msg
+	@chmod +x .git/hooks/commit-msg
 
 .PHONY: lint
 lint:  ## Run code style checks
