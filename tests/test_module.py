@@ -17,6 +17,68 @@ from tests.conftest import (
 )
 
 
+def collect_instance_logs(asg_name, aws_region, test_role_arn):
+    """
+    Collect diagnostic logs from all instances in an ASG for troubleshooting.
+
+    Collects:
+    - cloud-init logs
+    - system logs (syslog/messages)
+    - Elasticsearch logs
+
+    :param asg_name: Name of the Auto Scaling Group
+    :param aws_region: AWS region
+    :param test_role_arn: IAM role ARN for AWS access
+    """
+    LOG.info(f"\n{'='*80}")
+    LOG.info(f"Collecting logs from ASG: {asg_name}")
+    LOG.info(f"{'='*80}\n")
+
+    try:
+        asg = ASG(asg_name, region=aws_region, role_arn=test_role_arn)
+
+        # Log files to collect (in order of importance)
+        log_files = [
+            # cloud-init logs (most important for provisioning failures)
+            "/var/log/cloud-init-output.log",
+            "/var/log/cloud-init.log",
+            # System logs
+            "/var/log/syslog",  # Ubuntu/Debian
+            "/var/log/messages",  # RHEL/Amazon Linux (may not exist on Ubuntu)
+            # Elasticsearch logs (if they exist)
+            "/var/log/elasticsearch/elasticsearch.log",
+            "/var/log/elasticsearch/main-cluster.log",  # cluster-specific log
+        ]
+
+        for instance in asg.instances:
+            LOG.info(f"\n{'-'*80}")
+            LOG.info(f"Instance ID: {instance.instance_id}")
+            LOG.info(f"State: {instance.state}")
+            LOG.info(f"{'-'*80}\n")
+
+            for log_file in log_files:
+                LOG.info(f"\n### {log_file} (last 500 lines) ###\n")
+                try:
+                    # Use tail to get last 500 lines, cat if file is small
+                    result = instance.execute_command(
+                        f"tail -500 {log_file} 2>/dev/null || echo 'File not found or empty: {log_file}'"
+                    )
+                    if result and "File not found" not in result:
+                        LOG.info(result)
+                    else:
+                        LOG.info(f"  (file not found or empty)")
+                except Exception as e:
+                    LOG.warning(f"  Failed to read {log_file}: {e}")
+
+            LOG.info(f"\n{'-'*80}\n")
+
+    except Exception as e:
+        LOG.error(f"Failed to collect logs from ASG {asg_name}: {e}")
+        import traceback
+
+        LOG.error(traceback.format_exc())
+
+
 @pytest.mark.parametrize(
     "aws_provider_version", ["~> 5.11", "~> 6.0"], ids=["aws-5", "aws-6"]
 )
@@ -33,7 +95,6 @@ def test_module(
 
     subnet_public_ids = service_network["subnet_public_ids"]["value"]
     subnet_private_ids = service_network["subnet_private_ids"]["value"]
-    internet_gateway_id = service_network["internet_gateway_id"]["value"]
 
     # Bootstrap ES cluster
     terraform_module_dir = osp.join(TERRAFORM_ROOT_DIR, "test_module")
@@ -81,9 +142,8 @@ def test_module(
                     elastic_zone_id = "{subzone_id}"
                     bootstrap_mode  = {str(bootstrap_mode).lower()}
 
-                    lb_subnet_ids       = {json.dumps(subnet_public_ids)}
-                    backend_subnet_ids  = {json.dumps(subnet_private_ids)}
-                    internet_gateway_id = "{internet_gateway_id}"
+                    lb_subnet_ids      = {json.dumps(subnet_public_ids)}
+                    backend_subnet_ids = {json.dumps(subnet_private_ids)}
                     """
                 )
             )
@@ -113,8 +173,24 @@ def test_module(
             autoscaling_client = boto3_session.client(
                 "autoscaling", region_name=aws_region
             )
-            wait_for_instance_refresh(master_asg_name, autoscaling_client)
-            wait_for_instance_refresh(data_asg_name, autoscaling_client)
+
+            # Wait for master nodes instance refresh, collect logs on failure
+            try:
+                wait_for_instance_refresh(master_asg_name, autoscaling_client)
+            except Exception as e:
+                LOG.error(f"Master ASG instance refresh failed: {e}")
+                LOG.info("Collecting diagnostic logs from master instances...")
+                collect_instance_logs(master_asg_name, aws_region, test_role_arn)
+                raise
+
+            # Wait for data nodes instance refresh, collect logs on failure
+            try:
+                wait_for_instance_refresh(data_asg_name, autoscaling_client)
+            except Exception as e:
+                LOG.error(f"Data ASG instance refresh failed: {e}")
+                LOG.info("Collecting diagnostic logs from data instances...")
+                collect_instance_logs(data_asg_name, aws_region, test_role_arn)
+                raise
 
             # Test CloudWatch logging functionality
             _test_cloudwatch_logging(
