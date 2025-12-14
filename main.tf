@@ -109,7 +109,7 @@ module "elastic_data_userdata" {
 
 module "elastic_cluster" {
   source  = "registry.infrahouse.com/infrahouse/website-pod/aws"
-  version = "5.10.0"
+  version = "5.13.0"
   providers = {
     aws     = aws
     aws.dns = aws.dns
@@ -121,7 +121,7 @@ module "elastic_cluster" {
   subnets                                       = var.subnet_ids
   backend_subnets                               = var.subnet_ids
   zone_id                                       = var.zone_id
-  internet_gateway_id                           = var.internet_gateway_id
+  internet_gateway_id                           = data.aws_internet_gateway.selected.id
   key_pair_name                                 = var.key_pair_name
   ssh_cidr_block                                = var.ssh_cidr_block
   dns_a_records                                 = [var.cluster_name, "${var.cluster_name}-master"]
@@ -156,6 +156,17 @@ module "elastic_cluster" {
   root_volume_size     = var.master_nodes_root_volume_size
   asg_min_elb_capacity = 1
   instance_role_name   = local.master_profile_name
+
+  # Alert Configuration (new in v4.0.0)
+  alarm_emails                         = var.alarm_emails
+  alarm_topic_arns                     = var.alarm_topic_arns
+  alarm_unhealthy_host_threshold       = var.alarm_unhealthy_host_threshold
+  alarm_target_response_time_threshold = var.alarm_target_response_time_threshold
+  alarm_success_rate_threshold         = var.alarm_success_rate_threshold
+  alarm_success_rate_period            = var.alarm_success_rate_period
+  alarm_cpu_utilization_threshold      = var.alarm_cpu_utilization_threshold
+  alarm_evaluation_periods             = var.alarm_evaluation_periods
+
   tags = {
     Name : "${var.cluster_name} master node"
     cluster : var.cluster_name
@@ -173,7 +184,7 @@ module "elastic_cluster_data" {
   # Deploy only if not in the bootstrap mode
   count   = var.bootstrap_mode ? 0 : 1
   source  = "registry.infrahouse.com/infrahouse/website-pod/aws"
-  version = "5.10.0"
+  version = "5.13.0"
   providers = {
     aws     = aws
     aws.dns = aws.dns
@@ -185,7 +196,7 @@ module "elastic_cluster_data" {
   subnets                                       = var.subnet_ids
   backend_subnets                               = var.subnet_ids
   zone_id                                       = var.zone_id
-  internet_gateway_id                           = var.internet_gateway_id
+  internet_gateway_id                           = data.aws_internet_gateway.selected.id
   key_pair_name                                 = var.key_pair_name
   ssh_cidr_block                                = var.ssh_cidr_block
   dns_a_records                                 = ["${var.cluster_name}-data"]
@@ -220,6 +231,17 @@ module "elastic_cluster_data" {
   root_volume_size     = var.data_nodes_root_volume_size
   asg_min_elb_capacity = 1
   instance_role_name   = local.data_profile_name
+
+  # Alert Configuration (new in v4.0.0)
+  alarm_emails                         = var.alarm_emails
+  alarm_topic_arns                     = var.alarm_topic_arns
+  alarm_unhealthy_host_threshold       = var.alarm_unhealthy_host_threshold
+  alarm_target_response_time_threshold = var.alarm_target_response_time_threshold
+  alarm_success_rate_threshold         = var.alarm_success_rate_threshold
+  alarm_success_rate_period            = var.alarm_success_rate_period
+  alarm_cpu_utilization_threshold      = var.alarm_cpu_utilization_threshold
+  alarm_evaluation_periods             = var.alarm_evaluation_periods
+
   tags = {
     Name : "${var.cluster_name} data node"
     cluster : var.cluster_name

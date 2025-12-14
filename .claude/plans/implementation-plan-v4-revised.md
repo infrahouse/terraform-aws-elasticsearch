@@ -12,24 +12,24 @@
 ### Phase 1: Code Changes ✅
 
 #### Module Updates
-- [ ] Update `main.tf`: website-pod to 5.12.1 (lines 112, 176)
-- [ ] Update `dns.tf`: update-dns to 1.2.0 (lines 2, 11)
-- [ ] Update `secrets.tf`: secret to 1.1.1 (lines 7, 32)
-- [ ] Keep `tls.tf` as is (already uses ~> 1.0)
+- [x] Update `main.tf`: website-pod to 5.13.0 (lines 112, 187) - fixes SNS topic naming conflict
+- [x] Update `dns.tf`: update-dns to 1.2.0 (lines 2, 11)
+- [x] Update `secrets.tf`: secret to 1.1.1 (lines 7, 32)
+- [x] Keep `tls.tf` as is (already uses ~> 1.0)
 
 #### Variable Additions
-- [ ] Add all alarm variables to `variables.tf` after line 225
-- [ ] Add validations to existing variables (cluster counts, CIDR blocks, cluster name)
-- [ ] Add type declarations to puppet variables
+- [x] Add all alarm variables to `variables.tf` after line 225
+- [x] Add validations to existing variables (cluster counts, CIDR blocks, cluster name)
+- [x] Add type declarations to puppet variables
 
 #### Module Parameters
-- [ ] Add alarm parameters to `module.elastic_cluster` in `main.tf`
-- [ ] Add alarm parameters to `module.elastic_cluster_data` in `main.tf`
-- [ ] Add alarm parameters to both DNS modules in `dns.tf`
+- [x] Add alarm parameters to `module.elastic_cluster` in `main.tf`
+- [x] Add alarm parameters to `module.elastic_cluster_data` in `main.tf`
+- [x] Add alarm parameters to both DNS modules in `dns.tf`
 
 #### Outputs
-- [ ] Add alarm SNS topic ARN outputs
-- [ ] Add additional outputs (backend_security_group_id, vpc_id, etc.)
+- [x] Add alarm SNS topic ARN outputs
+- [x] Add additional outputs (backend_security_group_id, vpc_id, etc.)
 
 #### Bug Fixes
 - [ ] Fix timeout units bug in `main.tf` line 216 (s → m)
@@ -39,8 +39,8 @@
 - [ ] DO NOT fix security group Names (would cause recreation)
 
 #### Test Updates
-- [ ] Update test module with alarm_emails
-- [ ] Change monitoring_cidr_block to VPC CIDR
+- [x] Update test module with alarm_emails
+- [x] Change monitoring_cidr_block to VPC CIDR
 
 ### Phase 2: Testing 🧪
 

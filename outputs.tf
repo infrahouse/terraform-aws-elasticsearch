@@ -119,3 +119,40 @@ output "data_asg_name" {
   description = "Name of the Auto Scaling Group for data nodes"
   value       = var.bootstrap_mode ? null : module.elastic_cluster_data[0].asg_name
 }
+
+# Alert Outputs (new in v4.0.0)
+output "alarm_sns_topic_arn" {
+  description = "ARN of the SNS topic used for alarm notifications (from master nodes ALB)"
+  value       = module.elastic_cluster.alarm_sns_topic_arn
+}
+
+output "alarm_sns_topic_arn_data" {
+  description = "ARN of the SNS topic used for alarm notifications (from data nodes ALB)"
+  value       = var.bootstrap_mode ? null : module.elastic_cluster_data[0].alarm_sns_topic_arn
+}
+
+output "dns_lambda_sns_topic_arn" {
+  description = "ARN of the SNS topic for DNS Lambda monitoring"
+  value       = module.update-dns.sns_topic_arn
+}
+
+output "dns_lambda_sns_topic_arn_data" {
+  description = "ARN of the SNS topic for DNS Lambda monitoring (data nodes)"
+  value       = module.update-dns-data.sns_topic_arn
+}
+
+# Additional useful outputs (new in v4.0.0)
+output "backend_security_group_id" {
+  description = "ID of the security group used for Elasticsearch transport protocol"
+  value       = aws_security_group.backend_extra.id
+}
+
+output "vpc_id" {
+  description = "VPC ID where the Elasticsearch cluster is deployed"
+  value       = data.aws_subnet.selected.vpc_id
+}
+
+output "cloudwatch_kms_key_alias" {
+  description = "Alias of the KMS key used for CloudWatch log encryption"
+  value       = var.enable_cloudwatch_logging ? aws_kms_alias.cloudwatch_logs[0].name : null
+}
