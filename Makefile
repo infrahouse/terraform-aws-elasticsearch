@@ -162,9 +162,9 @@ define do_release
 			echo "Updating CHANGELOG.md with git-cliff..."; \
 			git cliff --unreleased --tag $$NEW_VERSION --prepend CHANGELOG.md; \
 			git add CHANGELOG.md; \
-			git commit -m "Update CHANGELOG for $$NEW_VERSION"; \
+			git commit -m "chore: Update CHANGELOG for $$NEW_VERSION"; \
 			echo "Bumping version with bumpversion..."; \
-			bumpversion --new-version $$NEW_VERSION patch; \
+			bumpversion --new-version $$NEW_VERSION --message "chore: bump version to {new_version}" patch; \
 			echo ""; \
 			echo "✓ Released version $$NEW_VERSION"; \
 			echo ""; \
