@@ -26,18 +26,38 @@ variable "cluster_name" {
   description = "How to name the cluster"
   type        = string
   default     = "elastic"
+
+  validation {
+    condition     = length(var.cluster_name) >= 1 && length(var.cluster_name) <= 32
+    error_message = "cluster_name must be between 1 and 32 characters for ALB name_prefix compatibility."
+  }
 }
 
 variable "cluster_master_count" {
-  description = "Number of master nodes in the cluster"
+  description = "Number of master nodes in the cluster (must be odd for quorum)"
   type        = number
   default     = 3
+
+  validation {
+    condition     = var.cluster_master_count % 2 == 1
+    error_message = "cluster_master_count must be an odd number for Elasticsearch quorum (e.g., 1, 3, 5, 7)."
+  }
+
+  validation {
+    condition     = var.cluster_master_count >= 1
+    error_message = "cluster_master_count must be at least 1."
+  }
 }
 
 variable "cluster_data_count" {
   description = "Number of data nodes in the cluster"
   type        = number
   default     = 3
+
+  validation {
+    condition     = var.cluster_data_count >= 1
+    error_message = "cluster_data_count must be at least 1."
+  }
 }
 
 variable "environment" {
@@ -102,11 +122,6 @@ variable "instance_type_data" {
   default     = null
 }
 
-variable "internet_gateway_id" { # tflint-ignore: terraform_unused_declarations
-  description = "Not used, but AWS Internet Gateway must be present. Ensure by passing its id."
-  type        = string
-}
-
 variable "key_pair_name" {
   description = "SSH keypair name to be deployed in EC2 instances"
   type        = string
@@ -140,6 +155,7 @@ variable "puppet_environmentpath" {
 
 variable "puppet_hiera_config_path" {
   description = "Path to hiera configuration file."
+  type        = string
   default     = "{root_directory}/environments/{environment}/hiera.yaml"
 }
 
@@ -151,6 +167,7 @@ variable "puppet_manifest" {
 
 variable "puppet_module_path" {
   description = "Path to common puppet modules."
+  type        = string
   default     = "{root_directory}/environments/{environment}/modules:{root_directory}/modules"
 }
 
@@ -200,6 +217,14 @@ variable "monitoring_cidr_block" {
   description = "CIDR range that is allowed to monitor elastic instances."
   type        = string
   default     = null
+
+  validation {
+    condition = (
+      var.monitoring_cidr_block == null ||
+      !can(regex("^0\\.0\\.0\\.0/0$", var.monitoring_cidr_block))
+    )
+    error_message = "Monitoring CIDR block should not be 0.0.0.0/0. Specify a restricted CIDR range for security."
+  }
 }
 
 variable "subnet_ids" {
@@ -227,6 +252,81 @@ variable "extra_instance_profile_permissions" {
   description = "A JSON with a permissions policy document. The policy will be attached to the ASG instance profile."
   type        = string
   default     = null
+}
+
+variable "alarm_emails" {
+  description = <<-EOT
+    List of email addresses to receive CloudWatch alarm notifications for Elasticsearch cluster monitoring.
+    Covers ALB health, Lambda function errors, and infrastructure issues.
+
+    IMPORTANT: After deployment, AWS SNS will send confirmation emails to each address.
+    You MUST click the confirmation link in each email to activate notifications.
+
+    At least one email address is required for all environments (dev needs monitoring too!).
+  EOT
+  type        = list(string)
+  default     = []
+
+  validation {
+    condition     = length(var.alarm_emails) > 0
+    error_message = "At least one alarm email address is required. Development environments need monitoring too!"
+  }
+}
+
+variable "alarm_topic_arns" {
+  description = <<-EOT
+    List of existing SNS topic ARNs to receive CloudWatch alarm notifications.
+    Use this for advanced integrations with PagerDuty, Slack, OpsGenie, etc.
+    These topics receive notifications alongside alarm_emails.
+  EOT
+  type        = list(string)
+  default     = []
+}
+
+variable "alarm_unhealthy_host_threshold" {
+  description = "Number of unhealthy hosts before triggering alarm. Set to 0 for immediate alerting, 1 to alert when 2+ hosts are unhealthy."
+  type        = number
+  default     = 1
+}
+
+variable "alarm_target_response_time_threshold" {
+  description = "Target response time threshold in seconds. Defaults to 80% of idle_timeout if not specified."
+  type        = number
+  default     = null
+}
+
+variable "alarm_success_rate_threshold" {
+  description = "Minimum success rate percentage (non-5xx responses). Defaults to 99.0%."
+  type        = number
+  default     = 99.0
+}
+
+variable "alarm_cpu_utilization_threshold" {
+  description = "CPU utilization percentage threshold for alarms. Defaults to autoscaling target + 30%."
+  type        = number
+  default     = null
+}
+
+variable "alarm_evaluation_periods" {
+  description = "Number of consecutive periods exceeding threshold before triggering alarm."
+  type        = number
+  default     = 2
+
+  validation {
+    condition     = var.alarm_evaluation_periods >= 1
+    error_message = "Alarm evaluation periods must be at least 1."
+  }
+}
+
+variable "alarm_success_rate_period" {
+  description = "Time window in seconds for success rate calculation. Must be 60, 300, 900, or 3600."
+  type        = number
+  default     = 300
+
+  validation {
+    condition     = contains([60, 300, 900, 3600], var.alarm_success_rate_period)
+    error_message = "Success rate period must be 60, 300, 900, or 3600 seconds."
+  }
 }
 
 variable "enable_cloudwatch_logging" {

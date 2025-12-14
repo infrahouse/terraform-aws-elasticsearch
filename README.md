@@ -287,10 +287,10 @@ Example alarm configuration is not included but can be added using the `cloudwat
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.11, < 7.0 |
-| <a name="provider_aws.dns"></a> [aws.dns](#provider\_aws.dns) | >= 5.11, < 7.0 |
-| <a name="provider_random"></a> [random](#provider\_random) | ~> 3.6 |
-| <a name="provider_tls"></a> [tls](#provider\_tls) | ~> 4.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 6.26.0 |
+| <a name="provider_aws.dns"></a> [aws.dns](#provider\_aws.dns) | 6.26.0 |
+| <a name="provider_random"></a> [random](#provider\_random) | 3.7.2 |
+| <a name="provider_tls"></a> [tls](#provider\_tls) | 4.1.0 |
 
 ## Modules
 
@@ -298,14 +298,14 @@ Example alarm configuration is not included but can be added using the `cloudwat
 |------|--------|---------|
 | <a name="module_ca_cert_secret"></a> [ca\_cert\_secret](#module\_ca\_cert\_secret) | registry.infrahouse.com/infrahouse/secret/aws | ~> 1.0 |
 | <a name="module_ca_key_secret"></a> [ca\_key\_secret](#module\_ca\_key\_secret) | registry.infrahouse.com/infrahouse/secret/aws | ~> 1.0 |
-| <a name="module_elastic-password"></a> [elastic-password](#module\_elastic-password) | registry.infrahouse.com/infrahouse/secret/aws | 1.1.0 |
-| <a name="module_elastic_cluster"></a> [elastic\_cluster](#module\_elastic\_cluster) | registry.infrahouse.com/infrahouse/website-pod/aws | 5.10.0 |
-| <a name="module_elastic_cluster_data"></a> [elastic\_cluster\_data](#module\_elastic\_cluster\_data) | registry.infrahouse.com/infrahouse/website-pod/aws | 5.10.0 |
+| <a name="module_elastic-password"></a> [elastic-password](#module\_elastic-password) | registry.infrahouse.com/infrahouse/secret/aws | 1.1.1 |
+| <a name="module_elastic_cluster"></a> [elastic\_cluster](#module\_elastic\_cluster) | registry.infrahouse.com/infrahouse/website-pod/aws | 5.13.0 |
+| <a name="module_elastic_cluster_data"></a> [elastic\_cluster\_data](#module\_elastic\_cluster\_data) | registry.infrahouse.com/infrahouse/website-pod/aws | 5.13.0 |
 | <a name="module_elastic_data_userdata"></a> [elastic\_data\_userdata](#module\_elastic\_data\_userdata) | registry.infrahouse.com/infrahouse/cloud-init/aws | 2.2.2 |
 | <a name="module_elastic_master_userdata"></a> [elastic\_master\_userdata](#module\_elastic\_master\_userdata) | registry.infrahouse.com/infrahouse/cloud-init/aws | 2.2.2 |
-| <a name="module_kibana_system-password"></a> [kibana\_system-password](#module\_kibana\_system-password) | registry.infrahouse.com/infrahouse/secret/aws | 1.1.0 |
-| <a name="module_update-dns"></a> [update-dns](#module\_update-dns) | registry.infrahouse.com/infrahouse/update-dns/aws | 0.11.1 |
-| <a name="module_update-dns-data"></a> [update-dns-data](#module\_update-dns-data) | registry.infrahouse.com/infrahouse/update-dns/aws | 0.11.1 |
+| <a name="module_kibana_system-password"></a> [kibana\_system-password](#module\_kibana\_system-password) | registry.infrahouse.com/infrahouse/secret/aws | 1.1.1 |
+| <a name="module_update-dns"></a> [update-dns](#module\_update-dns) | registry.infrahouse.com/infrahouse/update-dns/aws | 1.2.0 |
+| <a name="module_update-dns-data"></a> [update-dns-data](#module\_update-dns-data) | registry.infrahouse.com/infrahouse/update-dns/aws | 1.2.0 |
 
 ## Resources
 
@@ -341,14 +341,24 @@ Example alarm configuration is not included but can be added using the `cloudwat
 | [aws_iam_policy_document.cloudwatch_logs_permissions](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.elastic_permissions](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_role.caller_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_role) | data source |
+| [aws_internet_gateway.selected](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/internet_gateway) | data source |
 | [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
 | [aws_route53_zone.cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/route53_zone) | data source |
 | [aws_subnet.selected](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet) | data source |
+| [aws_vpc.selected](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/vpc) | data source |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_alarm_cpu_utilization_threshold"></a> [alarm\_cpu\_utilization\_threshold](#input\_alarm\_cpu\_utilization\_threshold) | CPU utilization percentage threshold for alarms. Defaults to autoscaling target + 30%. | `number` | `null` | no |
+| <a name="input_alarm_emails"></a> [alarm\_emails](#input\_alarm\_emails) | List of email addresses to receive CloudWatch alarm notifications for Elasticsearch cluster monitoring.<br/>Covers ALB health, Lambda function errors, and infrastructure issues.<br/><br/>IMPORTANT: After deployment, AWS SNS will send confirmation emails to each address.<br/>You MUST click the confirmation link in each email to activate notifications.<br/><br/>At least one email address is required for all environments (dev needs monitoring too!). | `list(string)` | `[]` | no |
+| <a name="input_alarm_evaluation_periods"></a> [alarm\_evaluation\_periods](#input\_alarm\_evaluation\_periods) | Number of consecutive periods exceeding threshold before triggering alarm. | `number` | `2` | no |
+| <a name="input_alarm_success_rate_period"></a> [alarm\_success\_rate\_period](#input\_alarm\_success\_rate\_period) | Time window in seconds for success rate calculation. Must be 60, 300, 900, or 3600. | `number` | `300` | no |
+| <a name="input_alarm_success_rate_threshold"></a> [alarm\_success\_rate\_threshold](#input\_alarm\_success\_rate\_threshold) | Minimum success rate percentage (non-5xx responses). Defaults to 99.0%. | `number` | `99` | no |
+| <a name="input_alarm_target_response_time_threshold"></a> [alarm\_target\_response\_time\_threshold](#input\_alarm\_target\_response\_time\_threshold) | Target response time threshold in seconds. Defaults to 80% of idle\_timeout if not specified. | `number` | `null` | no |
+| <a name="input_alarm_topic_arns"></a> [alarm\_topic\_arns](#input\_alarm\_topic\_arns) | List of existing SNS topic ARNs to receive CloudWatch alarm notifications.<br/>Use this for advanced integrations with PagerDuty, Slack, OpsGenie, etc.<br/>These topics receive notifications alongside alarm\_emails. | `list(string)` | `[]` | no |
+| <a name="input_alarm_unhealthy_host_threshold"></a> [alarm\_unhealthy\_host\_threshold](#input\_alarm\_unhealthy\_host\_threshold) | Number of unhealthy hosts before triggering alarm. Set to 0 for immediate alerting, 1 to alert when 2+ hosts are unhealthy. | `number` | `1` | no |
 | <a name="input_asg_ami"></a> [asg\_ami](#input\_asg\_ami) | Image for EC2 instances | `string` | `null` | no |
 | <a name="input_asg_create_initial_lifecycle_hook"></a> [asg\_create\_initial\_lifecycle\_hook](#input\_asg\_create\_initial\_lifecycle\_hook) | Used for migration from version 1.* | `bool` | `true` | no |
 | <a name="input_asg_health_check_grace_period"></a> [asg\_health\_check\_grace\_period](#input\_asg\_health\_check\_grace\_period) | ASG will wait up to this number of seconds for instance to become healthy | `number` | `900` | no |
@@ -356,7 +366,7 @@ Example alarm configuration is not included but can be added using the `cloudwat
 | <a name="input_cloudwatch_kms_rotation_period_days"></a> [cloudwatch\_kms\_rotation\_period\_days](#input\_cloudwatch\_kms\_rotation\_period\_days) | Number of days between automatic KMS key rotations for CloudWatch logs encryption | `number` | `90` | no |
 | <a name="input_cloudwatch_log_retention_days"></a> [cloudwatch\_log\_retention\_days](#input\_cloudwatch\_log\_retention\_days) | CloudWatch log retention in days (minimum 365 days required for compliance) | `number` | `365` | no |
 | <a name="input_cluster_data_count"></a> [cluster\_data\_count](#input\_cluster\_data\_count) | Number of data nodes in the cluster | `number` | `3` | no |
-| <a name="input_cluster_master_count"></a> [cluster\_master\_count](#input\_cluster\_master\_count) | Number of master nodes in the cluster | `number` | `3` | no |
+| <a name="input_cluster_master_count"></a> [cluster\_master\_count](#input\_cluster\_master\_count) | Number of master nodes in the cluster (must be odd for quorum) | `number` | `3` | no |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | How to name the cluster | `string` | `"elastic"` | no |
 | <a name="input_data_nodes_root_volume_size"></a> [data\_nodes\_root\_volume\_size](#input\_data\_nodes\_root\_volume\_size) | Root volume size in data EC2 instance in Gigabytes | `number` | `30` | no |
 | <a name="input_enable_cloudwatch_logging"></a> [enable\_cloudwatch\_logging](#input\_enable\_cloudwatch\_logging) | Enable CloudWatch logging for the Elasticsearch cluster | `bool` | `true` | no |
@@ -369,7 +379,6 @@ Example alarm configuration is not included but can be added using the `cloudwat
 | <a name="input_instance_type"></a> [instance\_type](#input\_instance\_type) | Instance type to run the elasticsearch node | `string` | `"t3.medium"` | no |
 | <a name="input_instance_type_data"></a> [instance\_type\_data](#input\_instance\_type\_data) | Instance type to run the elasticsearch data node. If null, use var.instance\_type. | `string` | `null` | no |
 | <a name="input_instance_type_master"></a> [instance\_type\_master](#input\_instance\_type\_master) | Instance type to run the elasticsearch master node. If null, use var.instance\_type. | `string` | `null` | no |
-| <a name="input_internet_gateway_id"></a> [internet\_gateway\_id](#input\_internet\_gateway\_id) | Not used, but AWS Internet Gateway must be present. Ensure by passing its id. | `string` | n/a | yes |
 | <a name="input_key_pair_name"></a> [key\_pair\_name](#input\_key\_pair\_name) | SSH keypair name to be deployed in EC2 instances | `string` | n/a | yes |
 | <a name="input_master_nodes_root_volume_size"></a> [master\_nodes\_root\_volume\_size](#input\_master\_nodes\_root\_volume\_size) | Root volume size in master EC2 instance in Gigabytes | `number` | `null` | no |
 | <a name="input_max_instance_lifetime_days"></a> [max\_instance\_lifetime\_days](#input\_max\_instance\_lifetime\_days) | The maximum amount of time, in \_days\_, that an instance can be in service, values must be either equal to 0 or between 7 and 365 days. | `number` | `0` | no |
@@ -394,6 +403,10 @@ Example alarm configuration is not included but can be added using the `cloudwat
 
 | Name | Description |
 |------|-------------|
+| <a name="output_alarm_sns_topic_arn"></a> [alarm\_sns\_topic\_arn](#output\_alarm\_sns\_topic\_arn) | ARN of the SNS topic used for alarm notifications (from master nodes ALB) |
+| <a name="output_alarm_sns_topic_arn_data"></a> [alarm\_sns\_topic\_arn\_data](#output\_alarm\_sns\_topic\_arn\_data) | ARN of the SNS topic used for alarm notifications (from data nodes ALB) |
+| <a name="output_backend_security_group_id"></a> [backend\_security\_group\_id](#output\_backend\_security\_group\_id) | ID of the security group used for Elasticsearch transport protocol |
+| <a name="output_cloudwatch_kms_key_alias"></a> [cloudwatch\_kms\_key\_alias](#output\_cloudwatch\_kms\_key\_alias) | Alias of the KMS key used for CloudWatch log encryption |
 | <a name="output_cloudwatch_kms_key_arn"></a> [cloudwatch\_kms\_key\_arn](#output\_cloudwatch\_kms\_key\_arn) | ARN of the KMS key used for CloudWatch log encryption |
 | <a name="output_cloudwatch_kms_key_id"></a> [cloudwatch\_kms\_key\_id](#output\_cloudwatch\_kms\_key\_id) | ID of the KMS key used for CloudWatch log encryption |
 | <a name="output_cloudwatch_log_group_arn"></a> [cloudwatch\_log\_group\_arn](#output\_cloudwatch\_log\_group\_arn) | ARN of the CloudWatch log group for Elasticsearch logs |
@@ -409,6 +422,8 @@ Example alarm configuration is not included but can be added using the `cloudwat
 | <a name="output_cluster_url"></a> [cluster\_url](#output\_cluster\_url) | HTTPS endpoint to access the cluster |
 | <a name="output_data_asg_name"></a> [data\_asg\_name](#output\_data\_asg\_name) | Name of the Auto Scaling Group for data nodes |
 | <a name="output_data_instance_role_arn"></a> [data\_instance\_role\_arn](#output\_data\_instance\_role\_arn) | Data node EC2 instance profile will have this role ARN |
+| <a name="output_dns_lambda_sns_topic_arn"></a> [dns\_lambda\_sns\_topic\_arn](#output\_dns\_lambda\_sns\_topic\_arn) | ARN of the SNS topic for DNS Lambda monitoring |
+| <a name="output_dns_lambda_sns_topic_arn_data"></a> [dns\_lambda\_sns\_topic\_arn\_data](#output\_dns\_lambda\_sns\_topic\_arn\_data) | ARN of the SNS topic for DNS Lambda monitoring (data nodes) |
 | <a name="output_elastic_password"></a> [elastic\_password](#output\_elastic\_password) | Password for Elasticsearch superuser elastic. |
 | <a name="output_elastic_secret_id"></a> [elastic\_secret\_id](#output\_elastic\_secret\_id) | AWS secret that stores password for user elastic. |
 | <a name="output_idle_timeout_data"></a> [idle\_timeout\_data](#output\_idle\_timeout\_data) | The amount of time a client or target connection can be idle before the load balancer (that fronts data nodes) closes it. |
@@ -418,4 +433,5 @@ Example alarm configuration is not included but can be added using the `cloudwat
 | <a name="output_master_asg_name"></a> [master\_asg\_name](#output\_master\_asg\_name) | Name of the Auto Scaling Group for master nodes |
 | <a name="output_master_instance_role_arn"></a> [master\_instance\_role\_arn](#output\_master\_instance\_role\_arn) | Master node EC2 instance profile will have this role ARN |
 | <a name="output_snapshots_bucket"></a> [snapshots\_bucket](#output\_snapshots\_bucket) | AWS S3 Bucket where Elasticsearch snapshots will be stored. |
+| <a name="output_vpc_id"></a> [vpc\_id](#output\_vpc\_id) | VPC ID where the Elasticsearch cluster is deployed |
 <!-- END_TF_DOCS -->

@@ -5,90 +5,16 @@ import time
 from os import path as osp
 from textwrap import dedent
 
-import boto3
 import pytest
 from infrahouse_core.aws.asg import ASG
 from pytest_infrahouse import terraform_apply
+from pytest_infrahouse.utils import wait_for_instance_refresh
 
 from tests.conftest import (
     LOG,
     TERRAFORM_ROOT_DIR,
     bootstrap_cluster,
 )
-
-
-def wait_for_instance_refresh(
-    asg_name, aws_region, test_role_arn, boto3_session, timeout=600
-):
-    """
-    Wait for any in-progress ASG instance refreshes to complete.
-
-    :param asg_name: Name of the Auto Scaling Group
-    :param aws_region: AWS region
-    :param test_role_arn: IAM role ARN to assume (optional)
-    :param boto3_session: boto3 session with appropriate credentials
-    :param timeout: Maximum time to wait in seconds (default 600 = 10 minutes)
-    """
-    LOG.info("=" * 80)
-    LOG.info("Checking for in-progress ASG instance refreshes")
-    LOG.info("=" * 80)
-
-    # Create ASG client from boto3_session
-    asg_client = boto3_session.client("autoscaling", region_name=aws_region)
-
-    start_time = time.time()
-    last_status = None
-
-    while time.time() - start_time < timeout:
-        try:
-            # Check for instance refreshes
-            response = asg_client.describe_instance_refreshes(
-                AutoScalingGroupName=asg_name, MaxRecords=10
-            )
-
-            instance_refreshes = response.get("InstanceRefreshes", [])
-
-            # Filter for in-progress refreshes
-            in_progress = [
-                ir
-                for ir in instance_refreshes
-                if ir["Status"]
-                in ["Pending", "InProgress", "Cancelling", "RollbackInProgress"]
-            ]
-
-            if not in_progress:
-                if last_status is not None:
-                    LOG.info("All instance refreshes completed")
-                else:
-                    LOG.info("No in-progress instance refreshes found")
-                LOG.info("=" * 80)
-                return
-
-            # Log status of in-progress refreshes
-            for refresh in in_progress:
-                refresh_id = refresh["InstanceRefreshId"]
-                status = refresh["Status"]
-                percentage = refresh.get("PercentageComplete", 0)
-
-                status_msg = (
-                    f"Instance refresh {refresh_id}: {status} ({percentage}% complete)"
-                )
-                if status_msg != last_status:
-                    LOG.info(status_msg)
-                    last_status = status_msg
-
-            time.sleep(10)  # Check every 10 seconds
-
-        except Exception as e:
-            LOG.warning("Error checking instance refresh status: %s", e)
-            LOG.warning("Continuing anyway...")
-            break
-
-    if time.time() - start_time >= timeout:
-        LOG.warning("Timeout waiting for instance refresh to complete")
-        LOG.warning("Continuing anyway...")
-
-    LOG.info("=" * 80)
 
 
 @pytest.mark.parametrize(
@@ -184,12 +110,11 @@ def test_module(
             assert master_asg_name, "Master ASG name must be present in outputs"
             assert data_asg_name, "Data ASG name must be present in outputs"
 
-            wait_for_instance_refresh(
-                master_asg_name, aws_region, test_role_arn, boto3_session, timeout=3600
+            autoscaling_client = boto3_session.client(
+                "autoscaling", region_name=aws_region
             )
-            wait_for_instance_refresh(
-                data_asg_name, aws_region, test_role_arn, boto3_session, timeout=3600
-            )
+            wait_for_instance_refresh(master_asg_name, autoscaling_client)
+            wait_for_instance_refresh(data_asg_name, autoscaling_client)
 
             # Test CloudWatch logging functionality
             _test_cloudwatch_logging(

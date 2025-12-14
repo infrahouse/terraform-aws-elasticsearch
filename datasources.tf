@@ -42,6 +42,17 @@ data "aws_subnet" "selected" {
   id = var.subnet_ids[0]
 }
 
+data "aws_vpc" "selected" {
+  id = data.aws_subnet.selected.vpc_id
+}
+
+data "aws_internet_gateway" "selected" {
+  filter {
+    name   = "attachment.vpc-id"
+    values = [data.aws_vpc.selected.id]
+  }
+}
+
 data "aws_route53_zone" "cluster" {
   provider = aws.dns
   zone_id  = var.zone_id
