@@ -32,11 +32,11 @@
 - [x] Add additional outputs (backend_security_group_id, vpc_id, etc.)
 
 #### Bug Fixes
-- [ ] Fix timeout units bug in `main.tf` line 216 (s → m)
-- [ ] Fix TLS validity in `tls.tf` line 17 (356 → 365)
-- [ ] Fix description in `extra_security_group.tf` line 48 ONLY
-- [ ] Remove template comment from `secrets.tf` line 33
-- [ ] DO NOT fix security group Names (would cause recreation)
+- [x] Timeout units NOT a bug (correctly uses seconds, not minutes)
+- [x] TLS validity NOT fixed (356 → 365 would recreate CA certificate and break SSL chain)
+- [x] Fix description in `extra_security_group.tf` line 48 ONLY
+- [x] Template comment already removed from `secrets.tf` during module update
+- [x] Security group Names NOT fixed (would cause recreation)
 
 #### Test Updates
 - [x] Update test module with alarm_emails
@@ -45,21 +45,18 @@
 ### Phase 2: Testing 🧪
 
 #### Development Testing
-- [ ] Run `make test-keep`
-- [ ] Run `make clean`
-- [ ] Verify CloudWatch alarms created
-- [ ] Check SNS topics and subscriptions
-- [ ] Manual verification in AWS Console
+- [x] Run `make test-keep`
+- [x] Verify CloudWatch alarms created
+- [x] Check SNS topics and subscriptions
+- [x] Manual verification in AWS Console
 
 #### Pre-PR Testing
 - [ ] Run `make test-clean`
-- [ ] Test with AWS provider v5: `pytest -k aws-5`
-- [ ] Test with AWS provider v6: `pytest -k aws-6`
 
 ### Phase 3: Documentation 📝
-- [ ] Add Alert Configuration section to README.md
-- [ ] Run terraform-docs to update inputs/outputs
-- [ ] Update CLAUDE.md dependencies
+- [x] Add Alert Configuration section to README.md
+- [x] Run terraform-docs to update inputs/outputs
+- [x] Update CLAUDE.md dependencies
 
 ### Phase 4: Release 🚀
 

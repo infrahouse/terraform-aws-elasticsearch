@@ -272,6 +272,112 @@ Consider setting up CloudWatch alarms for:
 
 Example alarm configuration is not included but can be added using the `cloudwatch_log_group_name` output.
 
+## Alert Configuration
+
+The module includes comprehensive CloudWatch alarm monitoring for cluster health and operational issues.
+
+### Required Configuration
+
+**Email Notifications** are required for ALL environments:
+
+```hcl
+module "elasticsearch" {
+  source = "infrahouse/elasticsearch/aws"
+
+  alarm_emails = [
+    "ops-team@example.com",
+    "devops@example.com"
+  ]
+
+  # ... other variables
+}
+```
+
+**IMPORTANT**: After deployment, AWS SNS will send a confirmation email to each address. You **MUST** click the confirmation link in each email to activate notifications. Unconfirmed subscriptions will not receive alerts.
+
+### What Gets Monitored
+
+The module creates CloudWatch alarms for:
+
+#### Application Load Balancer Health
+- **Unhealthy Hosts**: Alerts when cluster nodes fail health checks
+- **High Latency**: Alerts when response times exceed thresholds
+- **Server Errors**: Alerts when 5xx error rate exceeds success rate threshold
+- **CPU Overutilization**: Alerts when autoscaling can't keep up with demand
+
+#### DNS Lambda Functions
+- **Lambda Errors**: Alerts on DNS update failures
+- **Lambda Throttling**: Alerts when Lambda is rate-limited
+- **Lambda Duration**: Alerts on timeout issues
+
+### Advanced Configuration
+
+Fine-tune alert behavior with these variables:
+
+```hcl
+module "elasticsearch" {
+  source = "infrahouse/elasticsearch/aws"
+
+  # Email notifications (required)
+  alarm_emails = ["ops-team@example.com"]
+
+  # Optional: Additional SNS topics (PagerDuty, Slack, OpsGenie, etc.)
+  alarm_topic_arns = ["arn:aws:sns:us-west-2:123456789012:pagerduty-topic"]
+
+  # Alert thresholds (optional - sensible defaults provided)
+  alarm_unhealthy_host_threshold       = 1     # Alert when 2+ hosts unhealthy
+  alarm_target_response_time_threshold = 3200  # Seconds (defaults to 80% of idle_timeout)
+  alarm_success_rate_threshold         = 99.0  # Percentage
+  alarm_cpu_utilization_threshold      = 85    # Percentage
+  alarm_evaluation_periods             = 2     # Consecutive periods before alerting
+  alarm_success_rate_period            = 300   # Time window in seconds (60, 300, 900, or 3600)
+
+  # ... other variables
+}
+```
+
+See the [Inputs](#inputs) section for complete variable documentation.
+
+### Integration with External Systems
+
+Use `alarm_topic_arns` to integrate with external monitoring systems:
+
+```hcl
+module "elasticsearch" {
+  source = "infrahouse/elasticsearch/aws"
+
+  alarm_emails = ["ops@example.com"]
+
+  # Forward alarms to PagerDuty, Slack, etc.
+  alarm_topic_arns = [
+    aws_sns_topic.pagerduty.arn,
+    aws_sns_topic.slack_alerts.arn
+  ]
+
+  # ... other variables
+}
+```
+
+### Cost Implications
+
+**SNS Topics:**
+- First 1,000 notifications/month: Free
+- Email notifications: Free
+- Additional notifications: ~$0.50/1,000
+
+**Typical monthly cost**: $0-5/month depending on alarm frequency.
+
+### Outputs
+
+The module provides alarm-related outputs for further integration:
+
+- `alarm_sns_topic_arn`: Master nodes ALB alarm SNS topic ARN
+- `alarm_sns_topic_arn_data`: Data nodes ALB alarm SNS topic ARN
+- `dns_lambda_sns_topic_arn`: DNS Lambda alarm SNS topic ARN
+- `dns_lambda_sns_topic_arn_data`: Data nodes DNS Lambda alarm SNS topic ARN
+
+See the [Outputs](#outputs) section for complete output documentation.
+
 <!-- BEGIN_TF_DOCS -->
 
 ## Requirements

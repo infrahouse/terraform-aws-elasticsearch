@@ -45,7 +45,7 @@ resource "aws_vpc_security_group_ingress_rule" "node_exporter" {
 
 resource "aws_vpc_security_group_ingress_rule" "elastic_exporter" {
   count             = var.monitoring_cidr_block == null ? 0 : 1
-  description       = "Prometheus node exporter"
+  description       = "Prometheus elasticsearch exporter"
   security_group_id = aws_security_group.backend_extra.id
   from_port         = 9114
   to_port           = 9114
