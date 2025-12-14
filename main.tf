@@ -149,7 +149,10 @@ module "elastic_cluster" {
   alb_idle_timeout                      = var.idle_timeout_master
   alb_healthcheck_interval              = local.tg_healthcheck_interval
   health_check_grace_period             = var.asg_health_check_grace_period
-  wait_for_capacity_timeout             = "${var.asg_health_check_grace_period * 1.5}s"
+  # NOTE: asg_health_check_grace_period is in SECONDS (900s = 15min), so 900 * 1.5 = 1350
+  # Using "s" suffix: 1350s = 22.5 minutes ✅ (correct - slightly longer than health check)
+  # Using "m" suffix: 1350m = 22.5 HOURS ❌ (wrong - would be absurdly long)
+  wait_for_capacity_timeout = "${var.asg_health_check_grace_period * 1.5}s"
   extra_security_groups_backend = [
     aws_security_group.backend_extra.id
   ]
@@ -224,7 +227,10 @@ module "elastic_cluster_data" {
   alb_healthcheck_response_code_matcher = "200"
   alb_healthcheck_interval              = local.tg_healthcheck_interval
   health_check_grace_period             = var.asg_health_check_grace_period
-  wait_for_capacity_timeout             = "${var.asg_health_check_grace_period * 1.5}s"
+  # NOTE: asg_health_check_grace_period is in SECONDS (900s = 15min), so 900 * 1.5 = 1350
+  # Using "s" suffix: 1350s = 22.5 minutes ✅ (correct - slightly longer than health check)
+  # Using "m" suffix: 1350m = 22.5 HOURS ❌ (wrong - would be absurdly long)
+  wait_for_capacity_timeout = "${var.asg_health_check_grace_period * 1.5}s"
   extra_security_groups_backend = [
     aws_security_group.backend_extra.id
   ]
