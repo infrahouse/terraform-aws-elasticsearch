@@ -149,9 +149,13 @@ module "elastic_cluster" {
   alb_idle_timeout                      = var.idle_timeout_master
   alb_healthcheck_interval              = local.tg_healthcheck_interval
   health_check_grace_period             = var.asg_health_check_grace_period
-  # NOTE: asg_health_check_grace_period is in SECONDS (900s = 15min), so 900 * 1.5 = 1350
-  # Using "s" suffix: 1350s = 22.5 minutes ✅ (correct - slightly longer than health check)
-  # Using "m" suffix: 1350m = 22.5 HOURS ❌ (wrong - would be absurdly long)
+  # NOTE: wait_for_capacity_timeout controls how long Terraform waits for min_elb_capacity
+  # instances to become healthy in the target group during initial ASG creation.
+  # asg_health_check_grace_period is in SECONDS (default: 900s = 15min).
+  # A full Puppet provisioning run takes 5-10 minutes, so 1.5x grace period (22.5 min)
+  # gives sufficient time for instances to provision without excessive waiting on failures.
+  # Calculation: 900s * 1.5 = 1350s = 22.5 minutes ✅
+  # Using "m" would give 1350 minutes = 22.5 hours ❌ (absurdly long for initial creation)
   wait_for_capacity_timeout = "${var.asg_health_check_grace_period * 1.5}s"
   extra_security_groups_backend = [
     aws_security_group.backend_extra.id
