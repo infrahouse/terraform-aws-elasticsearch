@@ -149,7 +149,7 @@ module "elastic_cluster" {
   alb_idle_timeout                      = var.idle_timeout_master
   alb_healthcheck_interval              = local.tg_healthcheck_interval
   health_check_grace_period             = var.asg_health_check_grace_period
-  wait_for_capacity_timeout             = "${var.asg_health_check_grace_period * 1.5}m"
+  wait_for_capacity_timeout             = "${var.asg_health_check_grace_period * 1.5}s"
   extra_security_groups_backend = [
     aws_security_group.backend_extra.id
   ]

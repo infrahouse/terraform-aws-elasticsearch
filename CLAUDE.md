@@ -85,11 +85,12 @@ The module deploys two types of nodes:
    - Configured via `elastic_data_userdata` module
    - Instance profile: `${cluster_name}-data-${random_suffix}`
 
-Both use the `infrahouse/website-pod/aws` module (pinned to 5.10.0) which provides:
+Both use the `infrahouse/website-pod/aws` module (pinned to 5.13.0) which provides:
 - Auto Scaling Groups with lifecycle hooks
 - Application Load Balancers with HTTPS
 - Target groups with health checks
 - Security groups
+- CloudWatch alarms for ALB health monitoring
 
 ### Bootstrap Mode
 
@@ -251,10 +252,10 @@ Both master and data nodes use the same `launching_hook_name`:
 ## Dependencies
 
 This module depends on:
-- `infrahouse/website-pod/aws` (5.10.0): Provides ASG, ALB, target groups
+- `infrahouse/website-pod/aws` (5.13.0): Provides ASG, ALB, target groups, and CloudWatch alarms
 - `infrahouse/cloud-init/aws` (2.2.2): Generates cloud-init userdata
-- `infrahouse/secret/aws` (1.1.0): Manages AWS Secrets Manager secrets
-- `infrahouse/update-dns/aws` (0.11.1): Lambda for DNS updates on instance launch/terminate
+- `infrahouse/secret/aws` (1.1.1): Manages AWS Secrets Manager secrets
+- `infrahouse/update-dns/aws` (1.2.0): Lambda for DNS updates on instance launch/terminate with CloudWatch monitoring
 
 External dependencies for users:
 - VPC with subnets (recommended: `infrahouse/service-network/aws`)
