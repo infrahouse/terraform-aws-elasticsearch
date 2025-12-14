@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.0.0] - 2025-12-14
+
+### Documentation
+
+- Add v4.0.0 implementation plan for alerts and monitoring
+- Update implementation plan and documentation for v4.0.0
+- Address Claude's concern about wait_for_capacity_timeout
+
+### Features
+
+- Add comprehensive CloudWatch alarm monitoring for v4.0.0
+
+### Miscellaneous Tasks
+
+- Fix git-cliff commit message
+
+### Testing
+
+- Add diagnostic log collection on instance refresh failure
+
 ## [3.12.0] - 2025-11-27
 
 ### Features
