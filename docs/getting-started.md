@@ -85,7 +85,7 @@ New clusters must be bootstrapped before scaling to full size. Create the module
 ```hcl
 module "elasticsearch" {
   source  = "registry.infrahouse.com/infrahouse/elasticsearch/aws"
-  version = "4.0.0"
+  version = "4.0.1"
 
   providers = {
     aws     = aws
