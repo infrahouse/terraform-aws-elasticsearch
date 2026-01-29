@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.0.1] - 2026-01-29
+
+### Bug Fixes
+
+- Update update-dns module to 1.2.1 to resolve Lambda memory timeout
+
 ## [4.0.0] - 2025-12-14
 
 ### Documentation
