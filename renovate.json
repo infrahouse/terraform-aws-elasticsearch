@@ -4,10 +4,12 @@
     "config:recommended"
   ],
   "prConcurrentLimit": 1,
+  "rebaseWhen": "conflicted",
   "packageRules": [
     {
       "matchManagers": ["github-actions"],
       "matchFileNames": [
+        ".github/workflows/checkov.yml",
         ".github/workflows/terraform-CI.yml",
         ".github/workflows/terraform-CD.yml",
         ".github/workflows/vuln-scanner-pr-public.yml",

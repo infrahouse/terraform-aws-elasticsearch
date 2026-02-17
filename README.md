@@ -1,5 +1,15 @@
 # terraform-aws-elasticsearch
 
+[![Need Help?](https://img.shields.io/badge/Need%20Help%3F-Contact%20Us-0066CC)](https://infrahouse.com/contact)
+[![Docs](https://img.shields.io/badge/docs-github.io-blue)](https://infrahouse.github.io/terraform-aws-elasticsearch/)
+[![Registry](https://img.shields.io/badge/Terraform-Registry-purple?logo=terraform)](https://registry.terraform.io/modules/infrahouse/elasticsearch/aws/latest)
+[![Release](https://img.shields.io/github/release/infrahouse/terraform-aws-elasticsearch.svg)](https://github.com/infrahouse/terraform-aws-elasticsearch/releases/latest)
+[![Security](https://img.shields.io/github/actions/workflow/status/infrahouse/terraform-aws-elasticsearch/vuln-scanner-pr.yml?label=Security)](https://github.com/infrahouse/terraform-aws-elasticsearch/actions/workflows/vuln-scanner-pr.yml)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+
+[![AWS EC2](https://img.shields.io/badge/AWS-EC2-orange?logo=amazonec2)](https://aws.amazon.com/ec2/)
+[![AWS Elasticsearch](https://img.shields.io/badge/AWS-Elasticsearch-orange?logo=elasticsearch)](https://www.elastic.co/elasticsearch/)
+
 The module deploys a multi-node Elasticsearch cluster.
 
 # Usage
@@ -58,25 +68,30 @@ module "service-network" {
   ]
 }
 ```
+
 ### Route53 Zone
+
 The module will create an A record for the cluster in a specified zone.
 If the cluster name (passed as `var.cluster_name`) is 'elastic', the client URL
 is going to be https://elastic.ci-cd.infrahouse.com.
 The zone can be created in the same Terraform module or accessed as a data source.
+
 ```hcl
 data "aws_route53_zone" "cicd" {
   name = "ci-cd.infrahouse.com"
 }
 ```
+
 ## Bootstrapping cluster
 
 Any new cluster needs to be bootstrapped first. Let's say we want to create a three node cluster.
 Declare the cluster and add `bootstrap_mode = true` to the module inputs.
 The size of the autoscaling group will be not three, but one node.
+
 ```hcl
 module "test" {
   source  = "registry.infrahouse.com/infrahouse/elasticsearch/aws"
-  version = "4.0.0"
+  version = "4.0.1"
 
   providers = {
     aws     = aws
@@ -93,22 +108,24 @@ module "test" {
 ## Provisioning remaining nodes
 
 After the cluster is bootstrapped, disable the bootstrap mode.
+
 ```hcl
 diff --git a/test_data/test_module/main.tf b/test_data/test_module/main.tf
 index c13df0d..33cf0d3 100644
 --- a/test_data/test_module/main.tf
 +++ b/test_data/test_module/main.tf
-@@ -12,5 +12,5 @@ module "test" {
-   subnet_ids                    = module.service-network.subnet_private_ids
-   zone_id                       = data.aws_route53_zone.cicd.zone_id
--  bootstrap_mode                = true
-+  bootstrap_mode                = false
- }
+@@ -12, 5 +12, 5 @@ module "test" {
+subnet_ids = module.service-network.subnet_private_ids
+zone_id = data.aws_route53_zone.cicd.zone_id
+-  bootstrap_mode = true
++  bootstrap_mode = false
+}
 ```
 
 ## Accessing the cluster
 
-The module creates HTTPS endpoints to access different parts of the Elasticsearch cluster. All endpoints are available as output variables.
+The module creates HTTPS endpoints to access different parts of the Elasticsearch cluster. All endpoints are available
+as output variables.
 
 ### Endpoints
 
@@ -126,11 +143,13 @@ All endpoints use HTTPS with automatically provisioned SSL certificates.
 
 ## CloudWatch Logging
 
-The module includes integrated CloudWatch Logs support for centralized log aggregation and monitoring of your Elasticsearch cluster.
+The module includes integrated CloudWatch Logs support for centralized log aggregation and monitoring of your
+Elasticsearch cluster.
 
 ### Overview
 
 CloudWatch logging is **enabled by default** and provides:
+
 - Centralized log storage for all cluster nodes (master and data)
 - KMS encryption at rest for log data
 - Configurable retention periods
@@ -140,8 +159,9 @@ CloudWatch logging is **enabled by default** and provides:
 ### Default Configuration
 
 When enabled (default), the module creates:
+
 - **CloudWatch Log Group**: `/elasticsearch/${var.environment}/${var.cluster_name}`
-  - Example: `/elasticsearch/production/main-cluster`
+    - Example: `/elasticsearch/production/main-cluster`
 - **KMS Key**: Customer-managed key with automatic rotation for log encryption
 - **IAM Permissions**: Least-privilege permissions for instances to write logs
 - **Log Retention**: 365 days (configurable via `cloudwatch_log_retention_days`, minimum 365 for compliance)
@@ -150,16 +170,19 @@ When enabled (default), the module creates:
 ### Cost Implications
 
 CloudWatch Logs pricing consists of:
+
 1. **Data Ingestion**: ~$0.50 per GB ingested
 2. **Storage**: ~$0.03 per GB per month
 3. **KMS Key**: ~$1.00 per month per key
 
 **Estimated Monthly Costs** (approximate, varies by region and usage):
+
 - Small cluster (3 nodes, ~5 GB/month logs): **$3.50-$5.00/month**
 - Medium cluster (6 nodes, ~15 GB/month logs): **$8.50-$10.00/month**
 - Large cluster (12+ nodes, ~50 GB/month logs): **$26.50-$30.00/month**
 
 **Cost optimization tips**:
+
 - Retention period is fixed at 365 days minimum for compliance requirements
 - Consider using log filtering and CloudWatch Logs Insights queries to reduce data ingestion
 - Archive older logs to S3 Glacier for long-term storage at lower cost
@@ -173,8 +196,8 @@ module "elasticsearch" {
   source = "infrahouse/elasticsearch/aws"
 
   # CloudWatch Logging Configuration
-  enable_cloudwatch_logging          = true  # Enable/disable CloudWatch logging (default: true)
-  cloudwatch_log_retention_days      = 365   # Log retention period in days (default: 365, minimum: 365)
+  enable_cloudwatch_logging = true  # Enable/disable CloudWatch logging (default: true)
+  cloudwatch_log_retention_days = 365   # Log retention period in days (default: 365, minimum: 365)
   cloudwatch_kms_rotation_period_days = 365  # KMS key rotation period (default: 365)
 
   # ... other variables
@@ -204,9 +227,9 @@ module "elasticsearch" {
 After deployment, access logs through:
 
 1. **AWS Console**:
-   - Navigate to CloudWatch → Log groups
-   - Find log group: `/elasticsearch/${environment}/${cluster_name}`
-   - Each instance creates its own log stream
+    - Navigate to CloudWatch → Log groups
+    - Find log group: `/elasticsearch/${environment}/${cluster_name}`
+    - Each instance creates its own log stream
 
 2. **AWS CLI**:
    ```bash
@@ -222,14 +245,14 @@ After deployment, access logs through:
    ```
 
 3. **CloudWatch Insights**:
-   - Use CloudWatch Logs Insights for advanced log queries
-   - Example query to find errors:
-     ```
-     fields @timestamp, @message
-     | filter @message like /ERROR/
-     | sort @timestamp desc
-     | limit 100
-     ```
+    - Use CloudWatch Logs Insights for advanced log queries
+    - Example query to find errors:
+      ```
+      fields @timestamp, @message
+      | filter @message like /ERROR/
+      | sort @timestamp desc
+      | limit 100
+      ```
 
 ### Outputs
 
@@ -248,9 +271,9 @@ CloudWatch logging can be added to existing clusters:
 
 1. **Add the configuration** to your Terraform module
 2. **Apply the changes** - The module will:
-   - Create the CloudWatch log group and KMS key
-   - Update instance IAM roles with logging permissions
-   - Refresh instances to pick up the new configuration (via instance refresh)
+    - Create the CloudWatch log group and KMS key
+    - Update instance IAM roles with logging permissions
+    - Refresh instances to pick up the new configuration (via instance refresh)
 3. **Verify logging** - Check the CloudWatch console for new log streams
 
 **Note**: Instance refresh will cause a rolling replacement of instances, planned to minimize disruption.
@@ -258,6 +281,7 @@ CloudWatch logging can be added to existing clusters:
 ### Security
 
 CloudWatch logging follows security best practices:
+
 - **Encryption at Rest**: All logs encrypted with customer-managed KMS key
 - **Key Rotation**: Automatic annual key rotation enabled by default
 - **Least Privilege IAM**: Instances can only write logs, not read them
@@ -266,6 +290,7 @@ CloudWatch logging follows security best practices:
 ### Monitoring and Alarms
 
 Consider setting up CloudWatch alarms for:
+
 - High error rates in logs
 - Missing log streams (indicating instance issues)
 - Log ingestion rate anomalies
@@ -293,19 +318,22 @@ module "elasticsearch" {
 }
 ```
 
-**IMPORTANT**: After deployment, AWS SNS will send a confirmation email to each address. You **MUST** click the confirmation link in each email to activate notifications. Unconfirmed subscriptions will not receive alerts.
+**IMPORTANT**: After deployment, AWS SNS will send a confirmation email to each address. You **MUST** click the
+confirmation link in each email to activate notifications. Unconfirmed subscriptions will not receive alerts.
 
 ### What Gets Monitored
 
 The module creates CloudWatch alarms for:
 
 #### Application Load Balancer Health
+
 - **Unhealthy Hosts**: Alerts when cluster nodes fail health checks
 - **High Latency**: Alerts when response times exceed thresholds
 - **Server Errors**: Alerts when 5xx error rate exceeds success rate threshold
 - **CPU Overutilization**: Alerts when autoscaling can't keep up with demand
 
 #### DNS Lambda Functions
+
 - **Lambda Errors**: Alerts on DNS update failures
 - **Lambda Throttling**: Alerts when Lambda is rate-limited
 - **Lambda Duration**: Alerts on timeout issues
@@ -325,12 +353,12 @@ module "elasticsearch" {
   alarm_topic_arns = ["arn:aws:sns:us-west-2:123456789012:pagerduty-topic"]
 
   # Alert thresholds (optional - sensible defaults provided)
-  alarm_unhealthy_host_threshold       = 1     # Alert when 2+ hosts unhealthy
+  alarm_unhealthy_host_threshold = 1     # Alert when 2+ hosts unhealthy
   alarm_target_response_time_threshold = 3200  # Seconds (defaults to 80% of idle_timeout)
-  alarm_success_rate_threshold         = 99.0  # Percentage
-  alarm_cpu_utilization_threshold      = 85    # Percentage
-  alarm_evaluation_periods             = 2     # Consecutive periods before alerting
-  alarm_success_rate_period            = 300   # Time window in seconds (60, 300, 900, or 3600)
+  alarm_success_rate_threshold = 99.0  # Percentage
+  alarm_cpu_utilization_threshold = 85    # Percentage
+  alarm_evaluation_periods = 2     # Consecutive periods before alerting
+  alarm_success_rate_period = 300   # Time window in seconds (60, 300, 900, or 3600)
 
   # ... other variables
 }
@@ -361,6 +389,7 @@ module "elasticsearch" {
 ### Cost Implications
 
 **SNS Topics:**
+
 - First 1,000 notifications/month: Free
 - Email notifications: Free
 - Additional notifications: ~$0.50/1,000
@@ -393,10 +422,10 @@ See the [Outputs](#outputs) section for complete output documentation.
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 6.26.0 |
-| <a name="provider_aws.dns"></a> [aws.dns](#provider\_aws.dns) | 6.26.0 |
-| <a name="provider_random"></a> [random](#provider\_random) | 3.7.2 |
-| <a name="provider_tls"></a> [tls](#provider\_tls) | 4.1.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.11, < 7.0 |
+| <a name="provider_aws.dns"></a> [aws.dns](#provider\_aws.dns) | >= 5.11, < 7.0 |
+| <a name="provider_random"></a> [random](#provider\_random) | ~> 3.6 |
+| <a name="provider_tls"></a> [tls](#provider\_tls) | ~> 4.0 |
 
 ## Modules
 
@@ -410,8 +439,8 @@ See the [Outputs](#outputs) section for complete output documentation.
 | <a name="module_elastic_data_userdata"></a> [elastic\_data\_userdata](#module\_elastic\_data\_userdata) | registry.infrahouse.com/infrahouse/cloud-init/aws | 2.2.2 |
 | <a name="module_elastic_master_userdata"></a> [elastic\_master\_userdata](#module\_elastic\_master\_userdata) | registry.infrahouse.com/infrahouse/cloud-init/aws | 2.2.2 |
 | <a name="module_kibana_system-password"></a> [kibana\_system-password](#module\_kibana\_system-password) | registry.infrahouse.com/infrahouse/secret/aws | 1.1.1 |
-| <a name="module_update-dns"></a> [update-dns](#module\_update-dns) | registry.infrahouse.com/infrahouse/update-dns/aws | 1.2.0 |
-| <a name="module_update-dns-data"></a> [update-dns-data](#module\_update-dns-data) | registry.infrahouse.com/infrahouse/update-dns/aws | 1.2.0 |
+| <a name="module_update-dns"></a> [update-dns](#module\_update-dns) | registry.infrahouse.com/infrahouse/update-dns/aws | 1.2.1 |
+| <a name="module_update-dns-data"></a> [update-dns-data](#module\_update-dns-data) | registry.infrahouse.com/infrahouse/update-dns/aws | 1.2.1 |
 
 ## Resources
 
