@@ -18,6 +18,7 @@ TERRAFORM_ROOT_DIR = "test_data"
 LOG = logging.getLogger(__name__)
 
 setup_logging(LOG, debug=True)
+setup_logging(logging.getLogger("pytest_infrahouse"), debug=True)
 
 
 @contextlib.contextmanager

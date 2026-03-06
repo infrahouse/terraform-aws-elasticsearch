@@ -33,6 +33,7 @@ module "elastic_master_userdata" {
           "cluster_name" : var.cluster_name
           "elastic_secret" : module.elastic-password.secret_id
           "kibana_system_secret" : module.kibana_system-password.secret_id
+          "memory_lock" : var.memory_lock
           "snapshots_bucket" : aws_s3_bucket.snapshots-bucket.bucket
           "ca_key_secret" : module.ca_key_secret.secret_id
           "ca_cert_secret" : module.ca_cert_secret.secret_id
@@ -84,6 +85,7 @@ module "elastic_data_userdata" {
           "cluster_name" : var.cluster_name
           "elastic_secret" : module.elastic-password.secret_id
           "kibana_system_secret" : module.kibana_system-password.secret_id
+          "memory_lock" : var.memory_lock
           "snapshots_bucket" : aws_s3_bucket.snapshots-bucket.bucket
           "ca_key_secret" : module.ca_key_secret.secret_id
           "ca_cert_secret" : module.ca_cert_secret.secret_id

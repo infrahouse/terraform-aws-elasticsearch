@@ -517,6 +517,7 @@ See the [Outputs](#outputs) section for complete output documentation.
 | <a name="input_key_pair_name"></a> [key\_pair\_name](#input\_key\_pair\_name) | SSH keypair name to be deployed in EC2 instances | `string` | n/a | yes |
 | <a name="input_master_nodes_root_volume_size"></a> [master\_nodes\_root\_volume\_size](#input\_master\_nodes\_root\_volume\_size) | Root volume size in master EC2 instance in Gigabytes | `number` | `null` | no |
 | <a name="input_max_instance_lifetime_days"></a> [max\_instance\_lifetime\_days](#input\_max\_instance\_lifetime\_days) | The maximum amount of time, in \_days\_, that an instance can be in service, values must be either equal to 0 or between 7 and 365 days. | `number` | `0` | no |
+| <a name="input_memory_lock"></a> [memory\_lock](#input\_memory\_lock) | Enable bootstrap.memory\_lock in Elasticsearch to prevent JVM heap from being swapped to disk. | `bool` | `true` | no |
 | <a name="input_monitoring_cidr_block"></a> [monitoring\_cidr\_block](#input\_monitoring\_cidr\_block) | CIDR range that is allowed to monitor elastic instances. | `string` | `null` | no |
 | <a name="input_packages"></a> [packages](#input\_packages) | List of packages to install when the instances bootstraps. | `list(string)` | `[]` | no |
 | <a name="input_puppet_debug_logging"></a> [puppet\_debug\_logging](#input\_puppet\_debug\_logging) | Enable debug logging if true. | `bool` | `false` | no |
