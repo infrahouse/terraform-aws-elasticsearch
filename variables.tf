@@ -127,6 +127,12 @@ variable "key_pair_name" {
   type        = string
 }
 
+variable "memory_lock" {
+  description = "Enable bootstrap.memory_lock in Elasticsearch to prevent JVM heap from being swapped to disk."
+  type        = bool
+  default     = true
+}
+
 variable "max_instance_lifetime_days" {
   description = "The maximum amount of time, in _days_, that an instance can be in service, values must be either equal to 0 or between 7 and 365 days."
   type        = number
