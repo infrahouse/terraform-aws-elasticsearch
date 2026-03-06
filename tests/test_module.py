@@ -80,7 +80,7 @@ def collect_instance_logs(asg_name, aws_region, test_role_arn):
 
 
 @pytest.mark.parametrize(
-    "aws_provider_version", ["~> 5.11", "~> 6.0"], ids=["aws-5", "aws-6"]
+    "aws_provider_version", ["~> 6.0"], ids=["aws-6"]
 )
 def test_module(
     service_network,

@@ -1,0 +1,80 @@
+# Checkov configuration for terraform-aws-elasticsearch module
+
+framework:
+  - terraform
+
+skip-path:
+  - test_data
+
+skip-check:
+  # CKV_TF_1: Module sources use version pins from private registry (registry.infrahouse.com)
+  # InfraHouse standard: exact version pinning from registry.infrahouse.com,
+  # which provides better maintainability than commit hash pinning.
+  # Renovate manages version updates via individual PRs for explicit review.
+  - CKV_TF_1
+
+  # CKV_AWS_109: KMS key policy allows kms:* for the account root principal
+  # This is the standard AWS pattern for KMS key policies - the root principal
+  # delegation enables IAM policies to control access. Without this, the key
+  # becomes unmanageable. The CloudWatch Logs service principal is scoped.
+  - CKV_AWS_109
+
+  # CKV_AWS_111: KMS key policy allows write access without resource constraints
+  # Same as CKV_AWS_109 - root principal delegation is required for KMS key
+  # manageability. Actual access is controlled via IAM policies.
+  - CKV_AWS_111
+
+  # CKV_AWS_356: IAM policy uses "*" as resource for restrictable actions
+  # CloudWatch Logs permissions (logs:CreateLogStream, logs:PutLogEvents) and
+  # EC2 describe actions require "*" resource - they cannot be scoped to
+  # specific ARNs. This is standard AWS IAM practice for these services.
+  - CKV_AWS_356
+
+  # CKV_AWS_18: S3 bucket access logging not enabled on snapshots bucket
+  # The snapshots bucket stores Elasticsearch snapshots for backup/restore.
+  # Access is restricted via bucket policy to the ES instance profiles only.
+  # VPC Flow Logs and CloudTrail provide sufficient audit trail.
+  - CKV_AWS_18
+
+  # CKV_AWS_21: S3 bucket versioning not enabled on snapshots bucket
+  # Elasticsearch manages its own snapshot lifecycle and retention.
+  # Versioning would increase storage costs without benefit since ES
+  # snapshots are immutable and managed by the snapshot API.
+  - CKV_AWS_21
+
+  # CKV_AWS_144: S3 cross-region replication not enabled on snapshots bucket
+  # Snapshots bucket is for operational backup/restore, not disaster recovery.
+  # Cross-region replication would double storage costs. Users can configure
+  # separate DR strategies if needed.
+  - CKV_AWS_144
+
+  # CKV_AWS_145: S3 bucket not encrypted with KMS CMK
+  # Snapshots bucket uses SSE-S3 (AES-256) encryption, which is the InfraHouse
+  # standard. CMK is only required for CloudTrail per security policy.
+  - CKV_AWS_145
+
+  # CKV2_AWS_5: Security group not attached to another resource
+  # aws_security_group.backend_extra is passed to the website-pod module via
+  # extra_security_groups. Checkov cannot trace references through module
+  # boundaries.
+  - CKV2_AWS_5
+
+  # CKV2_AWS_61: S3 bucket lifecycle configuration not set
+  # Elasticsearch manages snapshot retention via its own snapshot lifecycle
+  # management API. Adding S3 lifecycle rules would conflict with ES
+  # snapshot management and could delete active snapshots.
+  - CKV2_AWS_61
+
+  # CKV2_AWS_62: S3 bucket event notifications not enabled
+  # No use case for event notifications on the snapshots bucket.
+  # Elasticsearch handles snapshot operations directly via the S3 API.
+  - CKV2_AWS_62
+
+  # CKV2_AWS_64: KMS key policy is defined
+  # The KMS key for CloudWatch Logs has a policy defined via
+  # aws_kms_key_policy.cloudwatch_logs. Checkov may not detect the
+  # separate key policy resource association.
+  - CKV2_AWS_64
+
+compact: true
+quiet: false
