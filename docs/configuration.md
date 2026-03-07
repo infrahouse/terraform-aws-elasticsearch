@@ -1,212 +1,185 @@
 # Configuration
 
-Complete reference for all module variables organized by category.
+All variables are documented in the
+[README](https://github.com/infrahouse/terraform-aws-elasticsearch#inputs)
+via terraform-docs. This page covers the most important settings with guidance
+on how to choose values.
 
-## Required Variables
+## Instance sizing
 
-These variables must be provided:
+The single most important configuration decision. Elasticsearch needs memory for
+two things: the JVM heap and the Lucene filesystem cache. The rule of thumb is
+**give ES half the RAM for heap, leave the other half for filesystem cache**.
 
-| Variable | Type | Description |
-|----------|------|-------------|
-| `key_pair_name` | `string` | SSH keypair name to be deployed in EC2 instances |
-| `subnet_ids` | `list(string)` | List of subnet IDs where Elasticsearch instances will be created |
-| `zone_id` | `string` | Route53 zone ID for DNS records |
+```hcl
+# Minimum viable configuration
+instance_type = "t3.large"  # 8 GB -- enough for light workloads
 
-## Cluster Configuration
+# Production: size master and data nodes independently
+instance_type_master = "r6i.large"    # 16 GB -- masters are lighter
+instance_type_data   = "r6i.xlarge"   # 32 GB -- data nodes need more for Lucene cache
+```
 
-### Basic Settings
+!!! danger "memory_lock and instance sizing"
+    With `memory_lock = true` (the default), the JVM heap is locked in physical RAM
+    and cannot be swapped. The instance **must** have enough RAM for heap + OS + Lucene cache,
+    or the OOM killer will terminate Elasticsearch.
 
-| Variable | Type | Default | Description |
-|----------|------|---------|-------------|
-| `cluster_name` | `string` | `"elastic"` | Name of the Elasticsearch cluster |
-| `environment` | `string` | `"development"` | Environment name (e.g., production, staging) |
-| `bootstrap_mode` | `bool` | `true` | Set to `true` for initial cluster bootstrap, `false` after |
+    On a `t3.medium` (4 GB), this leaves only ~0.8 GB free after the ~1.9 GB heap is locked.
+    Any memory spike will trigger an OOM kill. Use `t3.large` (8 GB) at minimum.
 
-### Node Counts
-
-| Variable | Type | Default | Description |
-|----------|------|---------|-------------|
-| `cluster_master_count` | `number` | `3` | Number of master nodes (must be odd for quorum) |
-| `cluster_data_count` | `number` | `3` | Number of data nodes |
-
-### Instance Types
-
-| Variable | Type | Default | Description |
-|----------|------|---------|-------------|
-| `instance_type` | `string` | `"t3.medium"` | Default instance type for all nodes |
-| `instance_type_master` | `string` | `null` | Override instance type for master nodes |
-| `instance_type_data` | `string` | `null` | Override instance type for data nodes |
+See the [instance sizing table](index.md#instance-sizing) for detailed recommendations.
 
 ### Storage
 
-| Variable | Type | Default | Description |
-|----------|------|---------|-------------|
-| `master_nodes_root_volume_size` | `number` | `null` | Root volume size (GB) for master nodes |
-| `data_nodes_root_volume_size` | `number` | `30` | Root volume size (GB) for data nodes |
+```hcl
+# Master nodes: default is fine (they store metadata, not data)
+master_nodes_root_volume_size = null  # uses AMI default
+
+# Data nodes: size based on your index size + overhead
+data_nodes_root_volume_size = 100  # GB, default is 30
+```
+
+## Cluster sizing
+
+```hcl
+# Master nodes: must be odd for quorum (1, 3, 5)
+cluster_master_count = 3  # default, recommended for production
+
+# Data nodes: scale based on indexing/search throughput
+cluster_data_count = 3    # default
+```
+
+For a single-environment test cluster, 3 masters + 3 data nodes is a good starting point.
+For production with heavy indexing, consider 3 masters + 5-9 data nodes.
+
+## Memory lock
+
+```hcl
+# Prevents JVM heap from being swapped to disk (default: true)
+memory_lock = true
+```
+
+When enabled, Puppet configures:
+
+- `bootstrap.memory_lock: true` in `elasticsearch.yml`
+- `LimitMEMLOCK=infinity` in the systemd override
+
+This eliminates GC pauses caused by swapped heap pages. Without it, GC must page
+memory back from disk, turning 50ms pauses into multi-second pauses that make the
+node unresponsive.
+
+Set to `false` only if you understand the swap implications and have a specific reason.
+
+## Bootstrap mode
+
+```hcl
+# Phase 1: initial cluster creation (single master node)
+bootstrap_mode = true
+
+# Phase 2: scale to full cluster (change and re-apply)
+bootstrap_mode = false
+```
+
+See [Getting Started](getting-started.md) for the full bootstrap workflow.
 
 ## Networking
 
-| Variable | Type | Default | Description |
-|----------|------|---------|-------------|
-| `ssh_cidr_block` | `string` | `"0.0.0.0/0"` | CIDR range allowed to SSH into instances |
-| `monitoring_cidr_block` | `string` | `null` | CIDR range allowed to monitor instances (Prometheus) |
+```hcl
+# Subnets for ES instances (at least 2 AZs for HA)
+subnet_ids = module.service-network.subnet_private_ids
 
-## Load Balancer
+# SSH access (restrict in production)
+ssh_cidr_block = "10.0.0.0/8"
 
-| Variable | Type | Default | Description |
-|----------|------|---------|-------------|
-| `idle_timeout_master` | `number` | `4000` | Idle timeout (seconds) for master nodes ALB |
-| `idle_timeout_data` | `number` | `4000` | Idle timeout (seconds) for data nodes ALB |
+# Prometheus monitoring access (node_exporter + elasticsearch_exporter)
+monitoring_cidr_block = "10.0.0.0/8"  # null = disabled
+```
 
-## CloudWatch Logging
+## Load balancer
 
-CloudWatch logging is enabled by default for centralized log management.
+```hcl
+# Idle timeout in seconds -- Elasticsearch queries can be slow
+idle_timeout_master = 4000  # default
+idle_timeout_data   = 4000  # default
+```
 
-| Variable | Type | Default | Description |
-|----------|------|---------|-------------|
-| `enable_cloudwatch_logging` | `bool` | `true` | Enable CloudWatch logging |
-| `cloudwatch_log_retention_days` | `number` | `365` | Log retention period (minimum 365 for compliance) |
-| `cloudwatch_kms_rotation_period_days` | `number` | `90` | KMS key rotation period |
+The high default (4000s / ~66 min) accommodates long-running queries, scroll contexts,
+and reindexing operations. Reduce if your workload has shorter request lifetimes.
 
-### Log Group Location
+## CloudWatch logging
 
-Logs are stored at: `/elasticsearch/${environment}/${cluster_name}`
+Enabled by default. Creates a log group at `/elasticsearch/{environment}/{cluster_name}`
+with KMS encryption.
 
-### Accessing Logs
+```hcl
+enable_cloudwatch_logging          = true  # default
+cloudwatch_log_retention_days      = 365   # minimum for compliance
+cloudwatch_kms_rotation_period_days = 90   # KMS key rotation
+```
 
-```bash
-# List log streams
-aws logs describe-log-streams \
-  --log-group-name "/elasticsearch/production/my-cluster" \
-  --order-by LastEventTime --descending
+To disable (not recommended for production):
 
-# Tail logs
-aws logs tail "/elasticsearch/production/my-cluster" --follow
+```hcl
+enable_cloudwatch_logging = false
 ```
 
 ## Alerting
 
-### Email Notifications
-
-| Variable | Type | Default | Description |
-|----------|------|---------|-------------|
-| `alarm_emails` | `list(string)` | `[]` | Email addresses for CloudWatch alarm notifications |
-| `alarm_topic_arns` | `list(string)` | `[]` | Additional SNS topic ARNs (PagerDuty, Slack, etc.) |
-
-!!! warning "Email Confirmation Required"
-    After deployment, AWS SNS sends confirmation emails to each address.
-    You must click the confirmation link to activate notifications.
-
-### Alarm Thresholds
-
-| Variable | Type | Default | Description |
-|----------|------|---------|-------------|
-| `alarm_unhealthy_host_threshold` | `number` | `1` | Unhealthy hosts before alerting (0 = immediate) |
-| `alarm_target_response_time_threshold` | `number` | `null` | Response time threshold (defaults to 80% of idle_timeout) |
-| `alarm_success_rate_threshold` | `number` | `99` | Minimum success rate percentage |
-| `alarm_cpu_utilization_threshold` | `number` | `null` | CPU threshold (defaults to autoscaling target + 30%) |
-| `alarm_evaluation_periods` | `number` | `2` | Consecutive periods before alerting |
-| `alarm_success_rate_period` | `number` | `300` | Time window for success rate (60, 300, 900, or 3600) |
-
-### Example: PagerDuty Integration
+At least one alarm email is required:
 
 ```hcl
-module "elasticsearch" {
-  # ...
+alarm_emails = ["ops@example.com"]
 
-  alarm_emails     = ["ops@example.com"]
-  alarm_topic_arns = [aws_sns_topic.pagerduty.arn]
-}
+# Optional: forward to PagerDuty, Slack, etc.
+alarm_topic_arns = [aws_sns_topic.pagerduty.arn]
 ```
 
-## Security
+!!! note "Email confirmation required"
+    After deployment, AWS SNS sends confirmation emails. You must click the
+    confirmation link in each email to activate notifications.
 
-### Secrets Management
+### Alarm thresholds
 
-| Variable | Type | Default | Description |
-|----------|------|---------|-------------|
-| `secret_elastic_readers` | `list(string)` | `null` | IAM role ARNs allowed to read elastic user secret |
+All thresholds have sensible defaults. Override only if needed:
 
-The module automatically creates secrets for:
+```hcl
+alarm_unhealthy_host_threshold         = 1     # alert when 2+ hosts unhealthy
+alarm_target_response_time_threshold   = null  # defaults to 80% of idle_timeout
+alarm_success_rate_threshold           = 99.0  # minimum non-5xx rate
+alarm_cpu_utilization_threshold        = null  # defaults to autoscaling target + 30%
+alarm_evaluation_periods               = 2     # consecutive periods before alerting
+alarm_success_rate_period              = 300   # window in seconds
+```
 
-- `elastic` superuser password
-- `kibana_system` user password
-- TLS CA certificate and key
+## Secrets
 
-### SMTP Configuration
+The module auto-generates passwords for `elastic` and `kibana_system` users and
+stores them in AWS Secrets Manager.
 
-| Variable | Type | Default | Description |
-|----------|------|---------|-------------|
-| `smtp_credentials_secret` | `string` | `null` | AWS Secrets Manager secret name with SMTP credentials |
-
-The SMTP secret must contain JSON with `user` and `password` keys.
+```hcl
+# Grant additional IAM roles read access to the elastic password
+secret_elastic_readers = [
+  "arn:aws:iam::123456789012:role/app-role"
+]
+```
 
 ## Snapshots
 
-| Variable | Type | Default | Description |
-|----------|------|---------|-------------|
-| `snapshot_bucket_prefix` | `string` | `null` | S3 bucket name prefix (random if not specified) |
-| `snapshot_force_destroy` | `bool` | `false` | Allow destroying non-empty snapshot bucket |
-
-## Auto Scaling
-
-| Variable | Type | Default | Description |
-|----------|------|---------|-------------|
-| `asg_health_check_grace_period` | `number` | `900` | Seconds to wait for instance health |
-| `max_instance_lifetime_days` | `number` | `0` | Max instance lifetime (0 = unlimited, or 7-365) |
-
-## Puppet Configuration
-
-The module uses Puppet for instance configuration:
-
-| Variable | Type | Default | Description |
-|----------|------|---------|-------------|
-| `puppet_debug_logging` | `bool` | `false` | Enable Puppet debug logging |
-| `puppet_environmentpath` | `string` | `"{root_directory}/environments"` | Puppet environment path |
-| `puppet_hiera_config_path` | `string` | `"{root_directory}/environments/{environment}/hiera.yaml"` | Hiera config path |
-| `puppet_manifest` | `string` | `null` | Custom Puppet manifest path |
-| `puppet_module_path` | `string` | See defaults | Puppet module search path |
-
-## Advanced
-
-### Additional Instance Configuration
-
-| Variable | Type | Default | Description |
-|----------|------|---------|-------------|
-| `packages` | `list(string)` | `[]` | Additional packages to install |
-| `extra_files` | `list(object)` | `[]` | Additional files to create on instances |
-| `extra_repos` | `map(object)` | `{}` | Additional APT repositories |
-| `extra_instance_profile_permissions` | `string` | `null` | Additional IAM permissions JSON |
-
-### Example: Extra Files
-
 ```hcl
-module "elasticsearch" {
-  # ...
+# Custom bucket prefix (random if not specified)
+snapshot_bucket_prefix = "my-cluster-snapshots"
 
-  extra_files = [
-    {
-      content     = "custom configuration"
-      path        = "/etc/elasticsearch/custom.yml"
-      permissions = "0644"
-    }
-  ]
-}
+# Allow terraform destroy to delete non-empty bucket
+snapshot_force_destroy = false  # default, set true for test environments
 ```
 
-### AMI Configuration
-
-| Variable | Type | Default | Description |
-|----------|------|---------|-------------|
-| `asg_ami` | `string` | `null` | Custom AMI ID (defaults to Ubuntu Pro) |
-| `ubuntu_codename` | `string` | `"jammy"` | Ubuntu version codename |
-
-## Complete Example
+## Complete production example
 
 ```hcl
 module "elasticsearch" {
   source  = "registry.infrahouse.com/infrahouse/elasticsearch/aws"
-  version = "4.0.0"
+  version = "4.1.0"
 
   providers = {
     aws     = aws
@@ -214,30 +187,28 @@ module "elasticsearch" {
   }
 
   # Required
-  key_pair_name = "my-keypair"
+  key_pair_name = "production-key"
   subnet_ids    = module.vpc.private_subnet_ids
   zone_id       = data.aws_route53_zone.main.zone_id
 
-  # Cluster settings
+  # Cluster
   cluster_name         = "production-es"
   environment          = "production"
   bootstrap_mode       = false
   cluster_master_count = 3
   cluster_data_count   = 5
 
-  # Instance types
+  # Instance sizing
   instance_type_master = "r6i.large"
-  instance_type_data   = "r6i.2xlarge"
-
-  # Storage
+  instance_type_data   = "r6i.xlarge"
   data_nodes_root_volume_size = 500
-
-  # Alerting
-  alarm_emails     = ["ops@example.com", "oncall@example.com"]
-  alarm_topic_arns = [aws_sns_topic.pagerduty.arn]
 
   # Security
   ssh_cidr_block        = "10.0.0.0/8"
   monitoring_cidr_block = "10.0.0.0/8"
+
+  # Alerting
+  alarm_emails     = ["ops@example.com", "oncall@example.com"]
+  alarm_topic_arns = [aws_sns_topic.pagerduty.arn]
 }
 ```

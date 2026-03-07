@@ -10,7 +10,78 @@
 [![AWS EC2](https://img.shields.io/badge/AWS-EC2-orange?logo=amazonec2)](https://aws.amazon.com/ec2/)
 [![AWS Elasticsearch](https://img.shields.io/badge/AWS-Elasticsearch-orange?logo=elasticsearch)](https://www.elastic.co/elasticsearch/)
 
-The module deploys a multi-node Elasticsearch cluster.
+Terraform module that deploys a self-managed, multi-node
+[Elasticsearch](https://www.elastic.co/elasticsearch/) cluster on AWS EC2 --
+not AWS OpenSearch Service.
+
+## Why self-managed Elasticsearch?
+
+AWS OpenSearch Service is a fork of Elasticsearch with limitations.
+This module deploys the real, open-source Elasticsearch directly on EC2,
+giving you:
+
+- **Any Elasticsearch version** -- upgrade on your schedule,
+  not Amazon's. Run the latest 8.x release the day it ships.
+- **Full plugin support** -- install any Elasticsearch plugin
+  (analysis-icu, mapper-annotated-text, etc.) without waiting
+  for AWS to add it.
+- **No vendor lock-in** -- standard Elasticsearch APIs, compatible
+  with the official Elastic clients, Kibana, Logstash, and Beats.
+- **Full configuration control** -- tune JVM settings, thread pools,
+  circuit breakers, and shard allocation without service restrictions.
+- **Cost efficiency** -- choose any EC2 instance type (including Graviton),
+  use Reserved Instances or Savings Plans. No OpenSearch Service markup.
+- **VPC-native networking** -- instances run in your private subnets
+  with security groups you control. No VPC endpoint complexity.
+- **Production-ready automation** -- ASG lifecycle hooks handle
+  graceful node commissioning and decommissioning, TLS transport
+  encryption, automated snapshots to S3, and CloudWatch logging
+  with KMS encryption.
+
+### When does this module make sense?
+
+This module saves the most money on **compute-heavy clusters** — workloads
+that require many nodes for performance, not just storage. The per-instance
+price difference between EC2 and OpenSearch Service compounds with every
+node you add, while EBS costs are the same either way.
+
+Good fit for this module:
+- **High-throughput log ingestion** — hundreds of GB/day, CPU-bound indexing
+- **Low-latency search on large datasets** — sub-second queries across TBs
+- **Heavy aggregations and analytics** — complex dashboards, reporting
+- **High concurrent query load** — many services querying simultaneously
+
+OpenSearch Service may be a better fit for small clusters with modest
+query load where operational convenience outweighs cost savings.
+
+### Cost comparison: EC2 vs OpenSearch Service
+
+A mid-size logging cluster: 500 microservices generating ~50 GB/day,
+365-day retention (~18 TB). 3 dedicated masters (`r6g.large`) +
+12 data nodes (`r6g.xlarge`, 32 GiB RAM), 3 TB gp3 per data node,
+1 replica, us-east-1, on-demand pricing:
+
+| Component | EC2 (this module) | OpenSearch Service |
+|-----------|--------------------|---------------------|
+| 3 masters (r6g.large) | 3 x $0.1008/hr = **$0.302/hr** | 3 x $0.167/hr = **$0.501/hr** |
+| 12 data nodes (r6g.xlarge) | 12 x $0.2016/hr = **$2.419/hr** | 12 x $0.335/hr = **$4.020/hr** |
+| 2 ALBs | 2 x $0.0225/hr = **$0.045/hr** | included |
+| EBS (3 TB gp3 x 12 data + 30 GB x 3 master) | **~$2,887/mo** | **~$2,887/mo** |
+| **Monthly total** | **~$4,905/mo** | **~$6,189/mo** |
+| **Annual total** | **~$58,860/yr** | **~$74,268/yr** |
+
+**~21% savings** with EC2 on-demand (~$15,400/yr). The gap widens
+further with Reserved Instances or Savings Plans (up to 50-60%
+savings vs OpenSearch on-demand).
+
+*Prices are approximate, us-east-1, as of 2025.
+See [EC2 pricing](https://aws.amazon.com/ec2/pricing/on-demand/)
+and [OpenSearch pricing](https://aws.amazon.com/opensearch-service/pricing/)
+for current rates.*
+
+## Architecture
+
+![Elasticsearch Cluster Architecture](docs/assets/architecture.svg)
 
 # Usage
 
