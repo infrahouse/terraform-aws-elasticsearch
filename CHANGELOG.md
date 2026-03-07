@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.1.0] - 2026-03-07
+
+### Bug Fixes
+
+- Update update-dns module to 1.2.1 to resolve Lambda memory timeout
+
+### Features
+
+- Add memory_lock custom fact to prevent JVM heap swapping
+- Add checkov config and drop AWS provider 5.x test
+
 ## [4.0.1] - 2026-01-29
 
 ### Bug Fixes
