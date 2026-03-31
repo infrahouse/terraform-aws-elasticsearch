@@ -111,7 +111,7 @@ module "elastic_data_userdata" {
 
 module "elastic_cluster" {
   source  = "registry.infrahouse.com/infrahouse/website-pod/aws"
-  version = "5.13.0"
+  version = "5.14.0"
   providers = {
     aws     = aws
     aws.dns = aws.dns
@@ -193,7 +193,7 @@ module "elastic_cluster_data" {
   # Deploy only if not in the bootstrap mode
   count   = var.bootstrap_mode ? 0 : 1
   source  = "registry.infrahouse.com/infrahouse/website-pod/aws"
-  version = "5.13.0"
+  version = "5.14.0"
   providers = {
     aws     = aws
     aws.dns = aws.dns
