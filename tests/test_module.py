@@ -79,9 +79,7 @@ def collect_instance_logs(asg_name, aws_region, test_role_arn):
         LOG.error(traceback.format_exc())
 
 
-@pytest.mark.parametrize(
-    "aws_provider_version", ["~> 6.0"], ids=["aws-6"]
-)
+@pytest.mark.parametrize("aws_provider_version", ["~> 6.0"], ids=["aws-6"])
 def test_module(
     service_network,
     subzone,

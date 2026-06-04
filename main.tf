@@ -34,7 +34,7 @@ module "elastic_master_userdata" {
           "elastic_secret" : module.elastic-password.secret_id
           "kibana_system_secret" : module.kibana_system-password.secret_id
           "memory_lock" : var.memory_lock
-          "snapshots_bucket" : aws_s3_bucket.snapshots-bucket.bucket
+          "snapshots_bucket" : module.snapshots_bucket.bucket_name
           "ca_key_secret" : module.ca_key_secret.secret_id
           "ca_cert_secret" : module.ca_cert_secret.secret_id
         },
@@ -86,7 +86,7 @@ module "elastic_data_userdata" {
           "elastic_secret" : module.elastic-password.secret_id
           "kibana_system_secret" : module.kibana_system-password.secret_id
           "memory_lock" : var.memory_lock
-          "snapshots_bucket" : aws_s3_bucket.snapshots-bucket.bucket
+          "snapshots_bucket" : module.snapshots_bucket.bucket_name
           "ca_key_secret" : module.ca_key_secret.secret_id
           "ca_cert_secret" : module.ca_cert_secret.secret_id
         },
@@ -111,7 +111,7 @@ module "elastic_data_userdata" {
 
 module "elastic_cluster" {
   source  = "registry.infrahouse.com/infrahouse/website-pod/aws"
-  version = "5.13.0"
+  version = "6.0.1"
   providers = {
     aws     = aws
     aws.dns = aws.dns
@@ -123,7 +123,7 @@ module "elastic_cluster" {
   subnets                                       = var.subnet_ids
   backend_subnets                               = var.subnet_ids
   zone_id                                       = var.zone_id
-  internet_gateway_id                           = data.aws_internet_gateway.selected.id
+  replication_region                            = var.replication_region
   key_pair_name                                 = var.key_pair_name
   ssh_cidr_block                                = var.ssh_cidr_block
   dns_a_records                                 = [var.cluster_name, "${var.cluster_name}-master"]
@@ -193,7 +193,7 @@ module "elastic_cluster_data" {
   # Deploy only if not in the bootstrap mode
   count   = var.bootstrap_mode ? 0 : 1
   source  = "registry.infrahouse.com/infrahouse/website-pod/aws"
-  version = "5.13.0"
+  version = "6.0.1"
   providers = {
     aws     = aws
     aws.dns = aws.dns
@@ -205,7 +205,7 @@ module "elastic_cluster_data" {
   subnets                                       = var.subnet_ids
   backend_subnets                               = var.subnet_ids
   zone_id                                       = var.zone_id
-  internet_gateway_id                           = data.aws_internet_gateway.selected.id
+  replication_region                            = var.replication_region
   key_pair_name                                 = var.key_pair_name
   ssh_cidr_block                                = var.ssh_cidr_block
   dns_a_records                                 = ["${var.cluster_name}-data"]

@@ -1,3 +1,8 @@
+variable "replication_region" {
+  description = "AWS region for cross-region replication of S3 buckets (access logs, snapshots)."
+  type        = string
+}
+
 variable "asg_ami" {
   description = "Image for EC2 instances"
   type        = string

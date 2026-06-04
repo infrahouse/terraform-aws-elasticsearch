@@ -3,7 +3,6 @@ import json
 import os
 from textwrap import dedent
 
-import pytest
 import logging
 
 from os import path as osp

@@ -164,6 +164,15 @@ secret_elastic_readers = [
 ]
 ```
 
+## Cross-Region Replication
+
+The `replication_region` variable is required and enables cross-region replication
+on all S3 buckets managed by the module (ALB access logs and snapshots).
+
+```hcl
+replication_region = "us-east-1"
+```
+
 ## Snapshots
 
 ```hcl
@@ -187,9 +196,10 @@ module "elasticsearch" {
   }
 
   # Required
-  key_pair_name = "production-key"
-  subnet_ids    = module.vpc.private_subnet_ids
-  zone_id       = data.aws_route53_zone.main.zone_id
+  key_pair_name      = "production-key"
+  subnet_ids         = module.vpc.private_subnet_ids
+  zone_id            = data.aws_route53_zone.main.zone_id
+  replication_region = "us-east-1"
 
   # Cluster
   cluster_name         = "production-es"
