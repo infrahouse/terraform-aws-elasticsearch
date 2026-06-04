@@ -59,7 +59,7 @@ data "aws_iam_policy_document" "elastic_permissions" {
       "s3:ListBucketVersions"
     ]
     resources = [
-      aws_s3_bucket.snapshots-bucket.arn
+      module.snapshots_bucket.bucket_arn
     ]
   }
   statement {
@@ -71,7 +71,7 @@ data "aws_iam_policy_document" "elastic_permissions" {
       "s3:ListMultipartUploadParts"
     ]
     resources = [
-      "${aws_s3_bucket.snapshots-bucket.arn}/*"
+      "${module.snapshots_bucket.bucket_arn}/*"
     ]
   }
 }

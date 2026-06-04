@@ -13,6 +13,7 @@ module "test" {
   subnet_ids             = var.lb_subnet_ids
   zone_id                = var.elastic_zone_id
   bootstrap_mode         = var.bootstrap_mode
+  replication_region     = local.replication_region
   snapshot_bucket_prefix = "infrahouse-terraform-aws-elasticsearch"
   snapshot_force_destroy = true
   monitoring_cidr_block  = "10.1.0.0/16" # Changed from 0.0.0.0/0 to VPC CIDR for security

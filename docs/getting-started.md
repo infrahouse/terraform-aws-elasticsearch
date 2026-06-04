@@ -23,11 +23,12 @@ module "elasticsearch" {
     aws.dns = aws
   }
 
-  cluster_name  = "my-cluster"
-  environment   = "production"
-  key_pair_name = aws_key_pair.my_key.key_name
-  subnet_ids    = module.service-network.subnet_private_ids
-  zone_id       = data.aws_route53_zone.main.zone_id
+  cluster_name       = "my-cluster"
+  environment        = "production"
+  key_pair_name      = aws_key_pair.my_key.key_name
+  subnet_ids         = module.service-network.subnet_private_ids
+  zone_id            = data.aws_route53_zone.main.zone_id
+  replication_region = "us-east-1"
 
   alarm_emails = ["ops-team@example.com"]
 
