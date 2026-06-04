@@ -37,11 +37,9 @@ data "aws_ami" "ubuntu_pro" {
   owners = ["099720109477"] # Canonical
 }
 
-
 data "aws_subnet" "selected" {
   id = var.subnet_ids[0]
 }
-
 
 data "aws_route53_zone" "cluster" {
   provider = aws.dns
