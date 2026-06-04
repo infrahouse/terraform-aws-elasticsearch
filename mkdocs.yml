@@ -40,6 +40,7 @@ nav:
   - Configuration: configuration.md
   - Operations: operations.md
   - Troubleshooting: troubleshooting.md
+  - Upgrading: upgrading.md
 
 markdown_extensions:
   - pymdownx.highlight:
