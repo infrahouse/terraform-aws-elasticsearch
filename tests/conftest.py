@@ -34,8 +34,6 @@ def bootstrap_cluster(
 
     subnet_public_ids = service_network["subnet_public_ids"]["value"]
     subnet_private_ids = service_network["subnet_private_ids"]["value"]
-    internet_gateway_id = service_network["internet_gateway_id"]["value"]
-
     # Bootstrap ES cluster
     bootstrap_mode = True
     bootstrap_flag_file = ".bootstrapped"
@@ -56,7 +54,6 @@ def bootstrap_cluster(
 
                         lb_subnet_ids       = {json.dumps(subnet_public_ids)}
                         backend_subnet_ids  = {json.dumps(subnet_private_ids)}
-                        internet_gateway_id = "{internet_gateway_id}"
                         """
                     )
                 )
@@ -82,7 +79,8 @@ def bootstrap_cluster(
                 "Will delete %s file because we're destroying resources after the test.",
                 full_path,
             )
-            os.remove(full_path)
+            if osp.exists(full_path):
+                os.remove(full_path)
         else:
             LOG.info(
                 "Will keep %s around because we're keeping resources after the test.",
