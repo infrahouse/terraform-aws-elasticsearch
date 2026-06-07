@@ -111,9 +111,7 @@ def test_module(
     # Update terraform.tf with the specified AWS provider version
     terraform_tf_path = osp.join(terraform_module_dir, "terraform.tf")
     with open(terraform_tf_path, "w") as fp:
-        fp.write(
-            dedent(
-                f"""
+        fp.write(dedent(f"""
                 terraform {{
                   //noinspection HILUnresolvedReference
                   required_providers {{
@@ -123,9 +121,7 @@ def test_module(
                     }}
                   }}
                 }}
-                """
-            )
-        )
+                """))
 
     with bootstrap_cluster(
         service_network, subzone, keep_after, aws_region, test_role_arn, "test_module"
@@ -133,26 +129,18 @@ def test_module(
         # Create remaining master & data nodes
         bootstrap_mode = False
         with open(osp.join(terraform_module_dir, "terraform.tfvars"), "w") as fp:
-            fp.write(
-                dedent(
-                    f"""
+            fp.write(dedent(f"""
                     region          = "{aws_region}"
                     elastic_zone_id = "{subzone_id}"
                     bootstrap_mode  = {str(bootstrap_mode).lower()}
 
                     lb_subnet_ids      = {json.dumps(subnet_public_ids)}
                     backend_subnet_ids = {json.dumps(subnet_private_ids)}
-                    """
-                )
-            )
+                    """))
             if test_role_arn:
-                fp.write(
-                    dedent(
-                        f"""
+                fp.write(dedent(f"""
                         role_arn        = "{test_role_arn}"
-                        """
-                    )
-                )
+                        """))
 
         with terraform_apply(
             terraform_module_dir,
