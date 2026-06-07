@@ -124,6 +124,7 @@ module "elastic_cluster" {
   backend_subnets                               = var.subnet_ids
   zone_id                                       = var.zone_id
   replication_region                            = var.replication_region
+  alb_access_log_force_destroy                  = var.alb_access_log_force_destroy
   key_pair_name                                 = var.key_pair_name
   ssh_cidr_block                                = var.ssh_cidr_block
   dns_a_records                                 = [var.cluster_name, "${var.cluster_name}-master"]
@@ -206,6 +207,7 @@ module "elastic_cluster_data" {
   backend_subnets                               = var.subnet_ids
   zone_id                                       = var.zone_id
   replication_region                            = var.replication_region
+  alb_access_log_force_destroy                  = var.alb_access_log_force_destroy
   key_pair_name                                 = var.key_pair_name
   ssh_cidr_block                                = var.ssh_cidr_block
   dns_a_records                                 = ["${var.cluster_name}-data"]

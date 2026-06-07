@@ -15,8 +15,12 @@ module "test" {
   bootstrap_mode         = var.bootstrap_mode
   replication_region     = local.replication_region
   snapshot_bucket_prefix = "infrahouse-terraform-aws-elasticsearch"
-  snapshot_force_destroy = true
   monitoring_cidr_block  = "10.1.0.0/16" # Changed from 0.0.0.0/0 to VPC CIDR for security
+
+
+  snapshot_force_destroy       = true
+  alb_access_log_force_destroy = true
+
   secret_elastic_readers = [
     tolist(data.aws_iam_roles.sso-admin.arns)[0],
     "arn:aws:iam::990466748045:user/aleks"

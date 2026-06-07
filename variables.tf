@@ -218,6 +218,12 @@ variable "snapshot_force_destroy" {
   default     = false
 }
 
+variable "alb_access_log_force_destroy" {
+  description = "Destroy S3 bucket with ALB access logs even if non-empty"
+  type        = bool
+  default     = false
+}
+
 variable "ssh_cidr_block" {
   description = "CIDR range that is allowed to SSH into the elastic instances."
   type        = string
