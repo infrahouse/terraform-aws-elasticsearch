@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.0.0] - 2026-06-07
+
+### Breaking Changes
+
+- Drop AWS provider v5 support (minimum is now `~> 6.0`)
+- Upgrade `infrahouse/website-pod/aws` module from 5.13.0 to 6.0.1
+
+### Features
+
+- Add cross-region replication support for S3 buckets (access logs, snapshots) via `replication_region` variable
+- Add `alb_access_log_force_destroy` variable to allow destroying access log buckets with versioned objects
+
+### Bug Fixes
+
+- Pin `ca_key_secret` and `ca_cert_secret` to secret module 1.1.1 (v1.2.0 causes plan-time count errors)
+- Fix snapshot `bucket_prefix` length for CRR replica bucket
+
 ## [4.1.0] - 2026-03-07
 
 ### Bug Fixes
