@@ -511,8 +511,8 @@ See the [Outputs](#outputs) section for complete output documentation.
 | <a name="module_elastic_master_userdata"></a> [elastic\_master\_userdata](#module\_elastic\_master\_userdata) | registry.infrahouse.com/infrahouse/cloud-init/aws | 2.4.0 |
 | <a name="module_kibana_system-password"></a> [kibana\_system-password](#module\_kibana\_system-password) | registry.infrahouse.com/infrahouse/secret/aws | 1.1.1 |
 | <a name="module_snapshots_bucket"></a> [snapshots\_bucket](#module\_snapshots\_bucket) | registry.infrahouse.com/infrahouse/s3-bucket/aws | 0.6.0 |
-| <a name="module_update-dns"></a> [update-dns](#module\_update-dns) | registry.infrahouse.com/infrahouse/update-dns/aws | 1.4.0 |
-| <a name="module_update-dns-data"></a> [update-dns-data](#module\_update-dns-data) | registry.infrahouse.com/infrahouse/update-dns/aws | 1.4.0 |
+| <a name="module_update-dns"></a> [update-dns](#module\_update-dns) | registry.infrahouse.com/infrahouse/update-dns/aws | 1.5.1 |
+| <a name="module_update-dns-data"></a> [update-dns-data](#module\_update-dns-data) | registry.infrahouse.com/infrahouse/update-dns/aws | 1.5.1 |
 
 ## Resources
 
