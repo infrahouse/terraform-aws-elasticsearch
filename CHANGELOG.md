@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.1.1] - 2026-07-09
+
+### Bug Fixes
+
+- Bump update-dns module to 1.5.1
+
 ## [5.1.0] - 2026-07-03
 
 ## [5.0.0] - 2026-06-07
