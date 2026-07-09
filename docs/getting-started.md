@@ -16,7 +16,7 @@ New clusters require a two-phase deployment. Start with `bootstrap_mode = true`:
 ```hcl
 module "elasticsearch" {
   source  = "registry.infrahouse.com/infrahouse/elasticsearch/aws"
-  version = "5.1.0"
+  version = "5.1.1"
 
   providers = {
     aws     = aws
