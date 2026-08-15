@@ -1,4 +1,4 @@
-site_name: InfraHouse Elasticsearch
+site_name: InfraHouse elasticsearch
 site_url: https://infrahouse.github.io/terraform-aws-elasticsearch/
 site_description: Terraform module documentation
 site_author: InfraHouse
@@ -37,10 +37,13 @@ theme:
 nav:
   - Home: index.md
   - Getting Started: getting-started.md
+  - Architecture: architecture.md
   - Configuration: configuration.md
+  - Examples: examples.md
   - Operations: operations.md
   - Troubleshooting: troubleshooting.md
   - Upgrading: upgrading.md
+  - Changelog: changelog.md
 
 markdown_extensions:
   - pymdownx.highlight:
@@ -66,6 +69,7 @@ markdown_extensions:
 
 plugins:
   - search
+  - glightbox
   - minify:
       minify_html: true
 

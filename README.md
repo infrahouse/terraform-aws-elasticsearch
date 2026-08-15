@@ -4,11 +4,11 @@
 [![Docs](https://img.shields.io/badge/docs-github.io-blue)](https://infrahouse.github.io/terraform-aws-elasticsearch/)
 [![Registry](https://img.shields.io/badge/Terraform-Registry-purple?logo=terraform)](https://registry.terraform.io/modules/infrahouse/elasticsearch/aws/latest)
 [![Release](https://img.shields.io/github/release/infrahouse/terraform-aws-elasticsearch.svg)](https://github.com/infrahouse/terraform-aws-elasticsearch/releases/latest)
-[![Security](https://img.shields.io/github/actions/workflow/status/infrahouse/terraform-aws-elasticsearch/vuln-scanner-pr.yml?label=Security)](https://github.com/infrahouse/terraform-aws-elasticsearch/actions/workflows/vuln-scanner-pr.yml)
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
 [![AWS EC2](https://img.shields.io/badge/AWS-EC2-orange?logo=amazonec2)](https://aws.amazon.com/ec2/)
 [![AWS Elasticsearch](https://img.shields.io/badge/AWS-Elasticsearch-orange?logo=elasticsearch)](https://www.elastic.co/elasticsearch/)
+[![Security](https://img.shields.io/github/actions/workflow/status/infrahouse/terraform-aws-elasticsearch/vuln-scanner-pr.yml?label=Security)](https://github.com/infrahouse/terraform-aws-elasticsearch/actions/workflows/vuln-scanner-pr.yml)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
 Terraform module that deploys a self-managed, multi-node
 [Elasticsearch](https://www.elastic.co/elasticsearch/) cluster on AWS EC2 --
@@ -78,6 +78,93 @@ savings vs OpenSearch on-demand).
 See [EC2 pricing](https://aws.amazon.com/ec2/pricing/on-demand/)
 and [OpenSearch pricing](https://aws.amazon.com/opensearch-service/pricing/)
 for current rates.*
+
+## Features
+
+- **Two-tier cluster** -- dedicated master and data node pools in separate Auto
+  Scaling Groups, sized and scaled independently.
+- **Automated cluster formation** -- a two-phase bootstrap creates the cluster,
+  then scales it out without manual intervention.
+- **Shard-aware node lifecycle** -- ASG lifecycle hooks commission a node only once
+  it has actually joined, and drain shards before an instance is terminated.
+- **HTTPS endpoints** -- an Application Load Balancer per pool with ACM certificates
+  and separate DNS names for the cluster, the masters, and the data nodes.
+- **Self-healing DNS** -- a Lambda per ASG rewrites Route53 records as instances
+  launch and terminate.
+- **Transport encryption** -- a generated CA issues node certificates; the key and
+  certificate are stored in AWS Secrets Manager.
+- **Managed credentials** -- `elastic` and `kibana_system` passwords live in Secrets
+  Manager with an explicit list of readers, never in userdata.
+- **Snapshots** -- an encrypted S3 bucket with cross-region replication, ready to
+  register as a snapshot repository.
+- **CloudWatch logging** -- encrypted with a customer-managed KMS key, 365-day
+  retention by default.
+- **Alerting** -- ALB and Lambda alarms delivered to email and to your existing SNS
+  topics for PagerDuty, Slack, or OpsGenie.
+- **Prometheus ready** -- `node_exporter` and `elasticsearch_exporter` exposed to a
+  monitoring CIDR you control.
+- **Least-privilege IAM** -- instance profiles scoped to this cluster's ASGs, secrets,
+  bucket, and hosted zone, extensible with your own policy document.
+
+## Quick Start
+
+```hcl
+module "elasticsearch" {
+  source  = "registry.infrahouse.com/infrahouse/elasticsearch/aws"
+  version = "5.1.1"
+
+  providers = {
+    aws     = aws
+    aws.dns = aws.dns
+  }
+
+  cluster_name       = "elastic"
+  environment        = "production"
+  key_pair_name      = aws_key_pair.this.key_name
+  subnet_ids         = module.service_network.subnet_private_ids
+  zone_id            = data.aws_route53_zone.cluster.zone_id
+  replication_region = "us-east-1"
+  alarm_emails       = ["ops-team@example.com"]
+
+  # t3.medium (the module default) is too small for real workloads.
+  instance_type = "t3.large"
+
+  # Phase 1: create the cluster with a single master node.
+  bootstrap_mode = true
+}
+```
+
+```bash
+terraform init
+terraform apply                     # phase 1
+# set bootstrap_mode = false
+terraform apply                     # phase 2: 3 masters + 3 data nodes
+```
+
+A new cluster always takes two applies: the first master has to form the cluster
+before any other node can join it. See
+[Getting Started](https://infrahouse.github.io/terraform-aws-elasticsearch/getting-started/)
+for the full walkthrough.
+
+## Documentation
+
+Full documentation is published at
+[infrahouse.github.io/terraform-aws-elasticsearch](https://infrahouse.github.io/terraform-aws-elasticsearch/):
+
+- [Getting Started](https://infrahouse.github.io/terraform-aws-elasticsearch/getting-started/)
+  -- prerequisites, bootstrap, and first deployment
+- [Architecture](https://infrahouse.github.io/terraform-aws-elasticsearch/architecture/)
+  -- node pools, lifecycle hooks, DNS, encryption, IAM
+- [Configuration](https://infrahouse.github.io/terraform-aws-elasticsearch/configuration/)
+  -- every variable explained with examples
+- [Examples](https://infrahouse.github.io/terraform-aws-elasticsearch/examples/)
+  -- common configurations to copy
+- [Operations](https://infrahouse.github.io/terraform-aws-elasticsearch/operations/)
+  -- day-two cluster management with `ih-elastic` and Kibana
+- [Troubleshooting](https://infrahouse.github.io/terraform-aws-elasticsearch/troubleshooting/)
+  -- diagnosing memory pressure, join failures, and snapshot errors
+- [Upgrading](https://infrahouse.github.io/terraform-aws-elasticsearch/upgrading/)
+  -- migration guides between major versions
 
 ## Architecture
 
@@ -639,3 +726,28 @@ See the [Outputs](#outputs) section for complete output documentation.
 | <a name="output_snapshots_bucket"></a> [snapshots\_bucket](#output\_snapshots\_bucket) | AWS S3 Bucket where Elasticsearch snapshots will be stored. |
 | <a name="output_vpc_id"></a> [vpc\_id](#output\_vpc\_id) | VPC ID where the Elasticsearch cluster is deployed |
 <!-- END_TF_DOCS -->
+
+## Examples
+
+Runnable root modules live in [examples/](examples):
+
+| Example | What it shows |
+|---------|---------------|
+| [minimal](examples/minimal) | Smallest working cluster -- defaults, HTTPS endpoints, snapshots, logging |
+| [production](examples/production) | Sized node pools, restricted CIDRs, Prometheus, alarm routing, secret readers |
+
+Copy `terraform.tfvars.example` to `terraform.tfvars`, fill in your VPC, hosted zone,
+and key pair, then `terraform init && terraform apply`. More configurations are
+described in
+[Examples](https://infrahouse.github.io/terraform-aws-elasticsearch/examples/).
+
+## Contributing
+
+Bug reports, feature requests, and pull requests are welcome. See
+[CONTRIBUTING.md](CONTRIBUTING.md) for the development workflow, coding standards,
+and how to run the integration tests. Security issues should follow
+[SECURITY.md](SECURITY.md) instead of the public issue tracker.
+
+## License
+
+Apache License 2.0. See [LICENSE](LICENSE) for the full text.
