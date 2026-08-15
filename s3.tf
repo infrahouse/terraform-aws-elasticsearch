@@ -11,7 +11,7 @@ locals {
 
 module "snapshots_bucket" {
   source             = "registry.infrahouse.com/infrahouse/s3-bucket/aws"
-  version            = "0.6.0"
+  version            = "0.9.0"
   bucket_prefix      = substr(local.bucket_prefix, 0, 29)
   force_destroy      = var.snapshot_force_destroy
   replication_region = var.replication_region

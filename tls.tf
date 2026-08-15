@@ -24,7 +24,7 @@ resource "tls_self_signed_cert" "ca_cert" {
 
 module "ca_key_secret" {
   source             = "registry.infrahouse.com/infrahouse/secret/aws"
-  version            = "1.1.1"
+  version            = "1.3.0"
   environment        = var.environment
   service_name       = local.service_name
   secret_description = "CA secret key for cluster ${var.cluster_name}"
@@ -42,7 +42,7 @@ module "ca_key_secret" {
 
 module "ca_cert_secret" {
   source             = "registry.infrahouse.com/infrahouse/secret/aws"
-  version            = "1.1.1"
+  version            = "1.3.0"
   environment        = var.environment
   service_name       = local.service_name
   secret_description = "CA certificate for cluster ${var.cluster_name}"

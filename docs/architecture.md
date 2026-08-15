@@ -167,11 +167,11 @@ Extra permissions can be appended as a policy document JSON through
 
 | Module | Version | What it provides |
 |--------|---------|------------------|
-| `infrahouse/website-pod/aws` | 6.0.1 | ASG, ALB, target group, ACM certificate, CloudWatch alarms |
+| `infrahouse/website-pod/aws` | 6.4.0 | ASG, ALB, target group, ACM certificate, CloudWatch alarms |
 | `infrahouse/cloud-init/aws` | 2.4.0 | Userdata that installs Puppet and applies the node role |
 | `infrahouse/update-dns/aws` | 1.5.1 | Lambda that maintains the A records on ASG events |
-| `infrahouse/secret/aws` | 1.1.1 | Secrets Manager secrets with an explicit reader list |
-| `infrahouse/s3-bucket/aws` | 0.6.0 | Snapshot bucket with encryption and cross-region replication |
+| `infrahouse/secret/aws` | 1.3.0 | Secrets Manager secrets with an explicit reader list |
+| `infrahouse/s3-bucket/aws` | 0.9.0 | Snapshot bucket with encryption and cross-region replication |
 
 ## File layout
 

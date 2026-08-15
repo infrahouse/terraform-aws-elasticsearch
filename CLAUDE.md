@@ -65,7 +65,7 @@ Must be on `main` branch. Uses `git-cliff` for changelog and `bumpversion` for v
    - Userdata: `elastic_data_userdata` module
    - Instance profile: `${cluster_name}-data-${random_suffix}`
 
-Both use `infrahouse/website-pod/aws` module (pinned to 5.13.0) providing ASGs, ALBs, target groups, and CloudWatch alarms.
+Both use `infrahouse/website-pod/aws` module (pinned to 6.4.0) providing ASGs, ALBs, target groups, and CloudWatch alarms.
 
 ### Bootstrap Mode
 
@@ -97,10 +97,11 @@ Tests use a two-phase bootstrap tracked by `.bootstrapped` flag file in `test_da
 
 ### Key Dependencies
 
-- `infrahouse/website-pod/aws` (5.13.0): ASG, ALB, target groups, CloudWatch alarms
-- `infrahouse/cloud-init/aws` (2.2.2): Cloud-init userdata generation
-- `infrahouse/secret/aws` (1.1.1): AWS Secrets Manager secrets
-- `infrahouse/update-dns/aws` (1.2.0): Lambda for DNS updates on instance launch/terminate
+- `infrahouse/website-pod/aws` (6.4.0): ASG, ALB, target groups, CloudWatch alarms
+- `infrahouse/cloud-init/aws` (2.4.0): Cloud-init userdata generation
+- `infrahouse/secret/aws` (1.3.0): AWS Secrets Manager secrets
+- `infrahouse/update-dns/aws` (1.5.1): Lambda for DNS updates on instance launch/terminate
+- `infrahouse/s3-bucket/aws` (0.9.0): Snapshots bucket with encryption and CRR
 
 ## Testing
 
@@ -119,7 +120,7 @@ Follow `.claude/CODING_STANDARD.md` for InfraHouse conventions:
 
 ### Terraform
 - Use HEREDOC for long variable/output descriptions
-- Pin modules to exact versions (e.g., `version = "5.13.0"`)
+- Pin modules to exact versions (e.g., `version = "6.4.0"`)
 - Use data source policy documents, not generated JSON
 - Only require providers the module directly uses
 
