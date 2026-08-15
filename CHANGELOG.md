@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.2.0] - 2026-08-15
+
+### Documentation
+
+- Implement Terraform Module Requirements
+
+### Features
+
+- Validate environment name
+
+### Miscellaneous Tasks
+
+- Track example module versions in bumpversion
+- Upgrade module and test dependencies
+
 ## [5.1.1] - 2026-07-09
 
 ### Bug Fixes
