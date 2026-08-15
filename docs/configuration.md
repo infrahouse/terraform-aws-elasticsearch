@@ -5,6 +5,16 @@ All variables are documented in the
 via terraform-docs. This page covers the most important settings with guidance
 on how to choose values.
 
+## Environment name
+
+```hcl
+environment = "production"   # lowercase letters, numbers, and underscores only
+```
+
+The value names the Puppet environment, prefixes the CloudWatch log group, and tags
+every resource the module creates. Validation rejects anything outside
+`^[a-z0-9_]+$`, so use `prod_us` rather than `prod-us`.
+
 ## Instance sizing
 
 The single most important configuration decision. Elasticsearch needs memory for

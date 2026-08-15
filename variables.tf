@@ -69,6 +69,17 @@ variable "environment" {
   description = "Name of environment."
   type        = string
   default     = "development"
+
+  # The value becomes a Puppet environment name and is passed to the secret module,
+  # which enforces the same rule. Validating here fails the plan at the module call
+  # with a clear message instead of somewhere in the module tree.
+  validation {
+    condition     = can(regex("^[a-z0-9_]+$", var.environment))
+    error_message = <<-EOT
+      environment must contain only lowercase letters, numbers, and underscores (no hyphens).
+      Use "prod_us" instead of "prod-us". Got: ${var.environment}
+    EOT
+  }
 }
 
 variable "extra_files" {
