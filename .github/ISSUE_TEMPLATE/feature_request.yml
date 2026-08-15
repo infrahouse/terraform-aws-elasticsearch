@@ -1,0 +1,35 @@
+---
+name: Feature request
+description: Propose a capability or configuration option for the module
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What are you trying to do that the module does not support today?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed interface
+      description: |
+        What would the module block look like? Name the variables or outputs you expect.
+      render: hcl
+
+  - type: textarea
+    id: workaround
+    attributes:
+      label: Current workaround
+      description: How are you solving this now, if at all?
+
+  - type: checkboxes
+    id: breaking
+    attributes:
+      label: Compatibility
+      options:
+        - label: This change would alter the behavior of existing clusters
+        - label: I am willing to open a pull request for it

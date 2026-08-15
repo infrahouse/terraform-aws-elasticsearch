@@ -1,0 +1,33 @@
+region      = "us-west-2"
+environment = "production"
+
+cluster_name  = "logs"
+zone_name     = "example.com."
+key_pair_name = "production-keypair"
+
+subnet_ids = [
+  "subnet-0123456789abcdef0",
+  "subnet-0123456789abcdef1",
+  "subnet-0123456789abcdef2",
+]
+
+replication_region = "us-east-1"
+
+# Restrict both ranges - the module refuses 0.0.0.0/0 for monitoring.
+admin_cidr_block      = "10.1.0.0/16"
+monitoring_cidr_block = "10.1.0.0/16"
+
+alarm_emails = [
+  "ops-team@example.com",
+]
+
+alarm_topic_arns = [
+  # "arn:aws:sns:us-west-2:123456789012:pagerduty",
+]
+
+secret_elastic_readers = [
+  # "arn:aws:iam::123456789012:role/AWSReservedSSO_AdministratorAccess_0123456789abcdef",
+]
+
+# Phase 1: true. Phase 2 (after the first apply succeeds): false.
+bootstrap_mode = true

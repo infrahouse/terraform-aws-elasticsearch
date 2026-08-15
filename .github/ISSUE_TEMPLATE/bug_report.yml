@@ -1,0 +1,68 @@
+---
+name: Bug report
+description: Something in the module does not behave as documented
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. Please do not paste secrets, passwords, or account
+        identifiers. Security vulnerabilities go to the process in
+        [SECURITY.md](https://github.com/infrahouse/terraform-aws-elasticsearch/blob/main/SECURITY.md),
+        not to this tracker.
+
+  - type: textarea
+    id: what_happened
+    attributes:
+      label: What happened
+      description: What did the module do, and what did you expect instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Module configuration
+      description: The minimal module block that reproduces the problem.
+      render: hcl
+    validations:
+      required: true
+
+  - type: input
+    id: module_version
+    attributes:
+      label: Module version
+      placeholder: "5.1.1"
+    validations:
+      required: true
+
+  - type: input
+    id: terraform_version
+    attributes:
+      label: Terraform and AWS provider versions
+      placeholder: "Terraform 1.9.5, hashicorp/aws 6.2.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: phase
+    attributes:
+      label: When does it happen
+      options:
+        - terraform plan
+        - terraform apply, bootstrap phase (bootstrap_mode = true)
+        - terraform apply, scale-out phase (bootstrap_mode = false)
+        - terraform destroy
+        - After deployment, on a running cluster
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs and error output
+      description: |
+        Terraform output, `/var/log/cloud-init-output.log` from the instance, or the
+        relevant CloudWatch log events. Redact anything sensitive.
+      render: shell

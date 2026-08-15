@@ -1,0 +1,19 @@
+region      = "us-west-2"
+environment = "development"
+
+zone_name     = "ci-cd.infrahouse.com."
+key_pair_name = "my-keypair"
+
+subnet_ids = [
+  "subnet-0123456789abcdef0",
+  "subnet-0123456789abcdef1",
+]
+
+replication_region = "us-east-1"
+
+alarm_emails = [
+  "ops-team@example.com",
+]
+
+# Phase 1: true. Phase 2 (after the first apply succeeds): false.
+bootstrap_mode = true
