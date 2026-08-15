@@ -1,5 +1,69 @@
 # Upgrading
 
+## 5.1.x to 5.2
+
+A dependency refresh. No variables were added, removed, or renamed, but two of the
+updated modules change behavior on apply.
+
+### What to expect on the first apply
+
+- **All instances are replaced.** website-pod 6.2.0 encrypts the ASG root EBS volume
+  unconditionally, so the launch template changes and both ASGs run an instance
+  refresh. Nodes roll one at a time through the usual lifecycle hooks: each new node
+  joins before the old one is decommissioned, and shards are drained on the way out.
+  Expect the apply to take as long as a normal node roll, and run it in a maintenance
+  window if the cluster is at capacity. Cluster health should never leave `yellow`.
+- **A tag update on two secrets.** The `elastic` and `kibana_system` secrets now carry
+  `service = <cluster_name>` instead of `service = unknown`, because `service_name` is
+  passed to the secret module explicitly. `secret/aws` deprecates the old default in
+  its v2.0.
+
+### AWS provider floor raised to 6.33.0
+
+The module now requires `>= 6.33.0, < 7.0.0` instead of `~> 6.0`, following
+website-pod 6.4.0. If your root module pins the AWS provider below 6.33.0,
+`terraform init` fails until you raise it.
+
+### New constraint on `environment`
+
+`secret/aws` 1.3.0 validates that `environment` contains only lowercase letters,
+numbers, and underscores. A value with a hyphen (for example `prod-us`) now fails at
+plan time inside the secret module. Rename the environment to `prod_us` before
+upgrading.
+
+### Migration steps
+
+1. Raise the AWS provider constraint in your root module if it is pinned below 6.33.0.
+2. Run `terraform init -upgrade`.
+3. Run `terraform plan` and confirm the changes are limited to launch templates,
+   instance refreshes, and secret tags - no bucket, secret, or load balancer
+   replacement.
+4. Apply, then watch the refresh:
+
+    ```bash
+    aws autoscaling describe-instance-refreshes --auto-scaling-group-name <cluster_name>
+    ```
+
+5. Confirm cluster health is `green` before draining the maintenance window:
+
+    ```bash
+    curl -u "elastic:${ELASTIC_PASSWORD}" "https://<cluster>/_cluster/health?pretty"
+    ```
+
+### What changed internally
+
+- **website-pod** 6.0.1 to 6.4.0 - root EBS volume encryption, optional ASG warm pool,
+  `cpu_options` passthrough, GPU ECS autoscaling support, and an AWS provider floor of
+  6.33.0. New inputs are all optional and unused by this module.
+- **secret/aws** 1.1.1 to 1.3.0 - optional customer-managed CMK for cross-account
+  access (opt-in via `create_cross_account_cmk`, left off), a precondition that exactly
+  one of `secret_name` / `secret_name_prefix` is set, and the `environment` validation
+  above.
+- **s3-bucket/aws** 0.6.0 to 0.9.0 - optional S3 Object Lock and SSE-KMS with a
+  customer-managed key. Both default to off, so the snapshots bucket keeps SSE-S3.
+- **infrahouse-core** (test dependency) `~= 0.17` to `~= 1.1`. The `ASG`, `EC2Instance`,
+  and `setup_logging` APIs the tests use are unchanged.
+
 ## 4.x to 5.0
 
 ### Breaking changes
