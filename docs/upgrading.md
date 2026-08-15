@@ -26,10 +26,14 @@ website-pod 6.4.0. If your root module pins the AWS provider below 6.33.0,
 
 ### New constraint on `environment`
 
-`secret/aws` 1.3.0 validates that `environment` contains only lowercase letters,
-numbers, and underscores. A value with a hyphen (for example `prod-us`) now fails at
-plan time inside the secret module. Rename the environment to `prod_us` before
-upgrading.
+`environment` must now contain only lowercase letters, numbers, and underscores.
+A value with a hyphen, for example `prod-us`, is rejected at plan time. The rule comes
+from `secret/aws` 1.3.0, and this module validates the same pattern on its own
+`environment` variable so the error points at your module call rather than at a
+resource inside the module tree.
+
+Rename the environment to `prod_us` before upgrading. The value is also the Puppet
+environment name, so it has to match on the Puppet side as well.
 
 ### Migration steps
 
