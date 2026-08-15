@@ -39,7 +39,7 @@ data "aws_route53_zone" "cluster" {
 
 module "elasticsearch" {
   source  = "registry.infrahouse.com/infrahouse/elasticsearch/aws"
-  version = "5.1.1"
+  version = "5.2.0"
 
   providers = {
     aws     = aws

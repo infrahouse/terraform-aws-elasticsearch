@@ -111,7 +111,7 @@ for current rates.*
 ```hcl
 module "elasticsearch" {
   source  = "registry.infrahouse.com/infrahouse/elasticsearch/aws"
-  version = "5.1.1"
+  version = "5.2.0"
 
   providers = {
     aws     = aws
@@ -249,7 +249,7 @@ The size of the autoscaling group will be not three, but one node.
 ```hcl
 module "test" {
   source  = "registry.infrahouse.com/infrahouse/elasticsearch/aws"
-  version = "5.1.1"
+  version = "5.2.0"
 
   providers = {
     aws     = aws
