@@ -79,6 +79,65 @@ def collect_instance_logs(asg_name, aws_region, test_role_arn):
         LOG.error(traceback.format_exc())
 
 
+def verify_inspector_exclusion_tag_removed(asg_name, aws_region, test_role_arn):
+    """
+    Verify the Inspector exclusion tag lifecycle on one ASG.
+
+    The ASG tags instances with InspectorEc2Exclusion at launch and
+    profile::boot_security_upgrade removes it once security updates are applied.
+
+    Both halves matter: without the ASG assertion, "the tag is gone" also passes
+    on a module that never tags at all.
+
+    :param asg_name: Name of the Auto Scaling Group
+    :param aws_region: AWS region
+    :param test_role_arn: IAM role ARN for AWS access
+    """
+    LOG.info(f"Verifying the Inspector exclusion tag lifecycle on {asg_name}...")
+    asg = ASG(asg_name, region=aws_region, role_arn=test_role_arn)
+
+    # 1. The ASG still asks for the tag at launch
+    assert "InspectorEc2Exclusion" in asg.launch_tags, (
+        f"ASG {asg_name} does not propagate InspectorEc2Exclusion at launch. "
+        f"Launch tags: {sorted(asg.launch_tags)}"
+    )
+    LOG.info(f"✓ ASG {asg_name} propagates InspectorEc2Exclusion at launch")
+
+    instances = list(asg.instances)
+    assert instances, f"No instances found in ASG {asg_name}"
+    instance = instances[0]
+
+    # Puppet removes the tag, so nothing can be said about it until the instance
+    # finished provisioning. cloud-init reports `done` only after ih-bootstrap -
+    # and therefore `ih-puppet apply` - succeeded.
+    instance.wait_for_bootstrap()
+
+    # 2. Puppet removed it from the running instance. EC2 tag reads are eventually
+    #    consistent and EC2Instance caches its describe call for 10 seconds, so poll
+    #    on a longer interval than that TTL rather than asserting once.
+    max_wait = 60
+    poll_interval = 15
+
+    for _ in range(max_wait // poll_interval):
+        if "InspectorEc2Exclusion" not in instance.tags:
+            LOG.info(f"✓ InspectorEc2Exclusion removed from {instance.instance_id}")
+            return
+        time.sleep(poll_interval)
+
+    # Still tagged. The likely cause is a missing or mis-scoped ec2:DeleteTags
+    # statement -- boot-security-upgrade.sh logs that case and exits 0.
+    _, cout, cerr = instance.execute_command(
+        "sudo grep -i InspectorEc2Exclusion /var/log/cloud-init-output.log",
+        execution_timeout=120,
+    )
+    pytest.fail(
+        f"InspectorEc2Exclusion still present on {instance.instance_id} {max_wait} seconds "
+        f"after the instance bootstrapped -- it would be invisible to Inspector forever. "
+        f"Check the ec2:DeleteTags statement in iam.tf.\n"
+        f"----- cloud-init-output.log -----\n{cout}{cerr}"
+    )
+
+
 @pytest.mark.parametrize("aws_provider_version", ["~> 6.0"], ids=["aws-6"])
 def test_module(
     service_network,
@@ -177,6 +236,13 @@ def test_module(
                 LOG.info("Collecting diagnostic logs from data instances...")
                 collect_instance_logs(data_asg_name, aws_region, test_role_arn)
                 raise
+
+            # Inspector exclusion tag: applied at launch, removed once Puppet
+            # patched. Both ASGs enable the deferral, so both are checked.
+            for asg_name in [master_asg_name, data_asg_name]:
+                verify_inspector_exclusion_tag_removed(
+                    asg_name, aws_region, test_role_arn
+                )
 
             # Test CloudWatch logging functionality
             _test_cloudwatch_logging(

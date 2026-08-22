@@ -78,6 +78,28 @@ decommission does not block the ASG forever.
 The launching hook name carries a random suffix. Renaming the hook forces a new
 instance refresh, which is how the module rolls nodes when the userdata changes.
 
+## Patching and AWS Inspector
+
+Both ASGs propagate an `InspectorEc2Exclusion` tag at launch
+(`defer_inspector_findings_until_patched` on `website-pod`), and Puppet's
+`profile::boot_security_upgrade` - included by `role::elastic_master` and
+`role::elastic_data` - applies pending security updates during provisioning and then
+removes the tag.
+
+Without it, Inspector scans an instance before `unattended-upgrades` has run and opens a
+finding. The finding closes on the next upgrade, but by then it has already reopened its
+vulnerability group, and a group old enough to be reopened that way breaks the remediation
+SLA. Deferring means Inspector's first findings describe an already-patched host.
+
+The exclusion is fail-open: a node that launches tagged and never has the tag removed is
+invisible to Inspector permanently, and silently. The tag and the `ec2:DeleteTags`
+permission below therefore ship together - see
+[Node missing from Inspector findings](troubleshooting.md#node-missing-from-inspector-findings).
+
+Boot-time patching never bounces Elasticsearch: `profile::elastic::service` blacklists the
+`elasticsearch` package in `apt.conf.d` and sets `needrestart` to list-only, and
+`unattended-upgrade` honours both no matter who invokes it.
+
 ## DNS
 
 ![DNS Update Architecture](assets/dns-architecture.svg)
@@ -145,6 +167,8 @@ in `iam.tf`), attached to each pool's own instance role:
   DNS-01 challenges.
 - `secretsmanager:GetSecretValue` on exactly the four secrets above.
 - S3 read and write on the snapshot bucket only.
+- `ec2:DeleteTags`, restricted to the `InspectorEc2Exclusion` key on instances in this
+  cluster's two ASGs, so Puppet can drop the tag after patching.
 - CloudWatch Logs write access and KMS decrypt, added only when
   `enable_cloudwatch_logging` is true.
 

@@ -170,6 +170,42 @@ aws logs create-log-stream \
 - Instance profile missing CloudWatch permissions (check IAM role in EC2 console)
 - KMS key policy doesn't allow the instance role to encrypt logs
 
+## Node missing from Inspector findings
+
+### Symptoms
+
+A node never shows up in AWS Inspector findings - not "clean", simply absent.
+
+### Diagnosis
+
+```bash
+# Healthy case: empty output
+aws ec2 describe-tags \
+  --filters Name=resource-id,Values=i-xxxxxxxx Name=key,Values=InspectorEc2Exclusion
+
+# On the node itself
+sudo grep -i InspectorEc2Exclusion /var/log/cloud-init-output.log
+```
+
+Nodes launch tagged `InspectorEc2Exclusion` so Inspector does not scan them before security
+updates are applied, and `profile::boot_security_upgrade` removes the tag once it has
+patched. If nothing removes it, the node stays excluded forever and nothing alerts.
+
+### Common causes
+
+- `could not remove ... (no ec2:DeleteTags?)` in the log - the instance profile lost the
+  `ec2:DeleteTags` statement in `iam.tf`, most likely because IAM was customized. Removal is
+  best effort by design and never fails a Puppet run, so this is only ever a log line.
+- Nothing in the log - `profile::boot_security_upgrade` did not run. Check that the node's
+  Puppet environment has it in `role::elastic_master` / `role::elastic_data`, and that the
+  Puppet run finished.
+
+### Fix
+
+Restore the permission or the Puppet code, then replace the node - the tag is applied at
+launch, so the next instance goes through the cycle cleanly. To unblock scanning right away,
+`aws ec2 delete-tags --resources i-xxxxxxxx --tags Key=InspectorEc2Exclusion`.
+
 ## Snapshot failures
 
 ### Diagnosis

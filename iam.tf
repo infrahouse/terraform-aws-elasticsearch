@@ -74,4 +74,23 @@ data "aws_iam_policy_document" "elastic_permissions" {
       "${module.snapshots_bucket.bucket_arn}/*"
     ]
   }
+
+  # profile::boot_security_upgrade removes this tag once security updates are
+  # applied, so Inspector's first findings describe a patched host. Scoped to this
+  # tag key, to instances, and to instances in this cluster's two ASGs. Both node
+  # types share this document, so one statement covers master and data nodes.
+  statement {
+    actions   = ["ec2:DeleteTags"]
+    resources = ["arn:aws:ec2:*:${data.aws_caller_identity.current.account_id}:instance/*"]
+    condition {
+      test     = "ForAllValues:StringEquals"
+      variable = "aws:TagKeys"
+      values   = ["InspectorEc2Exclusion"]
+    }
+    condition {
+      test     = "StringEquals"
+      variable = "ec2:ResourceTag/aws:autoscaling:groupName"
+      values   = [var.cluster_name, "${var.cluster_name}-data"]
+    }
+  }
 }

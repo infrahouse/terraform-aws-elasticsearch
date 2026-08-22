@@ -592,8 +592,8 @@ See the [Outputs](#outputs) section for complete output documentation.
 | <a name="module_ca_cert_secret"></a> [ca\_cert\_secret](#module\_ca\_cert\_secret) | registry.infrahouse.com/infrahouse/secret/aws | 1.3.0 |
 | <a name="module_ca_key_secret"></a> [ca\_key\_secret](#module\_ca\_key\_secret) | registry.infrahouse.com/infrahouse/secret/aws | 1.3.0 |
 | <a name="module_elastic-password"></a> [elastic-password](#module\_elastic-password) | registry.infrahouse.com/infrahouse/secret/aws | 1.3.0 |
-| <a name="module_elastic_cluster"></a> [elastic\_cluster](#module\_elastic\_cluster) | registry.infrahouse.com/infrahouse/website-pod/aws | 6.4.0 |
-| <a name="module_elastic_cluster_data"></a> [elastic\_cluster\_data](#module\_elastic\_cluster\_data) | registry.infrahouse.com/infrahouse/website-pod/aws | 6.4.0 |
+| <a name="module_elastic_cluster"></a> [elastic\_cluster](#module\_elastic\_cluster) | registry.infrahouse.com/infrahouse/website-pod/aws | 6.5.0 |
+| <a name="module_elastic_cluster_data"></a> [elastic\_cluster\_data](#module\_elastic\_cluster\_data) | registry.infrahouse.com/infrahouse/website-pod/aws | 6.5.0 |
 | <a name="module_elastic_data_userdata"></a> [elastic\_data\_userdata](#module\_elastic\_data\_userdata) | registry.infrahouse.com/infrahouse/cloud-init/aws | 2.4.0 |
 | <a name="module_elastic_master_userdata"></a> [elastic\_master\_userdata](#module\_elastic\_master\_userdata) | registry.infrahouse.com/infrahouse/cloud-init/aws | 2.4.0 |
 | <a name="module_kibana_system-password"></a> [kibana\_system-password](#module\_kibana\_system-password) | registry.infrahouse.com/infrahouse/secret/aws | 1.3.0 |
