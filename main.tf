@@ -111,7 +111,7 @@ module "elastic_data_userdata" {
 
 module "elastic_cluster" {
   source  = "registry.infrahouse.com/infrahouse/website-pod/aws"
-  version = "6.4.0"
+  version = "6.5.0"
   providers = {
     aws     = aws
     aws.dns = aws.dns
@@ -167,6 +167,11 @@ module "elastic_cluster" {
   asg_min_elb_capacity = 1
   instance_role_name   = local.master_profile_name
 
+  # Suppress Inspector findings until profile::boot_security_upgrade has applied
+  # pending security updates and removed the tag. REQUIRES the ec2:DeleteTags
+  # statement in iam.tf -- see .claude/plans/inspector-findings-deferral.md.
+  defer_inspector_findings_until_patched = true
+
   # Alert Configuration (new in v4.0.0)
   alarm_emails                         = var.alarm_emails
   alarm_topic_arns                     = var.alarm_topic_arns
@@ -194,7 +199,7 @@ module "elastic_cluster_data" {
   # Deploy only if not in the bootstrap mode
   count   = var.bootstrap_mode ? 0 : 1
   source  = "registry.infrahouse.com/infrahouse/website-pod/aws"
-  version = "6.4.0"
+  version = "6.5.0"
   providers = {
     aws     = aws
     aws.dns = aws.dns
@@ -245,6 +250,11 @@ module "elastic_cluster_data" {
   root_volume_size     = var.data_nodes_root_volume_size
   asg_min_elb_capacity = 1
   instance_role_name   = local.data_profile_name
+
+  # Suppress Inspector findings until profile::boot_security_upgrade has applied
+  # pending security updates and removed the tag. REQUIRES the ec2:DeleteTags
+  # statement in iam.tf -- see .claude/plans/inspector-findings-deferral.md.
+  defer_inspector_findings_until_patched = true
 
   # Alert Configuration (new in v4.0.0)
   alarm_emails                         = var.alarm_emails
