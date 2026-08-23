@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.3.0] - 2026-08-23
+
+### Features
+
+- Defer Inspector findings until nodes are patched
+
+### Testing
+
+- Do not fail the Inspector check on an unrelated cloud-init error
+
 ## [5.2.0] - 2026-08-15
 
 ### Documentation
